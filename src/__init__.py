@@ -1,0 +1,1 @@
+"""Football Odds Analysis package."""
