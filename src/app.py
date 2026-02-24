@@ -1,0 +1,354 @@
+"""Streamlit dashboard for the football odds analysis system."""
+
+import logging
+
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+from src.api_client import OddsAPIClient
+from src.analyzer import OddsAnalyzer
+from src.config import LEAGUES, SHARP_BOOKMAKERS
+from src.db_manager import DBManager
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+st.set_page_config(
+    page_title="⚽ Football Odds Analysis",
+    page_icon="⚽",
+    layout="wide",
+)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+@st.cache_resource
+def get_db() -> DBManager:
+    """Return a cached database manager instance."""
+    return DBManager()
+
+
+@st.cache_data(ttl=300)
+def load_latest_odds(sport_key: str | None = None) -> pd.DataFrame:
+    """Load the latest odds from the database (cached 5 min)."""
+    db = get_db()
+    rows = db.get_latest_odds(sport_key)
+    return pd.DataFrame(rows) if rows else pd.DataFrame()
+
+
+@st.cache_data(ttl=300)
+def load_upcoming_matches(sport_key: str | None = None) -> pd.DataFrame:
+    """Load upcoming matches from the database (cached 5 min)."""
+    db = get_db()
+    rows = db.get_upcoming_matches(sport_key)
+    return pd.DataFrame(rows) if rows else pd.DataFrame()
+
+
+def fetch_and_store(selected_leagues: list[str]) -> int:
+    """Fetch odds from the API and persist them.
+
+    Args:
+        selected_leagues: Display names of leagues to fetch.
+
+    Returns:
+        Number of odds rows stored.
+    """
+    client = OddsAPIClient()
+    db = get_db()
+    all_rows: list[dict] = []
+    league_map = {v: k for k, v in LEAGUES.items()}
+
+    for sport_key in selected_leagues:
+        league_name = league_map.get(sport_key, sport_key)
+        with st.spinner(f"Fetching {league_name}…"):
+            rows = client.fetch_odds(sport_key)
+            all_rows.extend(rows)
+
+    if all_rows:
+        db.store_odds(all_rows)
+        # Clear caches so new data is reflected immediately
+        load_latest_odds.clear()
+        load_upcoming_matches.clear()
+
+    return len(all_rows)
+
+
+# ---------------------------------------------------------------------------
+# Sidebar
+# ---------------------------------------------------------------------------
+
+st.sidebar.title("⚙️ Settings")
+
+league_options = {name: key for name, key in LEAGUES.items()}
+selected_league_names: list[str] = st.sidebar.multiselect(
+    "Select Leagues",
+    options=list(league_options.keys()),
+    default=list(league_options.keys()),
+)
+selected_sport_keys: list[str] = [
+    league_options[n] for n in selected_league_names
+]
+
+if st.sidebar.button("🔄 Refresh Data"):
+    if not selected_sport_keys:
+        st.sidebar.warning("Please select at least one league.")
+    else:
+        count = fetch_and_store(selected_sport_keys)
+        if count:
+            st.sidebar.success(f"Stored {count} odds rows.")
+        else:
+            st.sidebar.warning("No data returned. Check your API key.")
+
+# ---------------------------------------------------------------------------
+# Main content
+# ---------------------------------------------------------------------------
+
+st.title("⚽ Football Odds Analysis Dashboard")
+
+tab_matches, tab_value, tab_arb, tab_movement, tab_margin = st.tabs(
+    [
+        "📅 Upcoming Matches",
+        "💡 Value Bets",
+        "🔄 Arbitrage Scanner",
+        "📈 Odds Movement",
+        "📊 Margin Analysis",
+    ]
+)
+
+analyzer = OddsAnalyzer()
+
+# Always load all data from DB, then filter by selected leagues in-app.
+odds_df_all = load_latest_odds()
+upcoming_df_all = load_upcoming_matches()
+
+if selected_sport_keys and len(selected_sport_keys) < len(LEAGUES):
+    odds_df = (
+        odds_df_all[odds_df_all["sport_key"].isin(selected_sport_keys)]
+        if not odds_df_all.empty
+        else odds_df_all
+    )
+    upcoming_df_base = (
+        upcoming_df_all[upcoming_df_all["sport_key"].isin(selected_sport_keys)]
+        if not upcoming_df_all.empty
+        else upcoming_df_all
+    )
+else:
+    odds_df = odds_df_all
+    upcoming_df_base = upcoming_df_all
+
+# ---------------------------------------------------------------------------
+# Tab 1: Upcoming Matches
+# ---------------------------------------------------------------------------
+with tab_matches:
+    st.subheader("Upcoming Matches")
+    upcoming_df = upcoming_df_base
+
+    if upcoming_df.empty:
+        st.info(
+            "No upcoming matches in the database. "
+            "Use **Refresh Data** in the sidebar to fetch odds."
+        )
+    else:
+        st.metric("Matches available", len(upcoming_df))
+
+        if not odds_df.empty:
+            # Show best available odds for h2h markets
+            h2h = odds_df[odds_df["market"] == "h2h"]
+            if not h2h.empty:
+                best = (
+                    h2h.groupby(["match_id", "outcome_name"])["outcome_price"]
+                    .max()
+                    .unstack("outcome_name")
+                    .reset_index()
+                )
+                display = upcoming_df[
+                    ["match_id", "league", "home_team", "away_team",
+                     "commence_time"]
+                ].merge(best, on="match_id", how="left")
+                st.dataframe(display, use_container_width=True)
+            else:
+                st.dataframe(
+                    upcoming_df[
+                        ["league", "home_team", "away_team", "commence_time"]
+                    ],
+                    use_container_width=True,
+                )
+        else:
+            st.dataframe(
+                upcoming_df[
+                    ["league", "home_team", "away_team", "commence_time"]
+                ],
+                use_container_width=True,
+            )
+
+# ---------------------------------------------------------------------------
+# Tab 2: Value Bets
+# ---------------------------------------------------------------------------
+with tab_value:
+    st.subheader("Value Bets")
+    if odds_df.empty:
+        st.info("No odds data available. Refresh data first.")
+    else:
+        threshold = st.slider(
+            "Minimum edge threshold", 0.01, 0.20, 0.05, 0.01,
+            key="value_threshold",
+        )
+        value_df = analyzer.find_value_bets(
+            odds_df, sharp_bookmakers=SHARP_BOOKMAKERS, threshold=threshold
+        )
+        if value_df.empty:
+            st.success(
+                "No value bets found at the current threshold. "
+                "Try lowering the threshold."
+            )
+        else:
+            st.metric("Value bets found", len(value_df))
+            # Highlight edge column
+            styled = value_df.style.background_gradient(
+                subset=["edge"], cmap="Greens"
+            )
+            st.dataframe(styled, use_container_width=True)
+
+# ---------------------------------------------------------------------------
+# Tab 3: Arbitrage Scanner
+# ---------------------------------------------------------------------------
+with tab_arb:
+    st.subheader("Arbitrage Opportunities")
+    if odds_df.empty:
+        st.info("No odds data available. Refresh data first.")
+    else:
+        arb_df = analyzer.find_arbitrage(odds_df)
+        if arb_df.empty:
+            st.success("No arbitrage opportunities found in current data.")
+        else:
+            st.metric("Arbitrage opportunities", len(arb_df))
+            display_arb = arb_df[
+                ["home_team", "away_team", "commence_time", "market",
+                 "arb_pct"]
+            ].copy()
+            display_arb.columns = [
+                "Home", "Away", "Kick-off", "Market", "Profit %"
+            ]
+            st.dataframe(
+                display_arb.style.format({"Profit %": "{:.4f}%"}),
+                use_container_width=True,
+            )
+
+            st.markdown("### Best Odds per Opportunity")
+            for _, row in arb_df.iterrows():
+                with st.expander(
+                    f"{row['home_team']} vs {row['away_team']} "
+                    f"({row['market']}) — {row['arb_pct']:.4f}% profit"
+                ):
+                    st.json(row["best_odds"])
+
+# ---------------------------------------------------------------------------
+# Tab 4: Odds Movement
+# ---------------------------------------------------------------------------
+with tab_movement:
+    st.subheader("Odds Movement")
+    upcoming_df2 = upcoming_df_base
+
+    if upcoming_df2.empty:
+        st.info("No matches in the database.")
+    else:
+        match_labels = {
+            f"{r['home_team']} vs {r['away_team']}": r["match_id"]
+            for _, r in upcoming_df2.iterrows()
+        }
+        selected_match_label = st.selectbox(
+            "Select Match", options=list(match_labels.keys())
+        )
+        selected_match_id = match_labels[selected_match_label]
+
+        db2 = get_db()
+        history = db2.get_odds_history(selected_match_id)
+        hist_df = pd.DataFrame(history)
+
+        if hist_df.empty:
+            st.info("No historical odds for this match yet.")
+        else:
+            bookmakers = sorted(hist_df["bookmaker"].unique())
+            selected_book = st.selectbox("Select Bookmaker", bookmakers)
+
+            filtered = hist_df[
+                (hist_df["bookmaker"] == selected_book)
+                & (hist_df["market"] == "h2h")
+            ]
+
+            if filtered.empty:
+                st.info("No h2h odds history for this bookmaker.")
+            else:
+                fig = px.line(
+                    filtered,
+                    x="timestamp",
+                    y="outcome_price",
+                    color="outcome_name",
+                    title=f"Odds Movement – {selected_book}",
+                    labels={
+                        "timestamp": "Time",
+                        "outcome_price": "Decimal Odds",
+                        "outcome_name": "Outcome",
+                    },
+                    markers=True,
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+# ---------------------------------------------------------------------------
+# Tab 5: Margin Analysis
+# ---------------------------------------------------------------------------
+with tab_margin:
+    st.subheader("Bookmaker Margin Analysis")
+    if odds_df.empty:
+        st.info("No odds data available. Refresh data first.")
+    else:
+        h2h_df = odds_df[odds_df["market"] == "h2h"]
+        if h2h_df.empty:
+            st.info("No 1X2 odds data available.")
+        else:
+            margins: list[dict] = []
+            for (match_id, bookmaker), grp in h2h_df.groupby(
+                ["match_id", "bookmaker"]
+            ):
+                prices = grp["outcome_price"].tolist()
+                if len(prices) >= 2:  # noqa: PLR2004
+                    try:
+                        margin = analyzer.calculate_margin(prices)
+                        margins.append(
+                            {
+                                "bookmaker": bookmaker,
+                                "margin": margin * 100,
+                            }
+                        )
+                    except ValueError:
+                        continue
+
+            if margins:
+                margin_df = pd.DataFrame(margins)
+                avg_margin = (
+                    margin_df.groupby("bookmaker")["margin"]
+                    .mean()
+                    .reset_index()
+                    .sort_values("margin")
+                )
+
+                fig_bar = px.bar(
+                    avg_margin,
+                    x="bookmaker",
+                    y="margin",
+                    title="Average Bookmaker Margin (%) – 1X2 Markets",
+                    labels={
+                        "bookmaker": "Bookmaker",
+                        "margin": "Avg Margin (%)",
+                    },
+                    color="margin",
+                    color_continuous_scale="RdYlGn_r",
+                )
+                fig_bar.update_layout(showlegend=False)
+                st.plotly_chart(fig_bar, use_container_width=True)
+            else:
+                st.info("Insufficient data to compute margins.")
