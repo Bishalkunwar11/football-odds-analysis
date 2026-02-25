@@ -287,3 +287,93 @@ class BetCalculator:
             "profit": profit,
             "margin": margin,
         }
+
+    # ------------------------------------------------------------------
+    # Bet slip builder
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def build_bet_slip(
+        selections: Sequence[dict],
+        stake: float,
+        bet_type: str = "single",
+        bankroll: float = 1000.0,
+        fractional_kelly: float = 0.5,
+    ) -> dict[str, object]:
+        """Build a bet slip from a list of selections and compute payouts.
+
+        Each selection dict must contain at least a ``"decimal_odds"`` key
+        (float > 1).  Additional keys (e.g. ``"match"``, ``"outcome"``)
+        are passed through unchanged in the returned per-selection data.
+
+        Args:
+            selections: Sequence of dicts, each with ``"decimal_odds"``
+                and optionally ``"win_probability"``.
+            stake: Total amount wagered.
+            bet_type: ``"single"`` (one bet per selection) or
+                ``"accumulator"`` (all selections combined).
+            bankroll: Bankroll for Kelly Criterion calculation.
+            fractional_kelly: Fraction of full Kelly to use.
+
+        Returns:
+            Dict with ``bet_type``, ``stake``, ``selections`` (list of
+            enriched dicts), ``combined_odds``, ``total_payout``, and
+            ``total_profit``.
+
+        Raises:
+            ValueError: On invalid inputs.
+        """
+        if not selections:
+            raise ValueError("selections must not be empty.")
+        if stake < 0:
+            raise ValueError(f"stake must be non-negative, got {stake}")
+        if bet_type not in ("single", "accumulator"):
+            raise ValueError(
+                f"bet_type must be 'single' or 'accumulator', got '{bet_type}'"
+            )
+
+        enriched: list[dict] = []
+        combined_odds = 1.0
+
+        for sel in selections:
+            odds = sel.get("decimal_odds")
+            if odds is None or odds <= 1.0:
+                raise ValueError(
+                    f"Each selection must have decimal_odds > 1, got {odds}"
+                )
+            implied_prob = round(1.0 / odds, 4)
+            entry: dict = {**sel, "implied_probability": implied_prob}
+
+            # Kelly recommendation when win_probability is provided
+            win_prob = sel.get("win_probability")
+            if win_prob is not None and 0 < win_prob < 1:
+                b = odds - 1
+                q = 1.0 - win_prob
+                kf = max((win_prob * b - q) / b, 0.0)
+                kf_adj = round(kf * fractional_kelly, 4)
+                entry["kelly_stake"] = round(kf_adj * bankroll, 2)
+            else:
+                entry["kelly_stake"] = None
+
+            combined_odds *= odds
+            enriched.append(entry)
+
+        combined_odds = round(combined_odds, 4)
+
+        if bet_type == "accumulator":
+            total_payout = round(stake * combined_odds, 2)
+            total_profit = round(total_payout - stake, 2)
+        else:  # single — stake applied to each selection independently
+            total_payout = round(
+                sum(stake * sel["decimal_odds"] for sel in selections), 2
+            )
+            total_profit = round(total_payout - stake * len(selections), 2)
+
+        return {
+            "bet_type": bet_type,
+            "stake": stake,
+            "selections": enriched,
+            "combined_odds": combined_odds,
+            "total_payout": total_payout,
+            "total_profit": total_profit,
+        }
