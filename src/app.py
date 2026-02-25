@@ -49,6 +49,15 @@ st.markdown(
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
     }
+    .stApp, .main, [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    [data-testid="stMain"],
+    [data-testid="stMainBlockContainer"] {
+        background-color: #0D1B2A !important;
+    }
+    header[data-testid="stHeader"] {
+        background-color: #0D1B2A !important;
+    }
     .main .block-container {
         padding-top: 1rem;
     }
@@ -481,6 +490,142 @@ st.markdown(
         letter-spacing: 0.03em;
     }
     .app-footer .footer-accent { color: #00C853; }
+
+    /* ── Sidebar ── dark background & styled elements ── */
+    section[data-testid="stSidebar"] > div {
+        background-color: #0f1923 !important;
+    }
+
+    /* ── Multiselect tags ── premium dark pills ── */
+    span[data-baseweb="tag"] {
+        background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,200,83,0.08)) !important;
+        border: 1px solid rgba(0,200,83,0.3) !important;
+        border-radius: 20px !important;
+        color: #00E676 !important;
+        font-weight: 600 !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.02em !important;
+    }
+    span[data-baseweb="tag"] span {
+        color: #00E676 !important;
+    }
+    span[data-baseweb="tag"] [data-testid="stMarkdownContainer"],
+    span[data-baseweb="tag"] span[aria-label] {
+        color: #00E676 !important;
+    }
+    /* Tag close/remove button */
+    span[data-baseweb="tag"] span[role="presentation"] {
+        color: rgba(0,200,83,0.6) !important;
+    }
+    span[data-baseweb="tag"] span[role="presentation"]:hover {
+        color: #FF6B6B !important;
+    }
+
+    /* ── Form inputs ── dark-themed fields ── */
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div,
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input {
+        background-color: #1a2332 !important;
+        color: #E8EAED !important;
+        border: 1px solid rgba(0,200,83,0.15) !important;
+        border-radius: 10px !important;
+    }
+    .stSelectbox > div > div:focus-within,
+    .stMultiSelect > div > div:focus-within,
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus {
+        border-color: #00C853 !important;
+        box-shadow: 0 0 8px rgba(0,200,83,0.2) !important;
+    }
+    /* Dropdown menus */
+    [data-baseweb="popover"] > div,
+    [data-baseweb="menu"],
+    ul[role="listbox"] {
+        background-color: #1a2332 !important;
+        border: 1px solid rgba(0,200,83,0.15) !important;
+        border-radius: 10px !important;
+    }
+    [data-baseweb="menu"] li,
+    ul[role="listbox"] li {
+        color: #E8EAED !important;
+    }
+    [data-baseweb="menu"] li:hover,
+    ul[role="listbox"] li:hover {
+        background-color: rgba(0,200,83,0.12) !important;
+    }
+
+    /* ── Radio buttons ── styled chips ── */
+    div[role="radiogroup"] label {
+        background: rgba(26,35,50,0.9) !important;
+        border: 1px solid rgba(0,200,83,0.12) !important;
+        border-radius: 20px !important;
+        padding: 0.4rem 1rem !important;
+        color: #8899AA !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        transition: all 0.2s ease !important;
+    }
+    div[role="radiogroup"] label:hover {
+        border-color: rgba(0,200,83,0.3) !important;
+        color: #E8EAED !important;
+    }
+    div[role="radiogroup"] label[data-checked="true"],
+    div[role="radiogroup"] label:has(input:checked) {
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
+        color: #0D1B2A !important;
+        font-weight: 700 !important;
+        border-color: transparent !important;
+        box-shadow: 0 0 12px rgba(0,200,83,0.3) !important;
+    }
+
+    /* ── Slider track ── green accent ── */
+    .stSlider > div > div > div > div {
+        background: linear-gradient(90deg, #00C853, #00E676) !important;
+    }
+
+    /* ── Tab responsive improvement ── */
+    @media (max-width: 768px) {
+        div[data-testid="stTabs"] button[role="tab"] {
+            font-size: 0.7rem !important;
+            padding: 0.4rem 0.75rem !important;
+        }
+        .match-card .teams {
+            flex-direction: column !important;
+            text-align: center !important;
+        }
+        .match-card .team-name.away {
+            text-align: center !important;
+        }
+        .hero-header {
+            padding: 1.2rem 1rem 1rem 1rem !important;
+        }
+        .hero-header .hero-title {
+            font-size: 1.2rem !important;
+        }
+    }
+
+    /* ── Streamlit toast/alert ── dark style ── */
+    .stAlert {
+        background-color: rgba(26,35,50,0.95) !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(0,200,83,0.12) !important;
+    }
+
+    /* ── Text elements ── ensure readable on dark bg ── */
+    .stMarkdown, .stText, p, span, label, .stCaption {
+        color: #E8EAED;
+    }
+
+    /* ── Number input spinner buttons ── */
+    .stNumberInput button {
+        background-color: #1a2332 !important;
+        color: #00C853 !important;
+        border-color: rgba(0,200,83,0.15) !important;
+    }
+    .stNumberInput button:hover {
+        background-color: rgba(0,200,83,0.12) !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
