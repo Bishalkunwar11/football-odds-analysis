@@ -29,20 +29,392 @@ st.set_page_config(
     layout="wide",
 )
 
-# Make the tab bar wrap so all tabs remain visible on narrow screens.
+# ---------------------------------------------------------------------------
+# Premium Sportsbook UI/UX styling
+# ---------------------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Allow tabs to wrap onto multiple lines instead of overflowing */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* ── Tab bar ────────────────────────────────────────────────── */
     div[data-testid="stTabs"] [role="tablist"] {
         flex-wrap: wrap !important;
         overflow: visible !important;
-        gap: 0.25rem 0 !important;
+        gap: 0.35rem !important;
+        border-bottom: 2px solid rgba(49, 51, 63, 0.2) !important;
+        padding-bottom: 0.25rem !important;
+    }
+    div[data-testid="stTabs"] button[role="tab"] {
+        font-weight: 600 !important;
+        font-size: 0.82rem !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 8px 8px 0 0 !important;
+        transition: background 0.2s ease !important;
+    }
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #1b6b1f 0%, #2e8b35 100%) !important;
+        color: #ffffff !important;
+        border-bottom: 3px solid #2e8b35 !important;
+    }
+
+    /* ── Native metric cards ────────────────────────────────────── */
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, #0e1117 0%, #1a1d24 100%);
+        border: 1px solid rgba(49, 51, 63, 0.4);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    div[data-testid="stMetric"] label {
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        opacity: 0.7;
+    }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        background: linear-gradient(90deg, #4ade80, #22d3ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────────── */
+    div.stButton > button {
+        background: linear-gradient(135deg, #1b6b1f 0%, #2e8b35 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 0.55rem 1.5rem !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 8px rgba(46, 139, 53, 0.3) !important;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 16px rgba(46, 139, 53, 0.45) !important;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────────────── */
+    section[data-testid="stSidebar"] {
+        border-right: 2px solid rgba(46, 139, 53, 0.3) !important;
+    }
+    section[data-testid="stSidebar"] .stSelectbox,
+    section[data-testid="stSidebar"] .stMultiSelect {
+        border-radius: 8px;
+    }
+
+    /* ── Expander ─────────────────────────────────────────────────── */
+    details[data-testid="stExpander"] {
+        border: 1px solid rgba(49, 51, 63, 0.3) !important;
+        border-radius: 10px !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* ── Subheader accents ────────────────────────────────────────── */
+    .main .block-container h2 {
+        border-left: 4px solid #2e8b35;
+        padding-left: 0.75rem;
+    }
+
+    hr {
+        border-color: rgba(46, 139, 53, 0.25) !important;
+    }
+
+    /* ── Match cards ──────────────────────────────────────────────── */
+    .match-card {
+        background: linear-gradient(145deg, #161b22, #0d1117);
+        border: 1px solid rgba(46, 139, 53, 0.25);
+        border-radius: 14px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .match-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 139, 53, 0.3);
+    }
+    .match-card .league-badge {
+        display: inline-block;
+        background: rgba(46, 139, 53, 0.15);
+        color: #4ade80;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.2rem 0.55rem;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+    }
+    .match-card .teams {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .match-card .team-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #e6edf3;
+    }
+    .match-card .vs-label {
+        font-size: 0.72rem;
+        color: #8b949e;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .match-card .kickoff {
+        font-size: 0.72rem;
+        color: #8b949e;
+        margin-top: 0.4rem;
+    }
+    .match-card .odds-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+    }
+    .match-card .odds-btn {
+        flex: 1;
+        text-align: center;
+        background: rgba(46, 139, 53, 0.12);
+        border: 1px solid rgba(46, 139, 53, 0.3);
+        border-radius: 8px;
+        padding: 0.4rem 0.3rem;
+        transition: background 0.15s ease;
+    }
+    .match-card .odds-btn:hover {
+        background: rgba(46, 139, 53, 0.25);
+    }
+    .match-card .odds-btn .outcome-label {
+        font-size: 0.65rem;
+        color: #8b949e;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .match-card .odds-btn .odds-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #4ade80;
+    }
+
+    /* ── Stat panels (for results) ───────────────────────────────── */
+    .stat-panel {
+        background: linear-gradient(145deg, #161b22, #0d1117);
+        border: 1px solid rgba(49, 51, 63, 0.35);
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        text-align: center;
+    }
+    .stat-panel .stat-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #8b949e;
+        margin-bottom: 0.2rem;
+    }
+    .stat-panel .stat-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #4ade80, #22d3ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Bet slip cards ──────────────────────────────────────────── */
+    .slip-card {
+        background: linear-gradient(145deg, #161b22, #0d1117);
+        border-left: 3px solid #2e8b35;
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .slip-card .slip-info {
+        flex: 1;
+    }
+    .slip-card .slip-info .slip-match {
+        font-size: 0.78rem;
+        color: #8b949e;
+    }
+    .slip-card .slip-info .slip-outcome {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #e6edf3;
+    }
+    .slip-card .slip-odds {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #4ade80;
+        padding-left: 0.75rem;
+    }
+
+    /* ── Value / Arb cards ───────────────────────────────────────── */
+    .alert-card {
+        background: linear-gradient(145deg, #161b22, #0d1117);
+        border: 1px solid rgba(46, 139, 53, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        margin-bottom: 0.6rem;
+    }
+    .alert-card .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.45rem;
+    }
+    .alert-card .alert-teams {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #e6edf3;
+    }
+    .alert-card .alert-badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 6px;
+    }
+    .badge-value {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .badge-arb {
+        background: rgba(234, 179, 8, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+    .alert-card .alert-detail {
+        font-size: 0.78rem;
+        color: #8b949e;
+        line-height: 1.5;
+    }
+    .alert-card .alert-detail strong {
+        color: #e6edf3;
+    }
+
+    /* ── Counter badge ───────────────────────────────────────────── */
+    .count-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #1b6b1f, #2e8b35);
+        color: #ffffff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        margin-bottom: 0.75rem;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+
+# ---------------------------------------------------------------------------
+# HTML rendering helpers
+# ---------------------------------------------------------------------------
+
+
+def render_match_card(
+    home: str, away: str, league: str, kickoff: str,
+    odds: dict[str, float] | None = None,
+) -> str:
+    """Return HTML for a single sportsbook-style match card."""
+    odds_html = ""
+    if odds:
+        btns = []
+        for label, price in odds.items():
+            btns.append(
+                f'<div class="odds-btn">'
+                f'<div class="outcome-label">{label}</div>'
+                f'<div class="odds-value">{price:.2f}</div>'
+                f'</div>'
+            )
+        odds_html = f'<div class="odds-row">{"".join(btns)}</div>'
+    return (
+        f'<div class="match-card">'
+        f'<span class="league-badge">{league}</span>'
+        f'<div class="teams">'
+        f'<span class="team-name">{home}</span>'
+        f'<span class="vs-label">VS</span>'
+        f'<span class="team-name">{away}</span>'
+        f'</div>'
+        f'<div class="kickoff">🕐 {kickoff}</div>'
+        f'{odds_html}'
+        f'</div>'
+    )
+
+
+def render_stat_panel(label: str, value: str) -> str:
+    """Return HTML for a small stat panel."""
+    return (
+        f'<div class="stat-panel">'
+        f'<div class="stat-label">{label}</div>'
+        f'<div class="stat-value">{value}</div>'
+        f'</div>'
+    )
+
+
+def render_slip_card(match: str, outcome: str, odds: float) -> str:
+    """Return HTML for a single bet-slip selection card."""
+    return (
+        f'<div class="slip-card">'
+        f'<div class="slip-info">'
+        f'<div class="slip-match">{match}</div>'
+        f'<div class="slip-outcome">{outcome}</div>'
+        f'</div>'
+        f'<div class="slip-odds">{odds:.2f}</div>'
+        f'</div>'
+    )
+
+
+def render_value_card(
+    home: str, away: str, outcome: str, bookmaker: str,
+    price: float, edge: float,
+) -> str:
+    """Return HTML for a value-bet alert card."""
+    return (
+        f'<div class="alert-card">'
+        f'<div class="alert-header">'
+        f'<span class="alert-teams">{home} vs {away}</span>'
+        f'<span class="alert-badge badge-value">+{edge:.1%} EDGE</span>'
+        f'</div>'
+        f'<div class="alert-detail">'
+        f'<strong>{outcome}</strong> @ <strong>{price:.2f}</strong> '
+        f'via {bookmaker}'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_arb_card(
+    home: str, away: str, market: str, arb_pct: float,
+    best_odds: dict,
+) -> str:
+    """Return HTML for an arbitrage alert card."""
+    odds_parts = " · ".join(f"{k}: <strong>{v:.2f}</strong>" for k, v in best_odds.items())
+    return (
+        f'<div class="alert-card">'
+        f'<div class="alert-header">'
+        f'<span class="alert-teams">{home} vs {away}</span>'
+        f'<span class="alert-badge badge-arb">{arb_pct:.3f}% PROFIT</span>'
+        f'</div>'
+        f'<div class="alert-detail">'
+        f'Market: <strong>{market}</strong><br>'
+        f'{odds_parts}'
+        f'</div>'
+        f'</div>'
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -132,8 +504,9 @@ if st.sidebar.button("🔄 Refresh Data"):
 # ---------------------------------------------------------------------------
 
 st.title("⚽ Football Odds Analysis Dashboard")
+st.caption("Premium sports analytics · Real-time odds · Smart calculators")
 
-tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc = (
+tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc, tab_parlay = (
     st.tabs(
         [
             "📅 Matches",
@@ -142,6 +515,7 @@ tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc = (
             "📈 Movement",
             "📊 Margins",
             "🧮 Bet Calculator",
+            "🎯 Custom Bet & Parlay",
         ]
     )
 )
@@ -180,37 +554,40 @@ with tab_matches:
             "Use **Refresh Data** in the sidebar to fetch odds."
         )
     else:
-        st.metric("Matches available", len(upcoming_df))
+        st.markdown(
+            f'<span class="count-badge">{len(upcoming_df)} Matches</span>',
+            unsafe_allow_html=True,
+        )
 
+        # Build best-odds lookup per match
+        best_odds_map: dict[str, dict[str, float]] = {}
         if not odds_df.empty:
-            # Show best available odds for h2h markets
             h2h = odds_df[odds_df["market"] == "h2h"]
             if not h2h.empty:
                 best = (
                     h2h.groupby(["match_id", "outcome_name"])["outcome_price"]
                     .max()
                     .unstack("outcome_name")
-                    .reset_index()
                 )
-                display = upcoming_df[
-                    ["match_id", "league", "home_team", "away_team",
-                     "commence_time"]
-                ].merge(best, on="match_id", how="left")
-                st.dataframe(display, use_container_width=True)
-            else:
-                st.dataframe(
-                    upcoming_df[
-                        ["league", "home_team", "away_team", "commence_time"]
-                    ],
-                    use_container_width=True,
-                )
-        else:
-            st.dataframe(
-                upcoming_df[
-                    ["league", "home_team", "away_team", "commence_time"]
-                ],
-                use_container_width=True,
+                for mid in best.index:
+                    row_dict = best.loc[mid].dropna().to_dict()
+                    if row_dict:
+                        best_odds_map[mid] = row_dict
+
+        # Render cards in a two-column grid
+        cols = st.columns(2)
+        for idx, (_, row) in enumerate(upcoming_df.iterrows()):
+            m_id = row.get("match_id", "")
+            odds_for_match = best_odds_map.get(m_id)
+            card_html = render_match_card(
+                home=row["home_team"],
+                away=row["away_team"],
+                league=row.get("league", ""),
+                kickoff=str(row["commence_time"]),
+                odds=odds_for_match,
             )
+            with cols[idx % 2]:
+                st.markdown(card_html, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # Tab 2: Value Bets
@@ -233,12 +610,20 @@ with tab_value:
                 "Try lowering the threshold."
             )
         else:
-            st.metric("Value bets found", len(value_df))
-            # Highlight edge column
-            styled = value_df.style.background_gradient(
-                subset=["edge"], cmap="Greens"
+            st.markdown(
+                f'<span class="count-badge">{len(value_df)} Value Bets</span>',
+                unsafe_allow_html=True,
             )
-            st.dataframe(styled, use_container_width=True)
+            for _, vrow in value_df.iterrows():
+                card = render_value_card(
+                    home=vrow.get("home_team", ""),
+                    away=vrow.get("away_team", ""),
+                    outcome=vrow.get("outcome_name", ""),
+                    bookmaker=vrow.get("bookmaker", ""),
+                    price=float(vrow.get("outcome_price", 0)),
+                    edge=float(vrow.get("edge", 0)),
+                )
+                st.markdown(card, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # Tab 3: Arbitrage Scanner
@@ -252,26 +637,19 @@ with tab_arb:
         if arb_df.empty:
             st.success("No arbitrage opportunities found in current data.")
         else:
-            st.metric("Arbitrage opportunities", len(arb_df))
-            display_arb = arb_df[
-                ["home_team", "away_team", "commence_time", "market",
-                 "arb_pct"]
-            ].copy()
-            display_arb.columns = [
-                "Home", "Away", "Kick-off", "Market", "Profit %"
-            ]
-            st.dataframe(
-                display_arb.style.format({"Profit %": "{:.4f}%"}),
-                use_container_width=True,
+            st.markdown(
+                f'<span class="count-badge">{len(arb_df)} Opportunities</span>',
+                unsafe_allow_html=True,
             )
-
-            st.markdown("### Best Odds per Opportunity")
-            for _, row in arb_df.iterrows():
-                with st.expander(
-                    f"{row['home_team']} vs {row['away_team']} "
-                    f"({row['market']}) — {row['arb_pct']:.4f}% profit"
-                ):
-                    st.json(row["best_odds"])
+            for _, arow in arb_df.iterrows():
+                card = render_arb_card(
+                    home=arow["home_team"],
+                    away=arow["away_team"],
+                    market=arow["market"],
+                    arb_pct=float(arow["arb_pct"]),
+                    best_odds=arow["best_odds"],
+                )
+                st.markdown(card, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # Tab 4: Odds Movement
@@ -498,20 +876,15 @@ with tab_calc:
         if not slip:
             st.info("Your bet slip is empty. Add selections above.")
         else:
-            slip_df = pd.DataFrame(slip)
-            slip_df.index = range(1, len(slip_df) + 1)
-            slip_df.index.name = "#"
-            st.dataframe(
-                slip_df.rename(
-                    columns={
-                        "match": "Match",
-                        "outcome": "Outcome",
-                        "bookmaker": "Bookmaker",
-                        "decimal_odds": "Odds",
-                    }
-                ),
-                use_container_width=True,
-            )
+            for sel in slip:
+                st.markdown(
+                    render_slip_card(
+                        match=sel.get("match", ""),
+                        outcome=sel.get("outcome", ""),
+                        odds=sel["decimal_odds"],
+                    ),
+                    unsafe_allow_html=True,
+                )
 
             col_type, col_stake = st.columns(2)
             with col_type:
@@ -748,3 +1121,183 @@ with tab_calc:
                     for i, s in enumerate(result["stakes"])
                 }
                 st.json(stake_data)
+
+# ---------------------------------------------------------------------------
+# Tab 7: Custom Bet & Parlay Calculator
+# ---------------------------------------------------------------------------
+
+# Session state for custom parlay legs
+if "parlay_legs" not in st.session_state:
+    st.session_state["parlay_legs"] = []
+
+with tab_parlay:
+    st.subheader("🎯 Custom Bet & Parlay Calculator")
+    st.markdown(
+        "Build custom parlays by manually entering selections and odds. "
+        "Supports **straight parlays**, **round-robin** combinations, "
+        "and **single-bet** payouts."
+    )
+
+    parlay_calc = BetCalculator()
+
+    # --- Add a leg ---
+    st.markdown("#### Add a Selection")
+    pc1, pc2, pc3 = st.columns([3, 2, 2])
+    with pc1:
+        parlay_label = st.text_input(
+            "Selection label (e.g. Arsenal ML)",
+            key="parlay_label",
+        )
+    with pc2:
+        parlay_odds_fmt = st.selectbox(
+            "Odds format",
+            ["Decimal", "American", "Fractional"],
+            key="parlay_odds_fmt",
+        )
+    with pc3:
+        if parlay_odds_fmt == "Decimal":
+            parlay_dec = st.number_input(
+                "Decimal Odds", min_value=1.01, value=2.00, step=0.05,
+                key="parlay_dec",
+            )
+        elif parlay_odds_fmt == "American":
+            parlay_amer = st.number_input(
+                "American Odds", value=150, step=10,
+                key="parlay_amer",
+            )
+            parlay_dec = (
+                parlay_calc.american_to_decimal(int(parlay_amer))
+                if parlay_amer != 0
+                else 2.0
+            )
+        else:
+            pf1, pf2 = st.columns(2)
+            with pf1:
+                parlay_num = st.number_input(
+                    "Numerator", min_value=1, value=3, step=1,
+                    key="parlay_fnum",
+                )
+            with pf2:
+                parlay_den = st.number_input(
+                    "Denominator", min_value=1, value=2, step=1,
+                    key="parlay_fden",
+                )
+            parlay_dec = parlay_calc.fractional_to_decimal(
+                int(parlay_num), int(parlay_den)
+            )
+
+    st.markdown(f"**Decimal odds:** `{parlay_dec:.4f}`")
+
+    if st.button("➕ Add Leg", key="btn_add_parlay_leg"):
+        label = parlay_label.strip() or f"Leg {len(st.session_state['parlay_legs']) + 1}"
+        if parlay_dec > 1.0:
+            st.session_state["parlay_legs"].append(
+                {"label": label, "decimal_odds": round(parlay_dec, 4)}
+            )
+            st.success(f"Added: **{label}** @ {parlay_dec:.4f}")
+        else:
+            st.error("Odds must be greater than 1.0.")
+
+    # --- Display legs ---
+    st.markdown("---")
+    st.markdown("#### 🗒️ Your Parlay Legs")
+    legs = st.session_state["parlay_legs"]
+
+    if not legs:
+        st.info("No legs added yet. Use the form above to add selections.")
+    else:
+        for lg in legs:
+            st.markdown(
+                render_slip_card(
+                    match="Custom Selection",
+                    outcome=lg["label"],
+                    odds=lg["decimal_odds"],
+                ),
+                unsafe_allow_html=True,
+            )
+
+        if st.button("🗑️ Clear All Legs", key="btn_clear_parlay"):
+            st.session_state["parlay_legs"] = []
+            st.rerun()
+
+        # --- Calculation options ---
+        st.markdown("---")
+        st.markdown("#### Calculate")
+
+        parlay_mode = st.radio(
+            "Bet type",
+            ["Straight Parlay (Accumulator)", "Round-Robin Parlays", "Singles"],
+            horizontal=True,
+            key="parlay_mode",
+        )
+
+        parlay_stake = st.number_input(
+            "Stake ($)", min_value=0.0, value=10.0, step=5.0,
+            key="parlay_stake",
+        )
+
+        odds_list = [lg["decimal_odds"] for lg in legs]
+
+        if parlay_mode == "Straight Parlay (Accumulator)":
+            if st.button("💰 Calculate Parlay", key="btn_calc_parlay"):
+                result = parlay_calc.calculate_accumulator(parlay_stake, odds_list)
+                r1, r2, r3, r4 = st.columns(4)
+                r1.metric("Legs", result["num_legs"])
+                r2.metric("Combined Odds", f"{result['combined_odds']:.4f}")
+                r3.metric("Payout", f"${result['payout']:.2f}")
+                r4.metric("Profit", f"${result['profit']:.2f}")
+                st.caption(
+                    f"Implied probability: {result['implied_probability']:.4%}  ·  "
+                    "All legs must win for a payout."
+                )
+
+        elif parlay_mode == "Round-Robin Parlays":
+            max_combo = len(legs)
+            combo_size = st.slider(
+                "Legs per combo",
+                min_value=2,
+                max_value=max(max_combo, 2),
+                value=min(2, max_combo),
+                key="rr_combo_size",
+            )
+            if combo_size > len(legs):
+                st.warning("Combo size cannot exceed the number of legs.")
+            elif st.button("💰 Calculate Round-Robin", key="btn_calc_rr"):
+                result = parlay_calc.calculate_round_robin(
+                    parlay_stake, odds_list, combo_size
+                )
+                r1, r2, r3, r4 = st.columns(4)
+                r1.metric("Parlays", result["num_combos"])
+                r2.metric("Total Staked", f"${result['total_staked']:.2f}")
+                r3.metric("Payout (all win)", f"${result['total_payout_all_win']:.2f}")
+                r4.metric("Profit (all win)", f"${result['total_profit_all_win']:.2f}")
+
+                st.markdown("##### Individual Parlays")
+                for idx, combo in enumerate(result["combos"], 1):
+                    combo_labels = [legs[i]["label"] for i in combo["legs"]]
+                    with st.expander(
+                        f"Parlay {idx}: {' + '.join(combo_labels)}  "
+                        f"— Odds {combo['combined_odds']:.4f}  "
+                        f"→ ${combo['payout']:.2f}"
+                    ):
+                        for i in combo["legs"]:
+                            st.markdown(
+                                f"- **{legs[i]['label']}** @ {legs[i]['decimal_odds']:.2f}"
+                            )
+
+        else:  # Singles
+            if st.button("💰 Calculate Singles", key="btn_calc_singles"):
+                st.markdown("##### Single-Bet Payouts")
+                total_payout = 0.0
+                for i, lg in enumerate(legs):
+                    res = parlay_calc.calculate_payout(parlay_stake, lg["decimal_odds"])
+                    total_payout += res["payout"]
+                    c1, c2, c3 = st.columns([3, 1, 1])
+                    c1.markdown(f"**{lg['label']}** @ {lg['decimal_odds']:.2f}")
+                    c2.metric("Payout", f"${res['payout']:.2f}")
+                    c3.metric("Profit", f"${res['profit']:.2f}")
+                total_staked = parlay_stake * len(legs)
+                st.markdown("---")
+                s1, s2 = st.columns(2)
+                s1.metric("Total Staked", f"${total_staked:.2f}")
+                s2.metric("Total Payout (all win)", f"${total_payout:.2f}")

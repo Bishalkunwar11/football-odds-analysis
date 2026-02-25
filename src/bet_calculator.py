@@ -2,6 +2,7 @@
 
 import logging
 import math
+from itertools import combinations
 from typing import Sequence
 
 logger = logging.getLogger(__name__)
@@ -376,4 +377,84 @@ class BetCalculator:
             "combined_odds": combined_odds,
             "total_payout": total_payout,
             "total_profit": total_profit,
+        }
+
+    # ------------------------------------------------------------------
+    # Round-robin parlay calculator
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def calculate_round_robin(
+        stake_per_combo: float,
+        odds_list: Sequence[float],
+        combo_size: int,
+    ) -> dict[str, object]:
+        """Calculate all round-robin parlays of a given combination size.
+
+        A round-robin takes *n* selections and builds every possible
+        parlay of *combo_size* legs.  For example, 4 selections with
+        ``combo_size=2`` produces ``C(4,2) = 6`` two-leg parlays.
+
+        Args:
+            stake_per_combo: Stake placed on each individual parlay.
+            odds_list: Decimal odds for each selection (all must be > 1).
+            combo_size: Number of legs per parlay (2 ≤ combo_size ≤ len).
+
+        Returns:
+            Dict with ``stake_per_combo``, ``num_combos``, ``total_staked``,
+            ``combos`` (list of dicts with ``legs``, ``combined_odds``,
+            ``payout``), ``total_payout_all_win``, and
+            ``total_profit_all_win``.
+
+        Raises:
+            ValueError: On invalid inputs.
+        """
+        if stake_per_combo < 0:
+            raise ValueError(
+                f"stake_per_combo must be non-negative, got {stake_per_combo}"
+            )
+        if not odds_list:
+            raise ValueError("odds_list must not be empty.")
+        if combo_size < 2:
+            raise ValueError(
+                f"combo_size must be >= 2, got {combo_size}"
+            )
+        if combo_size > len(odds_list):
+            raise ValueError(
+                f"combo_size ({combo_size}) cannot exceed number of "
+                f"selections ({len(odds_list)})."
+            )
+        for o in odds_list:
+            if o <= 1.0:
+                raise ValueError(
+                    f"All decimal odds must be > 1, got {o}"
+                )
+
+        combos: list[dict] = []
+        for indices in combinations(range(len(odds_list)), combo_size):
+            combined = 1.0
+            for i in indices:
+                combined *= odds_list[i]
+            combined = round(combined, 4)
+            payout = round(stake_per_combo * combined, 2)
+            combos.append(
+                {
+                    "legs": list(indices),
+                    "combined_odds": combined,
+                    "payout": payout,
+                }
+            )
+
+        num_combos = len(combos)
+        total_staked = round(stake_per_combo * num_combos, 2)
+        total_payout = round(sum(c["payout"] for c in combos), 2)
+        total_profit = round(total_payout - total_staked, 2)
+
+        return {
+            "stake_per_combo": stake_per_combo,
+            "num_combos": num_combos,
+            "total_staked": total_staked,
+            "combos": combos,
+            "total_payout_all_win": total_payout,
+            "total_profit_all_win": total_profit,
         }
