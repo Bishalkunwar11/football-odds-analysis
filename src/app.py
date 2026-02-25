@@ -118,7 +118,7 @@ if st.sidebar.button("🔄 Refresh Data"):
 
 st.title("⚽ Football Odds Analysis Dashboard")
 
-tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_builder, tab_calc = (
+tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc = (
     st.tabs(
         [
             "📅 Matches",
@@ -126,8 +126,7 @@ tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_builder, tab_calc
             "🔄 Arbitrage",
             "📈 Movement",
             "📊 Margins",
-            "🎯 Bet Builder",
-            "🧮 Calculator",
+            "🧮 Bet Calculator",
         ]
     )
 )
@@ -367,366 +366,370 @@ with tab_margin:
                 st.info("Insufficient data to compute margins.")
 
 # ---------------------------------------------------------------------------
-# Tab 6: Custom Bet Builder
+# Tab 6: Bet Calculator (Builder + Calculator Tools)
 # ---------------------------------------------------------------------------
 
 # Initialise bet slip in session state
 if "bet_slip" not in st.session_state:
     st.session_state["bet_slip"] = []
 
-with tab_builder:
-    st.subheader("Custom Bet Builder")
-    st.markdown(
-        "Pick outcomes from available matches and build a single bet or "
-        "accumulator with real odds."
-    )
-
-    bet_calc_builder = BetCalculator()
-
-    if odds_df.empty:
-        st.info(
-            "No odds data available. Use **Refresh Data** in the sidebar "
-            "to fetch odds first."
-        )
-    else:
-        h2h_builder = odds_df[odds_df["market"] == "h2h"]
-        if h2h_builder.empty:
-            st.info("No 1X2 odds available to build bets from.")
-        else:
-            # Build match labels
-            match_info = (
-                h2h_builder[["match_id", "home_team", "away_team", "league"]]
-                .drop_duplicates("match_id")
-                .reset_index(drop=True)
-            )
-            match_info["label"] = (
-                match_info["home_team"]
-                + " vs "
-                + match_info["away_team"]
-                + " ("
-                + match_info["league"]
-                + ")"
-            )
-            label_to_id = dict(
-                zip(match_info["label"], match_info["match_id"])
-            )
-
-            st.markdown("#### Add a Selection")
-            col_m, col_o, col_b = st.columns([3, 2, 2])
-            with col_m:
-                sel_match_label = st.selectbox(
-                    "Match",
-                    options=list(label_to_id.keys()),
-                    key="builder_match",
-                )
-            sel_match_id = label_to_id.get(sel_match_label, "")
-
-            # Available outcomes for selected match
-            match_h2h = h2h_builder[h2h_builder["match_id"] == sel_match_id]
-            outcomes = sorted(match_h2h["outcome_name"].unique())
-            bookmakers = sorted(match_h2h["bookmaker"].unique())
-
-            with col_o:
-                sel_outcome = st.selectbox(
-                    "Outcome", options=outcomes, key="builder_outcome"
-                )
-            with col_b:
-                sel_bookmaker = st.selectbox(
-                    "Bookmaker", options=bookmakers, key="builder_book"
-                )
-
-            # Find the specific odds row
-            specific = match_h2h[
-                (match_h2h["outcome_name"] == sel_outcome)
-                & (match_h2h["bookmaker"] == sel_bookmaker)
-            ]
-            if not specific.empty:
-                sel_odds = float(specific.iloc[0]["outcome_price"])
-                st.markdown(
-                    f"**Selected odds:** `{sel_odds:.2f}` "
-                    f"({sel_outcome} @ {sel_bookmaker})"
-                )
-            else:
-                sel_odds = None
-                st.warning("No odds found for this combination.")
-
-            if st.button("➕ Add to Bet Slip", key="btn_add_slip"):
-                if sel_odds is not None and sel_odds > 1.0:
-                    st.session_state["bet_slip"].append(
-                        {
-                            "match": sel_match_label,
-                            "outcome": sel_outcome,
-                            "bookmaker": sel_bookmaker,
-                            "decimal_odds": sel_odds,
-                        }
-                    )
-                    st.success(
-                        f"Added: {sel_outcome} ({sel_match_label}) "
-                        f"@ {sel_odds:.2f}"
-                    )
-                else:
-                    st.error("Cannot add — no valid odds selected.")
-
-    # --- Bet Slip Display ---
-    st.markdown("---")
-    st.markdown("#### 🗒️ Your Bet Slip")
-    slip = st.session_state["bet_slip"]
-
-    if not slip:
-        st.info("Your bet slip is empty. Add selections above.")
-    else:
-        slip_df = pd.DataFrame(slip)
-        slip_df.index = range(1, len(slip_df) + 1)
-        slip_df.index.name = "#"
-        st.dataframe(
-            slip_df.rename(
-                columns={
-                    "match": "Match",
-                    "outcome": "Outcome",
-                    "bookmaker": "Bookmaker",
-                    "decimal_odds": "Odds",
-                }
-            ),
-            use_container_width=True,
-        )
-
-        col_type, col_stake = st.columns(2)
-        with col_type:
-            builder_bet_type = st.radio(
-                "Bet Type",
-                ["Single (each selection)", "Accumulator (combined)"],
-                key="builder_bet_type",
-                horizontal=True,
-            )
-        with col_stake:
-            builder_stake = st.number_input(
-                "Stake ($)", min_value=0.0, value=10.0, step=5.0,
-                key="builder_stake",
-            )
-
-        col_calc, col_clear = st.columns(2)
-        with col_calc:
-            if st.button("💰 Calculate Payout", key="btn_calc_slip"):
-                bt = (
-                    "single"
-                    if builder_bet_type.startswith("Single")
-                    else "accumulator"
-                )
-                result = bet_calc_builder.build_bet_slip(
-                    slip, builder_stake, bet_type=bt,
-                )
-                st.markdown("##### Results")
-                r1, r2, r3 = st.columns(3)
-                r1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
-                r2.metric("Total Payout", f"${result['total_payout']:.2f}")
-                r3.metric("Total Profit", f"${result['total_profit']:.2f}")
-
-                if bt == "accumulator":
-                    st.caption(
-                        "Accumulator: all selections must win for a payout."
-                    )
-                else:
-                    st.caption(
-                        "Single: stake is placed on each selection independently."
-                    )
-        with col_clear:
-            if st.button("🗑️ Clear Bet Slip", key="btn_clear_slip"):
-                st.session_state["bet_slip"] = []
-                st.rerun()
-
-# ---------------------------------------------------------------------------
-# Tab 7: Custom Bet Calculator
-# ---------------------------------------------------------------------------
 with tab_calc:
-    st.subheader("Custom Bet Calculator")
+    st.subheader("🧮 Bet Calculator")
 
-    bet_calc = BetCalculator()
-
-    calc_section = st.radio(
-        "Select Calculator",
-        [
-            "Single Bet",
-            "Accumulator / Parlay",
-            "Odds Converter",
-            "Kelly Criterion",
-            "Dutching",
-        ],
+    calc_mode = st.radio(
+        "Mode",
+        ["Calculator Tools", "Bet Builder"],
         horizontal=True,
-        key="calc_section",
+        key="calc_mode",
     )
 
-    # --- Single Bet ---
-    if calc_section == "Single Bet":
-        st.markdown("#### Single Bet Payout")
-        col1, col2 = st.columns(2)
-        with col1:
-            sb_stake = st.number_input(
-                "Stake", min_value=0.0, value=100.0, step=10.0,
-                key="sb_stake",
-            )
-        with col2:
-            sb_odds = st.number_input(
-                "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
-                key="sb_odds",
-            )
-        if st.button("Calculate Payout", key="btn_single"):
-            result = bet_calc.calculate_payout(sb_stake, sb_odds)
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Payout", f"${result['payout']:.2f}")
-            c2.metric("Profit", f"${result['profit']:.2f}")
-            c3.metric("Implied Probability", f"{result['implied_probability']:.2%}")
+    if calc_mode == "Bet Builder":
+        st.markdown(
+            "Pick outcomes from available matches and build a single bet or "
+            "accumulator with real odds."
+        )
 
-    # --- Accumulator / Parlay ---
-    elif calc_section == "Accumulator / Parlay":
-        st.markdown("#### Accumulator / Parlay Calculator")
-        acc_stake = st.number_input(
-            "Stake", min_value=0.0, value=10.0, step=5.0,
-            key="acc_stake",
-        )
-        num_legs = st.number_input(
-            "Number of Legs", min_value=2, max_value=20, value=3, step=1,
-            key="acc_legs",
-        )
-        leg_odds: list[float] = []
-        cols = st.columns(min(int(num_legs), 5))
-        for i in range(int(num_legs)):
-            with cols[i % len(cols)]:
-                val = st.number_input(
-                    f"Leg {i + 1} Odds", min_value=1.01, value=2.0, step=0.05,
-                    key=f"acc_leg_{i}",
+        bet_calc_builder = BetCalculator()
+
+        if odds_df.empty:
+            st.info(
+                "No odds data available. Use **Refresh Data** in the sidebar "
+                "to fetch odds first."
+            )
+        else:
+            h2h_builder = odds_df[odds_df["market"] == "h2h"]
+            if h2h_builder.empty:
+                st.info("No 1X2 odds available to build bets from.")
+            else:
+                # Build match labels
+                match_info = (
+                    h2h_builder[["match_id", "home_team", "away_team", "league"]]
+                    .drop_duplicates("match_id")
+                    .reset_index(drop=True)
                 )
-                leg_odds.append(val)
-        if st.button("Calculate Accumulator", key="btn_acc"):
-            result = bet_calc.calculate_accumulator(acc_stake, leg_odds)
-            c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
-            c2.metric("Payout", f"${result['payout']:.2f}")
-            c3.metric("Profit", f"${result['profit']:.2f}")
-            c4.metric("Implied Prob.", f"{result['implied_probability']:.4%}")
+                match_info["label"] = (
+                    match_info["home_team"]
+                    + " vs "
+                    + match_info["away_team"]
+                    + " ("
+                    + match_info["league"]
+                    + ")"
+                )
+                label_to_id = dict(
+                    zip(match_info["label"], match_info["match_id"])
+                )
 
-    # --- Odds Converter ---
-    elif calc_section == "Odds Converter":
-        st.markdown("#### Odds Format Converter")
-        fmt = st.selectbox(
-            "Input Format",
-            ["Decimal", "American", "Fractional"],
-            key="odds_fmt",
-        )
-        if fmt == "Decimal":
-            dec = st.number_input(
-                "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
-                key="conv_dec",
+                st.markdown("#### Add a Selection")
+                col_m, col_o, col_b = st.columns([3, 2, 2])
+                with col_m:
+                    sel_match_label = st.selectbox(
+                        "Match",
+                        options=list(label_to_id.keys()),
+                        key="builder_match",
+                    )
+                sel_match_id = label_to_id.get(sel_match_label, "")
+
+                # Available outcomes for selected match
+                match_h2h = h2h_builder[h2h_builder["match_id"] == sel_match_id]
+                outcomes = sorted(match_h2h["outcome_name"].unique())
+                bookmakers = sorted(match_h2h["bookmaker"].unique())
+
+                with col_o:
+                    sel_outcome = st.selectbox(
+                        "Outcome", options=outcomes, key="builder_outcome"
+                    )
+                with col_b:
+                    sel_bookmaker = st.selectbox(
+                        "Bookmaker", options=bookmakers, key="builder_book"
+                    )
+
+                # Find the specific odds row
+                specific = match_h2h[
+                    (match_h2h["outcome_name"] == sel_outcome)
+                    & (match_h2h["bookmaker"] == sel_bookmaker)
+                ]
+                if not specific.empty:
+                    sel_odds = float(specific.iloc[0]["outcome_price"])
+                    st.markdown(
+                        f"**Selected odds:** `{sel_odds:.2f}` "
+                        f"({sel_outcome} @ {sel_bookmaker})"
+                    )
+                else:
+                    sel_odds = None
+                    st.warning("No odds found for this combination.")
+
+                if st.button("➕ Add to Bet Slip", key="btn_add_slip"):
+                    if sel_odds is not None and sel_odds > 1.0:
+                        st.session_state["bet_slip"].append(
+                            {
+                                "match": sel_match_label,
+                                "outcome": sel_outcome,
+                                "bookmaker": sel_bookmaker,
+                                "decimal_odds": sel_odds,
+                            }
+                        )
+                        st.success(
+                            f"Added: {sel_outcome} ({sel_match_label}) "
+                            f"@ {sel_odds:.2f}"
+                        )
+                    else:
+                        st.error("Cannot add — no valid odds selected.")
+
+        # --- Bet Slip Display ---
+        st.markdown("---")
+        st.markdown("#### 🗒️ Your Bet Slip")
+        slip = st.session_state["bet_slip"]
+
+        if not slip:
+            st.info("Your bet slip is empty. Add selections above.")
+        else:
+            slip_df = pd.DataFrame(slip)
+            slip_df.index = range(1, len(slip_df) + 1)
+            slip_df.index.name = "#"
+            st.dataframe(
+                slip_df.rename(
+                    columns={
+                        "match": "Match",
+                        "outcome": "Outcome",
+                        "bookmaker": "Bookmaker",
+                        "decimal_odds": "Odds",
+                    }
+                ),
+                use_container_width=True,
             )
-            if st.button("Convert", key="btn_conv"):
-                num, den = bet_calc.decimal_to_fractional(dec)
-                american = bet_calc.decimal_to_american(dec)
+
+            col_type, col_stake = st.columns(2)
+            with col_type:
+                builder_bet_type = st.radio(
+                    "Bet Type",
+                    ["Single (each selection)", "Accumulator (combined)"],
+                    key="builder_bet_type",
+                    horizontal=True,
+                )
+            with col_stake:
+                builder_stake = st.number_input(
+                    "Stake ($)", min_value=0.0, value=10.0, step=5.0,
+                    key="builder_stake",
+                )
+
+            col_calc, col_clear = st.columns(2)
+            with col_calc:
+                if st.button("💰 Calculate Payout", key="btn_calc_slip"):
+                    bt = (
+                        "single"
+                        if builder_bet_type.startswith("Single")
+                        else "accumulator"
+                    )
+                    result = bet_calc_builder.build_bet_slip(
+                        slip, builder_stake, bet_type=bt,
+                    )
+                    st.markdown("##### Results")
+                    r1, r2, r3 = st.columns(3)
+                    r1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
+                    r2.metric("Total Payout", f"${result['total_payout']:.2f}")
+                    r3.metric("Total Profit", f"${result['total_profit']:.2f}")
+
+                    if bt == "accumulator":
+                        st.caption(
+                            "Accumulator: all selections must win for a payout."
+                        )
+                    else:
+                        st.caption(
+                            "Single: stake is placed on each selection independently."
+                        )
+            with col_clear:
+                if st.button("🗑️ Clear Bet Slip", key="btn_clear_slip"):
+                    st.session_state["bet_slip"] = []
+                    st.rerun()
+
+    else:  # Calculator Tools
+        bet_calc = BetCalculator()
+
+        calc_section = st.radio(
+            "Select Calculator",
+            [
+                "Single Bet",
+                "Accumulator / Parlay",
+                "Odds Converter",
+                "Kelly Criterion",
+                "Dutching",
+            ],
+            horizontal=True,
+            key="calc_section",
+        )
+
+        # --- Single Bet ---
+        if calc_section == "Single Bet":
+            st.markdown("#### Single Bet Payout")
+            col1, col2 = st.columns(2)
+            with col1:
+                sb_stake = st.number_input(
+                    "Stake", min_value=0.0, value=100.0, step=10.0,
+                    key="sb_stake",
+                )
+            with col2:
+                sb_odds = st.number_input(
+                    "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
+                    key="sb_odds",
+                )
+            if st.button("Calculate Payout", key="btn_single"):
+                result = bet_calc.calculate_payout(sb_stake, sb_odds)
                 c1, c2, c3 = st.columns(3)
-                c1.metric("Decimal", f"{dec:.2f}")
-                c2.metric("Fractional", f"{num}/{den}")
-                c3.metric("American", f"{american:+d}")
-        elif fmt == "American":
-            amer = st.number_input(
-                "American Odds", value=150, step=10, key="conv_amer",
-            )
-            if amer == 0:
-                st.warning("American odds cannot be zero.")
-            elif st.button("Convert", key="btn_conv_a"):
-                dec = bet_calc.american_to_decimal(int(amer))
-                num, den = bet_calc.decimal_to_fractional(dec)
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Decimal", f"{dec:.4f}")
-                c2.metric("Fractional", f"{num}/{den}")
-                c3.metric("American", f"{int(amer):+d}")
-        else:  # Fractional
-            fc1, fc2 = st.columns(2)
-            with fc1:
-                fnum = st.number_input(
-                    "Numerator", min_value=1, value=3, step=1,
-                    key="conv_fnum",
-                )
-            with fc2:
-                fden = st.number_input(
-                    "Denominator", min_value=1, value=2, step=1,
-                    key="conv_fden",
-                )
-            if st.button("Convert", key="btn_conv_f"):
-                dec = bet_calc.fractional_to_decimal(int(fnum), int(fden))
-                american = bet_calc.decimal_to_american(dec)
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Decimal", f"{dec:.4f}")
-                c2.metric("Fractional", f"{int(fnum)}/{int(fden)}")
-                c3.metric("American", f"{american:+d}")
+                c1.metric("Payout", f"${result['payout']:.2f}")
+                c2.metric("Profit", f"${result['profit']:.2f}")
+                c3.metric("Implied Probability", f"{result['implied_probability']:.2%}")
 
-    # --- Kelly Criterion ---
-    elif calc_section == "Kelly Criterion":
-        st.markdown("#### Kelly Criterion Stake Calculator")
-        kc1, kc2 = st.columns(2)
-        with kc1:
-            kc_odds = st.number_input(
-                "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
-                key="kc_odds",
+        # --- Accumulator / Parlay ---
+        elif calc_section == "Accumulator / Parlay":
+            st.markdown("#### Accumulator / Parlay Calculator")
+            acc_stake = st.number_input(
+                "Stake", min_value=0.0, value=10.0, step=5.0,
+                key="acc_stake",
             )
-            kc_prob = st.slider(
-                "Estimated Win Probability",
-                0.01, 0.99, 0.50, 0.01,
-                key="kc_prob",
+            num_legs = st.number_input(
+                "Number of Legs", min_value=2, max_value=20, value=3, step=1,
+                key="acc_legs",
             )
-        with kc2:
-            kc_bankroll = st.number_input(
-                "Bankroll", min_value=1.0, value=1000.0, step=50.0,
-                key="kc_bankroll",
-            )
-            kc_frac = st.slider(
-                "Kelly Fraction (1 = full Kelly)",
-                0.1, 1.0, 0.5, 0.1,
-                key="kc_frac",
-            )
-        if st.button("Calculate Kelly Stake", key="btn_kelly"):
-            result = bet_calc.kelly_criterion(
-                kc_odds, kc_prob, kc_bankroll, kc_frac
-            )
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Edge", f"{result['edge']:.2%}")
-            c2.metric("Kelly Fraction", f"{result['kelly_fraction']:.4f}")
-            c3.metric(
-                "Recommended Stake",
-                f"${result['recommended_stake']:.2f}",
-            )
-            if result["edge"] <= 0:
-                st.warning(
-                    "⚠️ No positive edge detected — Kelly recommends no bet."
-                )
+            leg_odds: list[float] = []
+            cols = st.columns(min(int(num_legs), 5))
+            for i in range(int(num_legs)):
+                with cols[i % len(cols)]:
+                    val = st.number_input(
+                        f"Leg {i + 1} Odds", min_value=1.01, value=2.0, step=0.05,
+                        key=f"acc_leg_{i}",
+                    )
+                    leg_odds.append(val)
+            if st.button("Calculate Accumulator", key="btn_acc"):
+                result = bet_calc.calculate_accumulator(acc_stake, leg_odds)
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
+                c2.metric("Payout", f"${result['payout']:.2f}")
+                c3.metric("Profit", f"${result['profit']:.2f}")
+                c4.metric("Implied Prob.", f"{result['implied_probability']:.4%}")
 
-    # --- Dutching ---
-    else:
-        st.markdown("#### Dutching Calculator")
-        dt_stake = st.number_input(
-            "Total Stake", min_value=1.0, value=100.0, step=10.0,
-            key="dt_stake",
-        )
-        dt_num = st.number_input(
-            "Number of Selections", min_value=2, max_value=10, value=3, step=1,
-            key="dt_num",
-        )
-        dt_odds: list[float] = []
-        cols_dt = st.columns(min(int(dt_num), 5))
-        for i in range(int(dt_num)):
-            with cols_dt[i % len(cols_dt)]:
-                val = st.number_input(
-                    f"Selection {i + 1} Odds",
-                    min_value=1.01, value=3.00, step=0.10,
-                    key=f"dt_odds_{i}",
+        # --- Odds Converter ---
+        elif calc_section == "Odds Converter":
+            st.markdown("#### Odds Format Converter")
+            fmt = st.selectbox(
+                "Input Format",
+                ["Decimal", "American", "Fractional"],
+                key="odds_fmt",
+            )
+            if fmt == "Decimal":
+                dec = st.number_input(
+                    "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
+                    key="conv_dec",
                 )
-                dt_odds.append(val)
-        if st.button("Calculate Dutching", key="btn_dutch"):
-            result = bet_calc.dutching_calculator(dt_stake, dt_odds)
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Equal Payout", f"${result['equal_payout']:.2f}")
-            c2.metric("Profit", f"${result['profit']:.2f}")
-            c3.metric("Market Margin", f"{result['margin']:.2%}")
-            st.markdown("**Individual Stakes:**")
-            stake_data = {
-                f"Selection {i + 1} (@ {dt_odds[i]:.2f})": f"${s:.2f}"
-                for i, s in enumerate(result["stakes"])
-            }
-            st.json(stake_data)
+                if st.button("Convert", key="btn_conv"):
+                    num, den = bet_calc.decimal_to_fractional(dec)
+                    american = bet_calc.decimal_to_american(dec)
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Decimal", f"{dec:.2f}")
+                    c2.metric("Fractional", f"{num}/{den}")
+                    c3.metric("American", f"{american:+d}")
+            elif fmt == "American":
+                amer = st.number_input(
+                    "American Odds", value=150, step=10, key="conv_amer",
+                )
+                if amer == 0:
+                    st.warning("American odds cannot be zero.")
+                elif st.button("Convert", key="btn_conv_a"):
+                    dec = bet_calc.american_to_decimal(int(amer))
+                    num, den = bet_calc.decimal_to_fractional(dec)
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Decimal", f"{dec:.4f}")
+                    c2.metric("Fractional", f"{num}/{den}")
+                    c3.metric("American", f"{int(amer):+d}")
+            else:  # Fractional
+                fc1, fc2 = st.columns(2)
+                with fc1:
+                    fnum = st.number_input(
+                        "Numerator", min_value=1, value=3, step=1,
+                        key="conv_fnum",
+                    )
+                with fc2:
+                    fden = st.number_input(
+                        "Denominator", min_value=1, value=2, step=1,
+                        key="conv_fden",
+                    )
+                if st.button("Convert", key="btn_conv_f"):
+                    dec = bet_calc.fractional_to_decimal(int(fnum), int(fden))
+                    american = bet_calc.decimal_to_american(dec)
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Decimal", f"{dec:.4f}")
+                    c2.metric("Fractional", f"{int(fnum)}/{int(fden)}")
+                    c3.metric("American", f"{american:+d}")
+
+        # --- Kelly Criterion ---
+        elif calc_section == "Kelly Criterion":
+            st.markdown("#### Kelly Criterion Stake Calculator")
+            kc1, kc2 = st.columns(2)
+            with kc1:
+                kc_odds = st.number_input(
+                    "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
+                    key="kc_odds",
+                )
+                kc_prob = st.slider(
+                    "Estimated Win Probability",
+                    0.01, 0.99, 0.50, 0.01,
+                    key="kc_prob",
+                )
+            with kc2:
+                kc_bankroll = st.number_input(
+                    "Bankroll", min_value=1.0, value=1000.0, step=50.0,
+                    key="kc_bankroll",
+                )
+                kc_frac = st.slider(
+                    "Kelly Fraction (1 = full Kelly)",
+                    0.1, 1.0, 0.5, 0.1,
+                    key="kc_frac",
+                )
+            if st.button("Calculate Kelly Stake", key="btn_kelly"):
+                result = bet_calc.kelly_criterion(
+                    kc_odds, kc_prob, kc_bankroll, kc_frac
+                )
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Edge", f"{result['edge']:.2%}")
+                c2.metric("Kelly Fraction", f"{result['kelly_fraction']:.4f}")
+                c3.metric(
+                    "Recommended Stake",
+                    f"${result['recommended_stake']:.2f}",
+                )
+                if result["edge"] <= 0:
+                    st.warning(
+                        "⚠️ No positive edge detected — Kelly recommends no bet."
+                    )
+
+        # --- Dutching ---
+        else:
+            st.markdown("#### Dutching Calculator")
+            dt_stake = st.number_input(
+                "Total Stake", min_value=1.0, value=100.0, step=10.0,
+                key="dt_stake",
+            )
+            dt_num = st.number_input(
+                "Number of Selections", min_value=2, max_value=10, value=3, step=1,
+                key="dt_num",
+            )
+            dt_odds: list[float] = []
+            cols_dt = st.columns(min(int(dt_num), 5))
+            for i in range(int(dt_num)):
+                with cols_dt[i % len(cols_dt)]:
+                    val = st.number_input(
+                        f"Selection {i + 1} Odds",
+                        min_value=1.01, value=3.00, step=0.10,
+                        key=f"dt_odds_{i}",
+                    )
+                    dt_odds.append(val)
+            if st.button("Calculate Dutching", key="btn_dutch"):
+                result = bet_calc.dutching_calculator(dt_stake, dt_odds)
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Equal Payout", f"${result['equal_payout']:.2f}")
+                c2.metric("Profit", f"${result['profit']:.2f}")
+                c3.metric("Market Margin", f"{result['margin']:.2%}")
+                st.markdown("**Individual Stakes:**")
+                stake_data = {
+                    f"Selection {i + 1} (@ {dt_odds[i]:.2f})": f"${s:.2f}"
+                    for i, s in enumerate(result["stakes"])
+                }
+                st.json(stake_data)
