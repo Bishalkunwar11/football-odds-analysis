@@ -29,6 +29,21 @@ st.set_page_config(
     layout="wide",
 )
 
+# Make the tab bar wrap so all tabs remain visible on narrow screens.
+st.markdown(
+    """
+    <style>
+    /* Allow tabs to wrap onto multiple lines instead of overflowing */
+    div[data-testid="stTabs"] [role="tablist"] {
+        flex-wrap: wrap !important;
+        overflow: visible !important;
+        gap: 0.25rem 0 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # ---------------------------------------------------------------------------
 # Helpers
