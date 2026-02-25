@@ -299,3 +299,59 @@ class TestBuildBetSlip:
         result = calc.build_bet_slip(selections, stake=10)
         assert result["selections"][0]["match"] == "X vs Y"
         assert result["selections"][0]["custom_key"] == 42
+
+
+# ---------------------------------------------------------------------------
+# calculate_round_robin
+# ---------------------------------------------------------------------------
+
+class TestCalculateRoundRobin:
+    def test_three_picks_two_leg_combos(self, calc: BetCalculator) -> None:
+        # C(3,2) = 3 two-leg parlays
+        result = calc.calculate_round_robin(10, [2.0, 3.0, 4.0], combo_size=2)
+        assert result["num_combos"] == 3
+        assert result["total_staked"] == pytest.approx(30.0)
+        # Combos: (2*3)=6, (2*4)=8, (3*4)=12 → payouts 60,80,120
+        assert result["total_payout_all_win"] == pytest.approx(260.0)
+        assert result["total_profit_all_win"] == pytest.approx(230.0)
+
+    def test_four_picks_three_leg_combos(self, calc: BetCalculator) -> None:
+        # C(4,3) = 4 three-leg parlays
+        result = calc.calculate_round_robin(5, [2.0, 2.0, 2.0, 2.0], combo_size=3)
+        assert result["num_combos"] == 4
+        assert result["total_staked"] == pytest.approx(20.0)
+        # Each combo: 2*2*2=8 odds → payout 40 each → total 160
+        assert result["total_payout_all_win"] == pytest.approx(160.0)
+
+    def test_combo_legs_indices(self, calc: BetCalculator) -> None:
+        result = calc.calculate_round_robin(10, [2.0, 3.0, 4.0], combo_size=2)
+        legs_sets = [tuple(c["legs"]) for c in result["combos"]]
+        assert (0, 1) in legs_sets
+        assert (0, 2) in legs_sets
+        assert (1, 2) in legs_sets
+
+    def test_combo_size_equals_selections(self, calc: BetCalculator) -> None:
+        # combo_size == len → only one full accumulator
+        result = calc.calculate_round_robin(10, [2.0, 3.0], combo_size=2)
+        assert result["num_combos"] == 1
+        assert result["combos"][0]["combined_odds"] == pytest.approx(6.0)
+
+    def test_empty_odds_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.calculate_round_robin(10, [], combo_size=2)
+
+    def test_combo_size_too_large_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.calculate_round_robin(10, [2.0, 3.0], combo_size=3)
+
+    def test_combo_size_below_two_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.calculate_round_robin(10, [2.0, 3.0], combo_size=1)
+
+    def test_negative_stake_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.calculate_round_robin(-5, [2.0, 3.0], combo_size=2)
+
+    def test_invalid_odds_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.calculate_round_robin(10, [2.0, 0.5], combo_size=2)

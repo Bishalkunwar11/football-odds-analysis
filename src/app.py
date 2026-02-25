@@ -29,15 +29,113 @@ st.set_page_config(
     layout="wide",
 )
 
-# Make the tab bar wrap so all tabs remain visible on narrow screens.
+# ---------------------------------------------------------------------------
+# Premium UI/UX styling
+# ---------------------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Allow tabs to wrap onto multiple lines instead of overflowing */
+    /* ── Import Google Font ─────────────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    /* ── Global ─────────────────────────────────────────────────── */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* ── Tab bar ────────────────────────────────────────────────── */
     div[data-testid="stTabs"] [role="tablist"] {
         flex-wrap: wrap !important;
         overflow: visible !important;
-        gap: 0.25rem 0 !important;
+        gap: 0.35rem !important;
+        border-bottom: 2px solid rgba(49, 51, 63, 0.2) !important;
+        padding-bottom: 0.25rem !important;
+    }
+    div[data-testid="stTabs"] button[role="tab"] {
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 8px 8px 0 0 !important;
+        transition: background 0.2s ease !important;
+    }
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #1b6b1f 0%, #2e8b35 100%) !important;
+        color: #ffffff !important;
+        border-bottom: 3px solid #2e8b35 !important;
+    }
+
+    /* ── Metric cards ───────────────────────────────────────────── */
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, #0e1117 0%, #1a1d24 100%);
+        border: 1px solid rgba(49, 51, 63, 0.4);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    div[data-testid="stMetric"] label {
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        opacity: 0.75;
+    }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        background: linear-gradient(90deg, #4ade80, #22d3ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    div.stButton > button {
+        background: linear-gradient(135deg, #1b6b1f 0%, #2e8b35 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 0.55rem 1.5rem !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 8px rgba(46, 139, 53, 0.3) !important;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 16px rgba(46, 139, 53, 0.45) !important;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────────── */
+    section[data-testid="stSidebar"] {
+        border-right: 2px solid rgba(46, 139, 53, 0.3) !important;
+    }
+    section[data-testid="stSidebar"] .stSelectbox,
+    section[data-testid="stSidebar"] .stMultiSelect {
+        border-radius: 8px;
+    }
+
+    /* ── DataFrames ──────────────────────────────────────────────── */
+    div[data-testid="stDataFrame"] {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(49, 51, 63, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ── Expander ────────────────────────────────────────────────── */
+    details[data-testid="stExpander"] {
+        border: 1px solid rgba(49, 51, 63, 0.3) !important;
+        border-radius: 10px !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* ── Subheader accents ───────────────────────────────────────── */
+    .main .block-container h2 {
+        border-left: 4px solid #2e8b35;
+        padding-left: 0.75rem;
+    }
+
+    /* ── Dividers ────────────────────────────────────────────────── */
+    hr {
+        border-color: rgba(46, 139, 53, 0.25) !important;
     }
     </style>
     """,
@@ -132,8 +230,9 @@ if st.sidebar.button("🔄 Refresh Data"):
 # ---------------------------------------------------------------------------
 
 st.title("⚽ Football Odds Analysis Dashboard")
+st.caption("Premium sports analytics · Real-time odds · Smart calculators")
 
-tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc = (
+tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc, tab_parlay = (
     st.tabs(
         [
             "📅 Matches",
@@ -142,6 +241,7 @@ tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc = (
             "📈 Movement",
             "📊 Margins",
             "🧮 Bet Calculator",
+            "🎯 Custom Bet & Parlay",
         ]
     )
 )
@@ -748,3 +848,181 @@ with tab_calc:
                     for i, s in enumerate(result["stakes"])
                 }
                 st.json(stake_data)
+
+# ---------------------------------------------------------------------------
+# Tab 7: Custom Bet & Parlay Calculator
+# ---------------------------------------------------------------------------
+
+# Session state for custom parlay legs
+if "parlay_legs" not in st.session_state:
+    st.session_state["parlay_legs"] = []
+
+with tab_parlay:
+    st.subheader("🎯 Custom Bet & Parlay Calculator")
+    st.markdown(
+        "Build custom parlays by manually entering selections and odds. "
+        "Supports **straight parlays**, **round-robin** combinations, "
+        "and **single-bet** payouts."
+    )
+
+    parlay_calc = BetCalculator()
+
+    # --- Add a leg ---
+    st.markdown("#### Add a Selection")
+    pc1, pc2, pc3 = st.columns([3, 2, 2])
+    with pc1:
+        parlay_label = st.text_input(
+            "Selection label (e.g. Arsenal ML)",
+            key="parlay_label",
+        )
+    with pc2:
+        parlay_odds_fmt = st.selectbox(
+            "Odds format",
+            ["Decimal", "American", "Fractional"],
+            key="parlay_odds_fmt",
+        )
+    with pc3:
+        if parlay_odds_fmt == "Decimal":
+            parlay_dec = st.number_input(
+                "Decimal Odds", min_value=1.01, value=2.00, step=0.05,
+                key="parlay_dec",
+            )
+        elif parlay_odds_fmt == "American":
+            parlay_amer = st.number_input(
+                "American Odds", value=150, step=10,
+                key="parlay_amer",
+            )
+            parlay_dec = (
+                parlay_calc.american_to_decimal(int(parlay_amer))
+                if parlay_amer != 0
+                else 2.0
+            )
+        else:
+            pf1, pf2 = st.columns(2)
+            with pf1:
+                parlay_num = st.number_input(
+                    "Numerator", min_value=1, value=3, step=1,
+                    key="parlay_fnum",
+                )
+            with pf2:
+                parlay_den = st.number_input(
+                    "Denominator", min_value=1, value=2, step=1,
+                    key="parlay_fden",
+                )
+            parlay_dec = parlay_calc.fractional_to_decimal(
+                int(parlay_num), int(parlay_den)
+            )
+
+    st.markdown(f"**Decimal odds:** `{parlay_dec:.4f}`")
+
+    if st.button("➕ Add Leg", key="btn_add_parlay_leg"):
+        label = parlay_label.strip() or f"Leg {len(st.session_state['parlay_legs']) + 1}"
+        if parlay_dec > 1.0:
+            st.session_state["parlay_legs"].append(
+                {"label": label, "decimal_odds": round(parlay_dec, 4)}
+            )
+            st.success(f"Added: **{label}** @ {parlay_dec:.4f}")
+        else:
+            st.error("Odds must be greater than 1.0.")
+
+    # --- Display legs ---
+    st.markdown("---")
+    st.markdown("#### 🗒️ Your Parlay Legs")
+    legs = st.session_state["parlay_legs"]
+
+    if not legs:
+        st.info("No legs added yet. Use the form above to add selections.")
+    else:
+        leg_df = pd.DataFrame(legs)
+        leg_df.index = range(1, len(leg_df) + 1)
+        leg_df.index.name = "#"
+        st.dataframe(
+            leg_df.rename(columns={"label": "Selection", "decimal_odds": "Odds"}),
+            use_container_width=True,
+        )
+
+        if st.button("🗑️ Clear All Legs", key="btn_clear_parlay"):
+            st.session_state["parlay_legs"] = []
+            st.rerun()
+
+        # --- Calculation options ---
+        st.markdown("---")
+        st.markdown("#### Calculate")
+
+        parlay_mode = st.radio(
+            "Bet type",
+            ["Straight Parlay (Accumulator)", "Round-Robin Parlays", "Singles"],
+            horizontal=True,
+            key="parlay_mode",
+        )
+
+        parlay_stake = st.number_input(
+            "Stake ($)", min_value=0.0, value=10.0, step=5.0,
+            key="parlay_stake",
+        )
+
+        odds_list = [lg["decimal_odds"] for lg in legs]
+
+        if parlay_mode == "Straight Parlay (Accumulator)":
+            if st.button("💰 Calculate Parlay", key="btn_calc_parlay"):
+                result = parlay_calc.calculate_accumulator(parlay_stake, odds_list)
+                r1, r2, r3, r4 = st.columns(4)
+                r1.metric("Legs", result["num_legs"])
+                r2.metric("Combined Odds", f"{result['combined_odds']:.4f}")
+                r3.metric("Payout", f"${result['payout']:.2f}")
+                r4.metric("Profit", f"${result['profit']:.2f}")
+                st.caption(
+                    f"Implied probability: {result['implied_probability']:.4%}  ·  "
+                    "All legs must win for a payout."
+                )
+
+        elif parlay_mode == "Round-Robin Parlays":
+            max_combo = len(legs)
+            combo_size = st.slider(
+                "Legs per combo",
+                min_value=2,
+                max_value=max(max_combo, 2),
+                value=min(2, max_combo),
+                key="rr_combo_size",
+            )
+            if combo_size > len(legs):
+                st.warning("Combo size cannot exceed the number of legs.")
+            elif st.button("💰 Calculate Round-Robin", key="btn_calc_rr"):
+                result = parlay_calc.calculate_round_robin(
+                    parlay_stake, odds_list, combo_size
+                )
+                r1, r2, r3, r4 = st.columns(4)
+                r1.metric("Parlays", result["num_combos"])
+                r2.metric("Total Staked", f"${result['total_staked']:.2f}")
+                r3.metric("Payout (all win)", f"${result['total_payout_all_win']:.2f}")
+                r4.metric("Profit (all win)", f"${result['total_profit_all_win']:.2f}")
+
+                st.markdown("##### Individual Parlays")
+                for idx, combo in enumerate(result["combos"], 1):
+                    combo_labels = [legs[i]["label"] for i in combo["legs"]]
+                    with st.expander(
+                        f"Parlay {idx}: {' + '.join(combo_labels)}  "
+                        f"— Odds {combo['combined_odds']:.4f}  "
+                        f"→ ${combo['payout']:.2f}"
+                    ):
+                        for i in combo["legs"]:
+                            st.markdown(
+                                f"- **{legs[i]['label']}** @ {legs[i]['decimal_odds']:.2f}"
+                            )
+
+        else:  # Singles
+            if st.button("💰 Calculate Singles", key="btn_calc_singles"):
+                st.markdown("##### Single-Bet Payouts")
+                total_payout = 0.0
+                for i, lg in enumerate(legs):
+                    res = parlay_calc.calculate_payout(parlay_stake, lg["decimal_odds"])
+                    total_payout += res["payout"]
+                    c1, c2, c3 = st.columns([3, 1, 1])
+                    c1.markdown(f"**{lg['label']}** @ {lg['decimal_odds']:.2f}")
+                    c2.metric("Payout", f"${res['payout']:.2f}")
+                    c3.metric("Profit", f"${res['profit']:.2f}")
+                total_staked = parlay_stake * len(legs)
+                st.markdown("---")
+                s1, s2 = st.columns(2)
+                s1.metric("Total Staked", f"${total_staked:.2f}")
+                s2.metric("Total Payout (all win)", f"${total_payout:.2f}")
