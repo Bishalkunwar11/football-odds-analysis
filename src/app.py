@@ -24,296 +24,463 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 st.set_page_config(
-    page_title="⚽ Football Odds Analysis",
-    page_icon="⚽",
+    page_title="\u26bd Football Odds Analysis",
+    page_icon="\u26bd",
     layout="wide",
 )
 
 # ---------------------------------------------------------------------------
-# Premium Sportsbook UI/UX styling
+# Premium Sportsbook UI \u2013 DraftKings / Bet365 / FanDuel inspired dark theme
 # ---------------------------------------------------------------------------
+DARK_THEME = {
+    "paper_bgcolor": "#0D1B2A",
+    "plot_bgcolor": "#0D1B2A",
+    "font_color": "#E8EAED",
+    "gridcolor": "rgba(0,200,83,0.08)",
+    "colorway": ["#00C853", "#FFD700", "#00E676", "#40C4FF", "#FF6B35", "#E040FB"],
+}
+
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+    /* \u2500\u2500 Global reset \u2500\u2500 */
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
     }
+    .main .block-container {
+        padding-top: 1rem;
+    }
 
-    /* ── Tab bar ────────────────────────────────────────────────── */
+    /* \u2500\u2500 Custom scrollbar \u2500\u2500 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0D1B2A; }
+    ::-webkit-scrollbar-thumb { background: #1a2332; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00C853; }
+
+    /* \u2500\u2500 Tab bar \u2013 pill-style tabs \u2500\u2500 */
     div[data-testid="stTabs"] [role="tablist"] {
         flex-wrap: wrap !important;
         overflow: visible !important;
-        gap: 0.35rem !important;
-        border-bottom: 2px solid rgba(49, 51, 63, 0.2) !important;
-        padding-bottom: 0.25rem !important;
+        gap: 0.4rem !important;
+        border-bottom: 2px solid rgba(0,200,83,0.1) !important;
+        padding-bottom: 0.35rem !important;
     }
     div[data-testid="stTabs"] button[role="tab"] {
         font-weight: 600 !important;
-        font-size: 0.82rem !important;
-        padding: 0.5rem 1rem !important;
-        border-radius: 8px 8px 0 0 !important;
-        transition: background 0.2s ease !important;
+        font-size: 0.8rem !important;
+        padding: 0.5rem 1.1rem !important;
+        border-radius: 20px !important;
+        border: 1px solid transparent !important;
+        color: #8899AA !important;
+        transition: all 0.25s ease !important;
+        letter-spacing: 0.02em !important;
+    }
+    div[data-testid="stTabs"] button[role="tab"]:hover {
+        color: #E8EAED !important;
+        background: rgba(0,200,83,0.08) !important;
     }
     div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
-        background: linear-gradient(135deg, #1b6b1f 0%, #2e8b35 100%) !important;
-        color: #ffffff !important;
-        border-bottom: 3px solid #2e8b35 !important;
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
+        color: #0D1B2A !important;
+        font-weight: 700 !important;
+        border-color: transparent !important;
+        box-shadow: 0 0 16px rgba(0,200,83,0.35) !important;
     }
 
-    /* ── Native metric cards ────────────────────────────────────── */
+    /* \u2500\u2500 Native metric cards \u2013 glassmorphism \u2500\u2500 */
     div[data-testid="stMetric"] {
-        background: linear-gradient(135deg, #0e1117 0%, #1a1d24 100%);
-        border: 1px solid rgba(49, 51, 63, 0.4);
-        border-radius: 12px;
+        background: linear-gradient(145deg, rgba(26,35,50,0.9), rgba(13,27,42,0.95));
+        border: 1px solid rgba(0,200,83,0.15);
+        border-radius: 14px;
         padding: 1rem 1.25rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
     }
     div[data-testid="stMetric"] label {
-        font-size: 0.78rem !important;
-        font-weight: 600 !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.06em !important;
-        opacity: 0.7;
+        letter-spacing: 0.08em !important;
+        color: #8899AA !important;
     }
     div[data-testid="stMetric"] [data-testid="stMetricValue"] {
         font-size: 1.5rem !important;
-        font-weight: 700 !important;
-        background: linear-gradient(90deg, #4ade80, #22d3ee);
+        font-weight: 800 !important;
+        background: linear-gradient(90deg, #00C853, #00E676, #40C4FF);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    div[data-testid="stMetric"] [data-testid="stMetricDelta"] {
+        color: #00E676 !important;
+    }
 
-    /* ── Buttons ──────────────────────────────────────────────────── */
+    /* \u2500\u2500 Buttons \u2013 green gradient with glow \u2500\u2500 */
     div.stButton > button {
-        background: linear-gradient(135deg, #1b6b1f 0%, #2e8b35 100%) !important;
-        color: #ffffff !important;
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
+        color: #0D1B2A !important;
         border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 0.82rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
         padding: 0.55rem 1.5rem !important;
-        transition: all 0.2s ease !important;
-        box-shadow: 0 2px 8px rgba(46, 139, 53, 0.3) !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 2px 12px rgba(0,200,83,0.3) !important;
     }
     div.stButton > button:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 16px rgba(46, 139, 53, 0.45) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 24px rgba(0,200,83,0.5) !important;
+        background: linear-gradient(135deg, #00E676 0%, #69F0AE 100%) !important;
+    }
+    div.stButton > button:active {
+        transform: translateY(0px) !important;
     }
 
-    /* ── Sidebar ──────────────────────────────────────────────────── */
+    /* \u2500\u2500 Sidebar \u2013 branded panel \u2500\u2500 */
     section[data-testid="stSidebar"] {
-        border-right: 2px solid rgba(46, 139, 53, 0.3) !important;
+        border-right: 2px solid rgba(0,200,83,0.2) !important;
     }
     section[data-testid="stSidebar"] .stSelectbox,
     section[data-testid="stSidebar"] .stMultiSelect {
-        border-radius: 8px;
+        border-radius: 10px;
     }
 
-    /* ── Expander ─────────────────────────────────────────────────── */
+    /* \u2500\u2500 Expanders \u2500\u2500 */
     details[data-testid="stExpander"] {
-        border: 1px solid rgba(49, 51, 63, 0.3) !important;
-        border-radius: 10px !important;
+        border: 1px solid rgba(0,200,83,0.12) !important;
+        border-radius: 12px !important;
         margin-bottom: 0.5rem !important;
+        background: rgba(26,35,50,0.4) !important;
+    }
+    details[data-testid="stExpander"] summary {
+        font-weight: 600 !important;
     }
 
-    /* ── Subheader accents ────────────────────────────────────────── */
+    /* \u2500\u2500 Subheader accents \u2500\u2500 */
     .main .block-container h2 {
-        border-left: 4px solid #2e8b35;
+        border-left: 4px solid #00C853;
         padding-left: 0.75rem;
+        letter-spacing: 0.02em;
     }
 
     hr {
-        border-color: rgba(46, 139, 53, 0.25) !important;
+        border-color: rgba(0,200,83,0.15) !important;
     }
 
-    /* ── Match cards ──────────────────────────────────────────────── */
+    /* \u2500\u2500 Inputs / sliders \u2013 green accent \u2500\u2500 */
+    .stSlider [data-testid="stThumbValue"] {
+        color: #00C853 !important;
+    }
+
+    /* \u2500\u2500 Hero header \u2500\u2500 */
+    .hero-header {
+        background: linear-gradient(135deg, #0D1B2A 0%, #1B2838 50%, #0f1923 100%);
+        border: 1px solid rgba(0,200,83,0.12);
+        border-radius: 16px;
+        padding: 1.8rem 2rem 1.4rem 2rem;
+        margin-bottom: 1.2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #00C853, #FFD700, #00E676);
+    }
+    .hero-header .hero-title {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #E8EAED;
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+    .hero-header .hero-title .accent { color: #00C853; }
+    .hero-header .hero-sub {
+        font-size: 0.82rem;
+        color: #8899AA;
+        margin-top: 0.3rem;
+        font-weight: 500;
+        letter-spacing: 0.03em;
+    }
+    .hero-header .hero-sub .dot {
+        display: inline-block;
+        width: 5px; height: 5px;
+        background: #00C853;
+        border-radius: 50%;
+        margin: 0 0.5rem;
+        vertical-align: middle;
+    }
+
+    /* \u2500\u2500 Match cards \u2013 sportsbook style \u2500\u2500 */
     .match-card {
-        background: linear-gradient(145deg, #161b22, #0d1117);
-        border: 1px solid rgba(46, 139, 53, 0.25);
-        border-radius: 14px;
-        padding: 1.1rem 1.3rem;
-        margin-bottom: 0.75rem;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        background: linear-gradient(145deg, #1a2332 0%, #0f1923 100%);
+        border: 1px solid rgba(0,200,83,0.15);
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 0.85rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
     }
     .match-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(46, 139, 53, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,200,83,0.2);
+    }
+    .match-card .card-top {
+        padding: 0.9rem 1.2rem 0.6rem 1.2rem;
     }
     .match-card .league-badge {
         display: inline-block;
-        background: rgba(46, 139, 53, 0.15);
-        color: #4ade80;
-        font-size: 0.7rem;
+        background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,200,83,0.08));
+        color: #00C853;
+        font-size: 0.65rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        padding: 0.2rem 0.55rem;
-        border-radius: 6px;
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.1em;
+        padding: 0.22rem 0.6rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,200,83,0.2);
     }
     .match-card .teams {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 0.75rem;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
     }
     .match-card .team-name {
         font-size: 0.95rem;
         font-weight: 700;
-        color: #e6edf3;
+        color: #E8EAED;
+        flex: 1;
     }
-    .match-card .vs-label {
-        font-size: 0.72rem;
-        color: #8b949e;
-        font-weight: 600;
+    .match-card .team-name.away { text-align: right; }
+    .match-card .vs-badge {
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: #0D1B2A;
+        background: linear-gradient(135deg, #00C853, #00E676);
+        padding: 0.25rem 0.55rem;
+        border-radius: 6px;
         text-transform: uppercase;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
     }
     .match-card .kickoff {
-        font-size: 0.72rem;
-        color: #8b949e;
-        margin-top: 0.4rem;
+        font-size: 0.7rem;
+        color: #8899AA;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
     }
     .match-card .odds-row {
         display: flex;
-        gap: 0.5rem;
-        margin-top: 0.6rem;
+        gap: 0;
+        border-top: 1px solid rgba(0,200,83,0.1);
     }
     .match-card .odds-btn {
         flex: 1;
         text-align: center;
-        background: rgba(46, 139, 53, 0.12);
-        border: 1px solid rgba(46, 139, 53, 0.3);
-        border-radius: 8px;
-        padding: 0.4rem 0.3rem;
-        transition: background 0.15s ease;
+        padding: 0.55rem 0.3rem;
+        transition: background 0.2s ease;
+        cursor: pointer;
+        border-right: 1px solid rgba(0,200,83,0.08);
     }
+    .match-card .odds-btn:last-child { border-right: none; }
     .match-card .odds-btn:hover {
-        background: rgba(46, 139, 53, 0.25);
+        background: rgba(0,200,83,0.12);
     }
     .match-card .odds-btn .outcome-label {
-        font-size: 0.65rem;
-        color: #8b949e;
+        font-size: 0.6rem;
+        color: #8899AA;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        font-weight: 600;
     }
     .match-card .odds-btn .odds-value {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #4ade80;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #00C853;
+        margin-top: 0.1rem;
     }
 
-    /* ── Stat panels (for results) ───────────────────────────────── */
+    /* \u2500\u2500 Stat panels \u2013 glassmorphism \u2500\u2500 */
     .stat-panel {
-        background: linear-gradient(145deg, #161b22, #0d1117);
-        border: 1px solid rgba(49, 51, 63, 0.35);
-        border-radius: 12px;
-        padding: 0.9rem 1.1rem;
+        background: linear-gradient(145deg, rgba(26,35,50,0.9), rgba(13,27,42,0.95));
+        border: 1px solid rgba(0,200,83,0.12);
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
         text-align: center;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     }
     .stat-panel .stat-label {
-        font-size: 0.68rem;
-        font-weight: 600;
+        font-size: 0.65rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #8b949e;
-        margin-bottom: 0.2rem;
+        letter-spacing: 0.1em;
+        color: #8899AA;
+        margin-bottom: 0.25rem;
     }
     .stat-panel .stat-value {
-        font-size: 1.3rem;
+        font-size: 1.35rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #4ade80, #22d3ee);
+        background: linear-gradient(90deg, #00C853, #00E676, #40C4FF);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
-    /* ── Bet slip cards ──────────────────────────────────────────── */
+    /* \u2500\u2500 Bet slip cards \u2500\u2500 */
     .slip-card {
-        background: linear-gradient(145deg, #161b22, #0d1117);
-        border-left: 3px solid #2e8b35;
-        border-radius: 10px;
-        padding: 0.8rem 1rem;
-        margin-bottom: 0.5rem;
+        background: linear-gradient(145deg, #1a2332, #0f1923);
+        border-left: 4px solid #00C853;
+        border-radius: 12px;
+        padding: 0.85rem 1.1rem;
+        margin-bottom: 0.55rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+        transition: transform 0.15s ease;
     }
-    .slip-card .slip-info {
-        flex: 1;
+    .slip-card:hover {
+        transform: translateX(3px);
     }
+    .slip-card .slip-info { flex: 1; }
     .slip-card .slip-info .slip-match {
-        font-size: 0.78rem;
-        color: #8b949e;
+        font-size: 0.72rem;
+        color: #8899AA;
+        font-weight: 500;
     }
     .slip-card .slip-info .slip-outcome {
         font-size: 0.92rem;
         font-weight: 700;
-        color: #e6edf3;
+        color: #E8EAED;
+        margin-top: 0.1rem;
     }
     .slip-card .slip-odds {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         font-weight: 800;
-        color: #4ade80;
-        padding-left: 0.75rem;
+        color: #0D1B2A;
+        background: linear-gradient(135deg, #00C853, #00E676);
+        padding: 0.3rem 0.7rem;
+        border-radius: 8px;
+        margin-left: 0.75rem;
     }
 
-    /* ── Value / Arb cards ───────────────────────────────────────── */
+    /* \u2500\u2500 Value bet / Arbitrage alert cards \u2500\u2500 */
     .alert-card {
-        background: linear-gradient(145deg, #161b22, #0d1117);
-        border: 1px solid rgba(46, 139, 53, 0.2);
-        border-radius: 12px;
-        padding: 1rem 1.2rem;
-        margin-bottom: 0.6rem;
+        background: linear-gradient(145deg, #1a2332, #0f1923);
+        border: 1px solid rgba(0,200,83,0.15);
+        border-radius: 14px;
+        padding: 1.05rem 1.3rem;
+        margin-bottom: 0.7rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        transition: transform 0.15s ease;
+    }
+    .alert-card:hover {
+        transform: translateY(-2px);
     }
     .alert-card .alert-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.45rem;
+        margin-bottom: 0.5rem;
     }
     .alert-card .alert-teams {
         font-size: 0.9rem;
         font-weight: 700;
-        color: #e6edf3;
+        color: #E8EAED;
     }
     .alert-card .alert-badge {
         display: inline-block;
-        font-size: 0.7rem;
-        font-weight: 700;
-        padding: 0.2rem 0.55rem;
-        border-radius: 6px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 0.25rem 0.65rem;
+        border-radius: 20px;
+        letter-spacing: 0.04em;
     }
     .badge-value {
-        background: rgba(34, 197, 94, 0.15);
-        color: #4ade80;
-        border: 1px solid rgba(34, 197, 94, 0.3);
+        background: rgba(0,200,83,0.12);
+        color: #00E676;
+        border: 1px solid rgba(0,200,83,0.3);
+        animation: pulse-green 2s ease-in-out infinite;
+    }
+    @keyframes pulse-green {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,83,0.3); }
+        50% { box-shadow: 0 0 12px 2px rgba(0,200,83,0.25); }
     }
     .badge-arb {
-        background: rgba(234, 179, 8, 0.15);
-        color: #fbbf24;
-        border: 1px solid rgba(234, 179, 8, 0.3);
+        background: rgba(255,215,0,0.12);
+        color: #FFD700;
+        border: 1px solid rgba(255,215,0,0.3);
+        animation: pulse-gold 2s ease-in-out infinite;
+    }
+    @keyframes pulse-gold {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.3); }
+        50% { box-shadow: 0 0 12px 2px rgba(255,215,0,0.25); }
     }
     .alert-card .alert-detail {
         font-size: 0.78rem;
-        color: #8b949e;
-        line-height: 1.5;
+        color: #8899AA;
+        line-height: 1.6;
     }
     .alert-card .alert-detail strong {
-        color: #e6edf3;
+        color: #E8EAED;
     }
 
-    /* ── Counter badge ───────────────────────────────────────────── */
+    /* \u2500\u2500 Counter badge \u2500\u2500 */
     .count-badge {
         display: inline-block;
-        background: linear-gradient(135deg, #1b6b1f, #2e8b35);
-        color: #ffffff;
-        font-size: 0.85rem;
-        font-weight: 700;
-        padding: 0.35rem 0.85rem;
+        background: linear-gradient(135deg, #00C853, #00E676);
+        color: #0D1B2A;
+        font-size: 0.8rem;
+        font-weight: 800;
+        padding: 0.35rem 0.95rem;
         border-radius: 20px;
         margin-bottom: 0.75rem;
+        letter-spacing: 0.03em;
+        box-shadow: 0 2px 10px rgba(0,200,83,0.3);
     }
+
+    /* \u2500\u2500 Empty state styling \u2500\u2500 */
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: #8899AA;
+    }
+    .empty-state .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.6rem;
+        opacity: 0.6;
+    }
+    .empty-state .empty-text {
+        font-size: 0.88rem;
+        font-weight: 500;
+        max-width: 400px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    /* \u2500\u2500 Footer \u2500\u2500 */
+    .app-footer {
+        text-align: center;
+        padding: 1.5rem 0 1rem 0;
+        color: #556677;
+        font-size: 0.72rem;
+        border-top: 1px solid rgba(0,200,83,0.08);
+        margin-top: 2rem;
+        letter-spacing: 0.03em;
+    }
+    .app-footer .footer-accent { color: #00C853; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -343,13 +510,15 @@ def render_match_card(
         odds_html = f'<div class="odds-row">{"".join(btns)}</div>'
     return (
         f'<div class="match-card">'
-        f'<span class="league-badge">{league}</span>'
+        f'<div class="card-top">'
+        f'<span class="league-badge">\u26bd {league}</span>'
         f'<div class="teams">'
         f'<span class="team-name">{home}</span>'
-        f'<span class="vs-label">VS</span>'
-        f'<span class="team-name">{away}</span>'
+        f'<span class="vs-badge">VS</span>'
+        f'<span class="team-name away">{away}</span>'
         f'</div>'
-        f'<div class="kickoff">🕐 {kickoff}</div>'
+        f'<div class="kickoff">\U0001f550 {kickoff}</div>'
+        f'</div>'
         f'{odds_html}'
         f'</div>'
     )
@@ -386,7 +555,7 @@ def render_value_card(
     return (
         f'<div class="alert-card">'
         f'<div class="alert-header">'
-        f'<span class="alert-teams">{home} vs {away}</span>'
+        f'<span class="alert-teams">\u26bd {home} vs {away}</span>'
         f'<span class="alert-badge badge-value">+{edge:.1%} EDGE</span>'
         f'</div>'
         f'<div class="alert-detail">'
@@ -402,12 +571,12 @@ def render_arb_card(
     best_odds: dict,
 ) -> str:
     """Return HTML for an arbitrage alert card."""
-    odds_parts = " · ".join(f"{k}: <strong>{v:.2f}</strong>" for k, v in best_odds.items())
+    odds_parts = " \u00b7 ".join(f"{k}: <strong>{v:.2f}</strong>" for k, v in best_odds.items())
     return (
         f'<div class="alert-card">'
         f'<div class="alert-header">'
-        f'<span class="alert-teams">{home} vs {away}</span>'
-        f'<span class="alert-badge badge-arb">{arb_pct:.3f}% PROFIT</span>'
+        f'<span class="alert-teams">\U0001f504 {home} vs {away}</span>'
+        f'<span class="alert-badge badge-arb">\U0001f4b0 {arb_pct:.3f}% PROFIT</span>'
         f'</div>'
         f'<div class="alert-detail">'
         f'Market: <strong>{market}</strong><br>'
@@ -415,6 +584,34 @@ def render_arb_card(
         f'</div>'
         f'</div>'
     )
+
+
+def _apply_dark_theme(fig):
+    """Apply the sportsbook dark theme to a plotly figure."""
+    fig.update_layout(
+        paper_bgcolor=DARK_THEME["paper_bgcolor"],
+        plot_bgcolor=DARK_THEME["plot_bgcolor"],
+        font_color=DARK_THEME["font_color"],
+        font_family="Inter, sans-serif",
+        colorway=DARK_THEME["colorway"],
+        title_font_size=14,
+        title_font_color="#E8EAED",
+        legend_bgcolor="rgba(0,0,0,0)",
+        legend_font_color="#8899AA",
+    )
+    fig.update_xaxes(
+        gridcolor=DARK_THEME["gridcolor"],
+        zerolinecolor=DARK_THEME["gridcolor"],
+        title_font_color="#8899AA",
+        tickfont_color="#8899AA",
+    )
+    fig.update_yaxes(
+        gridcolor=DARK_THEME["gridcolor"],
+        zerolinecolor=DARK_THEME["gridcolor"],
+        title_font_color="#8899AA",
+        tickfont_color="#8899AA",
+    )
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -460,7 +657,7 @@ def fetch_and_store(selected_leagues: list[str]) -> int:
 
     for sport_key in selected_leagues:
         league_name = league_map.get(sport_key, sport_key)
-        with st.spinner(f"Fetching {league_name}…"):
+        with st.spinner(f"Fetching {league_name}\u2026"):
             rows = client.fetch_odds(sport_key)
             all_rows.extend(rows)
 
@@ -477,7 +674,33 @@ def fetch_and_store(selected_leagues: list[str]) -> int:
 # Sidebar
 # ---------------------------------------------------------------------------
 
-st.sidebar.title("⚙️ Settings")
+st.sidebar.markdown(
+    """
+    <div style="
+        background: linear-gradient(135deg, #0D1B2A, #1B2838);
+        border: 1px solid rgba(0,200,83,0.15);
+        border-radius: 14px;
+        padding: 1.2rem 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    ">
+        <div style="font-size:1.8rem; margin-bottom:0.2rem;">\u26bd</div>
+        <div style="
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: #00C853;
+            text-transform: uppercase;
+        ">FOOTBALL ODDS</div>
+        <div style="font-size:0.68rem; color:#8899AA; margin-top:0.15rem; letter-spacing:0.05em;">
+            ANALYSIS PLATFORM
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.sidebar.title("\u2699\ufe0f Settings")
 
 league_options = {name: key for name, key in LEAGUES.items()}
 selected_league_names: list[str] = st.sidebar.multiselect(
@@ -489,7 +712,7 @@ selected_sport_keys: list[str] = [
     league_options[n] for n in selected_league_names
 ]
 
-if st.sidebar.button("🔄 Refresh Data"):
+if st.sidebar.button("\U0001f504 Refresh Data"):
     if not selected_sport_keys:
         st.sidebar.warning("Please select at least one league.")
     else:
@@ -503,19 +726,32 @@ if st.sidebar.button("🔄 Refresh Data"):
 # Main content
 # ---------------------------------------------------------------------------
 
-st.title("⚽ Football Odds Analysis Dashboard")
-st.caption("Premium sports analytics · Real-time odds · Smart calculators")
+st.markdown(
+    """
+    <div class="hero-header">
+        <div class="hero-title">\u26bd Football <span class="accent">Odds Analysis</span> Dashboard</div>
+        <div class="hero-sub">
+            PREMIUM ANALYTICS
+            <span class="dot"></span>
+            REAL-TIME ODDS
+            <span class="dot"></span>
+            SMART CALCULATORS
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc, tab_parlay = (
     st.tabs(
         [
-            "📅 Matches",
-            "💡 Value Bets",
-            "🔄 Arbitrage",
-            "📈 Movement",
-            "📊 Margins",
-            "🧮 Bet Calculator",
-            "🎯 Custom Bet & Parlay",
+            "\U0001f4c5 Matches",
+            "\U0001f4a1 Value Bets",
+            "\U0001f504 Arbitrage",
+            "\U0001f4c8 Movement",
+            "\U0001f4ca Margins",
+            "\U0001f9ee Bet Calculator",
+            "\U0001f3af Custom Bet & Parlay",
         ]
     )
 )
@@ -549,9 +785,13 @@ with tab_matches:
     upcoming_df = upcoming_df_base
 
     if upcoming_df.empty:
-        st.info(
-            "No upcoming matches in the database. "
-            "Use **Refresh Data** in the sidebar to fetch odds."
+        st.markdown(
+            '<div class="empty-state">'
+            '<div class="empty-icon">\U0001f4c5</div>'
+            '<div class="empty-text">No upcoming matches in the database.<br>'
+            'Use <b>Refresh Data</b> in the sidebar to fetch odds.</div>'
+            '</div>',
+            unsafe_allow_html=True,
         )
     else:
         st.markdown(
@@ -595,7 +835,13 @@ with tab_matches:
 with tab_value:
     st.subheader("Value Bets")
     if odds_df.empty:
-        st.info("No odds data available. Refresh data first.")
+        st.markdown(
+            '<div class="empty-state">'
+            '<div class="empty-icon">\U0001f4a1</div>'
+            '<div class="empty-text">No odds data available. Refresh data first.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
     else:
         threshold = st.slider(
             "Minimum edge threshold", 0.01, 0.20, 0.05, 0.01,
@@ -631,7 +877,13 @@ with tab_value:
 with tab_arb:
     st.subheader("Arbitrage Opportunities")
     if odds_df.empty:
-        st.info("No odds data available. Refresh data first.")
+        st.markdown(
+            '<div class="empty-state">'
+            '<div class="empty-icon">\U0001f504</div>'
+            '<div class="empty-text">No odds data available. Refresh data first.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
     else:
         arb_df = analyzer.find_arbitrage(odds_df)
         if arb_df.empty:
@@ -659,7 +911,13 @@ with tab_movement:
     upcoming_df2 = upcoming_df_base
 
     if upcoming_df2.empty:
-        st.info("No matches in the database.")
+        st.markdown(
+            '<div class="empty-state">'
+            '<div class="empty-icon">\U0001f4c8</div>'
+            '<div class="empty-text">No matches in the database.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
     else:
         match_labels = {
             f"{r['home_team']} vs {r['away_team']}": r["match_id"]
@@ -693,7 +951,7 @@ with tab_movement:
                     x="timestamp",
                     y="outcome_price",
                     color="outcome_name",
-                    title=f"Odds Movement – {selected_book}",
+                    title=f"Odds Movement \u2013 {selected_book}",
                     labels={
                         "timestamp": "Time",
                         "outcome_price": "Decimal Odds",
@@ -701,6 +959,7 @@ with tab_movement:
                     },
                     markers=True,
                 )
+                _apply_dark_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
 
 # ---------------------------------------------------------------------------
@@ -709,7 +968,13 @@ with tab_movement:
 with tab_margin:
     st.subheader("Bookmaker Margin Analysis")
     if odds_df.empty:
-        st.info("No odds data available. Refresh data first.")
+        st.markdown(
+            '<div class="empty-state">'
+            '<div class="empty-icon">\U0001f4ca</div>'
+            '<div class="empty-text">No odds data available. Refresh data first.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
     else:
         h2h_df = odds_df[odds_df["market"] == "h2h"]
         if h2h_df.empty:
@@ -745,7 +1010,7 @@ with tab_margin:
                     avg_margin,
                     x="bookmaker",
                     y="margin",
-                    title="Average Bookmaker Margin (%) – 1X2 Markets",
+                    title="Average Bookmaker Margin (%) \u2013 1X2 Markets",
                     labels={
                         "bookmaker": "Bookmaker",
                         "margin": "Avg Margin (%)",
@@ -754,6 +1019,7 @@ with tab_margin:
                     color_continuous_scale="RdYlGn_r",
                 )
                 fig_bar.update_layout(showlegend=False)
+                _apply_dark_theme(fig_bar)
                 st.plotly_chart(fig_bar, use_container_width=True)
             else:
                 st.info("Insufficient data to compute margins.")
@@ -767,7 +1033,7 @@ if "bet_slip" not in st.session_state:
     st.session_state["bet_slip"] = []
 
 with tab_calc:
-    st.subheader("🧮 Bet Calculator")
+    st.subheader("\U0001f9ee Bet Calculator")
 
     calc_mode = st.radio(
         "Mode",
@@ -851,7 +1117,7 @@ with tab_calc:
                     sel_odds = None
                     st.warning("No odds found for this combination.")
 
-                if st.button("➕ Add to Bet Slip", key="btn_add_slip"):
+                if st.button("\u2795 Add to Bet Slip", key="btn_add_slip"):
                     if sel_odds is not None and sel_odds > 1.0:
                         st.session_state["bet_slip"].append(
                             {
@@ -866,11 +1132,11 @@ with tab_calc:
                             f"@ {sel_odds:.2f}"
                         )
                     else:
-                        st.error("Cannot add — no valid odds selected.")
+                        st.error("Cannot add \u2014 no valid odds selected.")
 
         # --- Bet Slip Display ---
         st.markdown("---")
-        st.markdown("#### 🗒️ Your Bet Slip")
+        st.markdown("#### \U0001f5d2\ufe0f Your Bet Slip")
         slip = st.session_state["bet_slip"]
 
         if not slip:
@@ -902,7 +1168,7 @@ with tab_calc:
 
             col_calc, col_clear = st.columns(2)
             with col_calc:
-                if st.button("💰 Calculate Payout", key="btn_calc_slip"):
+                if st.button("\U0001f4b0 Calculate Payout", key="btn_calc_slip"):
                     bt = (
                         "single"
                         if builder_bet_type.startswith("Single")
@@ -926,7 +1192,7 @@ with tab_calc:
                             "Single: stake is placed on each selection independently."
                         )
             with col_clear:
-                if st.button("🗑️ Clear Bet Slip", key="btn_clear_slip"):
+                if st.button("\U0001f5d1\ufe0f Clear Bet Slip", key="btn_clear_slip"):
                     st.session_state["bet_slip"] = []
                     st.rerun()
 
@@ -1085,7 +1351,7 @@ with tab_calc:
                 )
                 if result["edge"] <= 0:
                     st.warning(
-                        "⚠️ No positive edge detected — Kelly recommends no bet."
+                        "\u26a0\ufe0f No positive edge detected \u2014 Kelly recommends no bet."
                     )
 
         # --- Dutching ---
@@ -1131,7 +1397,7 @@ if "parlay_legs" not in st.session_state:
     st.session_state["parlay_legs"] = []
 
 with tab_parlay:
-    st.subheader("🎯 Custom Bet & Parlay Calculator")
+    st.subheader("\U0001f3af Custom Bet & Parlay Calculator")
     st.markdown(
         "Build custom parlays by manually entering selections and odds. "
         "Supports **straight parlays**, **round-robin** combinations, "
@@ -1188,7 +1454,7 @@ with tab_parlay:
 
     st.markdown(f"**Decimal odds:** `{parlay_dec:.4f}`")
 
-    if st.button("➕ Add Leg", key="btn_add_parlay_leg"):
+    if st.button("\u2795 Add Leg", key="btn_add_parlay_leg"):
         label = parlay_label.strip() or f"Leg {len(st.session_state['parlay_legs']) + 1}"
         if parlay_dec > 1.0:
             st.session_state["parlay_legs"].append(
@@ -1200,7 +1466,7 @@ with tab_parlay:
 
     # --- Display legs ---
     st.markdown("---")
-    st.markdown("#### 🗒️ Your Parlay Legs")
+    st.markdown("#### \U0001f5d2\ufe0f Your Parlay Legs")
     legs = st.session_state["parlay_legs"]
 
     if not legs:
@@ -1216,7 +1482,7 @@ with tab_parlay:
                 unsafe_allow_html=True,
             )
 
-        if st.button("🗑️ Clear All Legs", key="btn_clear_parlay"):
+        if st.button("\U0001f5d1\ufe0f Clear All Legs", key="btn_clear_parlay"):
             st.session_state["parlay_legs"] = []
             st.rerun()
 
@@ -1239,7 +1505,7 @@ with tab_parlay:
         odds_list = [lg["decimal_odds"] for lg in legs]
 
         if parlay_mode == "Straight Parlay (Accumulator)":
-            if st.button("💰 Calculate Parlay", key="btn_calc_parlay"):
+            if st.button("\U0001f4b0 Calculate Parlay", key="btn_calc_parlay"):
                 result = parlay_calc.calculate_accumulator(parlay_stake, odds_list)
                 r1, r2, r3, r4 = st.columns(4)
                 r1.metric("Legs", result["num_legs"])
@@ -1247,7 +1513,7 @@ with tab_parlay:
                 r3.metric("Payout", f"${result['payout']:.2f}")
                 r4.metric("Profit", f"${result['profit']:.2f}")
                 st.caption(
-                    f"Implied probability: {result['implied_probability']:.4%}  ·  "
+                    f"Implied probability: {result['implied_probability']:.4%}  \u00b7  "
                     "All legs must win for a payout."
                 )
 
@@ -1262,7 +1528,7 @@ with tab_parlay:
             )
             if combo_size > len(legs):
                 st.warning("Combo size cannot exceed the number of legs.")
-            elif st.button("💰 Calculate Round-Robin", key="btn_calc_rr"):
+            elif st.button("\U0001f4b0 Calculate Round-Robin", key="btn_calc_rr"):
                 result = parlay_calc.calculate_round_robin(
                     parlay_stake, odds_list, combo_size
                 )
@@ -1277,8 +1543,8 @@ with tab_parlay:
                     combo_labels = [legs[i]["label"] for i in combo["legs"]]
                     with st.expander(
                         f"Parlay {idx}: {' + '.join(combo_labels)}  "
-                        f"— Odds {combo['combined_odds']:.4f}  "
-                        f"→ ${combo['payout']:.2f}"
+                        f"\u2014 Odds {combo['combined_odds']:.4f}  "
+                        f"\u2192 ${combo['payout']:.2f}"
                     ):
                         for i in combo["legs"]:
                             st.markdown(
@@ -1286,7 +1552,7 @@ with tab_parlay:
                             )
 
         else:  # Singles
-            if st.button("💰 Calculate Singles", key="btn_calc_singles"):
+            if st.button("\U0001f4b0 Calculate Singles", key="btn_calc_singles"):
                 st.markdown("##### Single-Bet Payouts")
                 total_payout = 0.0
                 for i, lg in enumerate(legs):
@@ -1301,3 +1567,17 @@ with tab_parlay:
                 s1, s2 = st.columns(2)
                 s1.metric("Total Staked", f"${total_staked:.2f}")
                 s2.metric("Total Payout (all win)", f"${total_payout:.2f}")
+
+# ---------------------------------------------------------------------------
+# Footer
+# ---------------------------------------------------------------------------
+st.markdown(
+    """
+    <div class="app-footer">
+        \u26bd Football Odds Analysis Platform \u00b7 Built with
+        <span class="footer-accent">Streamlit</span> \u00b7
+        Premium Sports Analytics
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
