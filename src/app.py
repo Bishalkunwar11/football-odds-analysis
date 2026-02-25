@@ -1,6 +1,14 @@
 """Streamlit dashboard for the football odds analysis system."""
 
 import logging
+import sys
+from pathlib import Path
+
+# Ensure the project root is on sys.path so that ``src`` is importable
+# when Streamlit rewrites sys.path[0] to the script's directory.
+_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 import pandas as pd
 import plotly.express as px
