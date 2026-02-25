@@ -40,7 +40,8 @@ A production-ready football (soccer) odds analysis system covering the top Europ
 - **Bookmaker Margin (Vig)** – calculates the overround for any market.
 - **Arbitrage Scanner** – detects risk-free profit opportunities across bookmakers.
 - **Value Bet Finder** – compares soft bookmakers against the sharp consensus line.
-- **Streamlit Dashboard** – 5-tab UI covering upcoming matches, value bets, arbitrage, odds movement charts, and margin analysis.
+- **Custom Bet Calculator** – odds conversion, single bet & accumulator payouts, Kelly Criterion stake sizing, and dutching calculator.
+- **Streamlit Dashboard** – 6-tab UI covering upcoming matches, value bets, arbitrage, odds movement charts, margin analysis, and bet calculator.
 
 ---
 
@@ -118,6 +119,7 @@ football-odds-analysis/
 │   ├── api_client.py       # OddsAPIClient – fetch & parse JSON
 │   ├── db_manager.py       # DBManager – SQLite schema & CRUD
 │   ├── analyzer.py         # OddsAnalyzer – vig, arbitrage, value bets
+│   ├── bet_calculator.py   # BetCalculator – payouts, parlays, Kelly, dutching
 │   └── app.py              # Streamlit dashboard
 ├── data/                   # SQLite database storage (gitignored)
 │   └── .gitkeep
@@ -125,6 +127,7 @@ football-odds-analysis/
 │   ├── __init__.py
 │   ├── test_analyzer.py
 │   ├── test_api_client.py
+│   ├── test_bet_calculator.py
 │   └── test_db_manager.py
 ├── .env.example
 ├── .gitignore
@@ -161,6 +164,19 @@ A value bet exists when a bookmaker's implied probability is lower than the shar
 ```
 value_bet  ↔  bookmaker_prob < consensus_prob - t
 edge       =  consensus_prob - bookmaker_prob
+```
+
+### Kelly Criterion
+The Kelly Criterion calculates the optimal fraction of your bankroll to wager:
+```
+f* = (p × (odds − 1) − (1 − p)) / (odds − 1)
+```
+where *p* is the estimated win probability. Use fractional Kelly (e.g. half-Kelly) for reduced variance.
+
+### Dutching
+Dutching distributes a total stake across multiple selections so that the profit is the same regardless of which selection wins:
+```
+stake_i = total_stake × (1 / odds_i) / sum(1 / odds_j)
 ```
 
 ---
