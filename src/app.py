@@ -121,13 +121,13 @@ st.title("⚽ Football Odds Analysis Dashboard")
 tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_builder, tab_calc = (
     st.tabs(
         [
-            "📅 Upcoming Matches",
+            "📅 Matches",
             "💡 Value Bets",
-            "🔄 Arbitrage Scanner",
-            "📈 Odds Movement",
-            "📊 Margin Analysis",
-            "🎯 Custom Bet Builder",
-            "🧮 Bet Calculator",
+            "🔄 Arbitrage",
+            "📈 Movement",
+            "📊 Margins",
+            "🎯 Bet Builder",
+            "🧮 Calculator",
         ]
     )
 )
