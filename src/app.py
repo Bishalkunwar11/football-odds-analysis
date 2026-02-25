@@ -1,6 +1,14 @@
 """Streamlit dashboard for the football odds analysis system."""
 
 import logging
+import sys
+from pathlib import Path
+
+# Ensure the project root is on sys.path so that ``src`` is importable
+# when Streamlit rewrites sys.path[0] to the script's directory.
+_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 import pandas as pd
 import plotly.express as px
@@ -110,15 +118,18 @@ if st.sidebar.button("🔄 Refresh Data"):
 
 st.title("⚽ Football Odds Analysis Dashboard")
 
-tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_calc = st.tabs(
-    [
-        "📅 Upcoming Matches",
-        "💡 Value Bets",
-        "🔄 Arbitrage Scanner",
-        "📈 Odds Movement",
-        "📊 Margin Analysis",
-        "🧮 Bet Calculator",
-    ]
+tab_matches, tab_value, tab_arb, tab_movement, tab_margin, tab_builder, tab_calc = (
+    st.tabs(
+        [
+            "📅 Upcoming Matches",
+            "💡 Value Bets",
+            "🔄 Arbitrage Scanner",
+            "📈 Odds Movement",
+            "📊 Margin Analysis",
+            "🎯 Custom Bet Builder",
+            "🧮 Bet Calculator",
+        ]
+    )
 )
 
 analyzer = OddsAnalyzer()
@@ -356,7 +367,175 @@ with tab_margin:
                 st.info("Insufficient data to compute margins.")
 
 # ---------------------------------------------------------------------------
-# Tab 6: Custom Bet Calculator
+# Tab 6: Custom Bet Builder
+# ---------------------------------------------------------------------------
+
+# Initialise bet slip in session state
+if "bet_slip" not in st.session_state:
+    st.session_state["bet_slip"] = []
+
+with tab_builder:
+    st.subheader("Custom Bet Builder")
+    st.markdown(
+        "Pick outcomes from available matches and build a single bet or "
+        "accumulator with real odds."
+    )
+
+    bet_calc_builder = BetCalculator()
+
+    if odds_df.empty:
+        st.info(
+            "No odds data available. Use **Refresh Data** in the sidebar "
+            "to fetch odds first."
+        )
+    else:
+        h2h_builder = odds_df[odds_df["market"] == "h2h"]
+        if h2h_builder.empty:
+            st.info("No 1X2 odds available to build bets from.")
+        else:
+            # Build match labels
+            match_info = (
+                h2h_builder[["match_id", "home_team", "away_team", "league"]]
+                .drop_duplicates("match_id")
+                .reset_index(drop=True)
+            )
+            match_info["label"] = (
+                match_info["home_team"]
+                + " vs "
+                + match_info["away_team"]
+                + " ("
+                + match_info["league"]
+                + ")"
+            )
+            label_to_id = dict(
+                zip(match_info["label"], match_info["match_id"])
+            )
+
+            st.markdown("#### Add a Selection")
+            col_m, col_o, col_b = st.columns([3, 2, 2])
+            with col_m:
+                sel_match_label = st.selectbox(
+                    "Match",
+                    options=list(label_to_id.keys()),
+                    key="builder_match",
+                )
+            sel_match_id = label_to_id.get(sel_match_label, "")
+
+            # Available outcomes for selected match
+            match_h2h = h2h_builder[h2h_builder["match_id"] == sel_match_id]
+            outcomes = sorted(match_h2h["outcome_name"].unique())
+            bookmakers = sorted(match_h2h["bookmaker"].unique())
+
+            with col_o:
+                sel_outcome = st.selectbox(
+                    "Outcome", options=outcomes, key="builder_outcome"
+                )
+            with col_b:
+                sel_bookmaker = st.selectbox(
+                    "Bookmaker", options=bookmakers, key="builder_book"
+                )
+
+            # Find the specific odds row
+            specific = match_h2h[
+                (match_h2h["outcome_name"] == sel_outcome)
+                & (match_h2h["bookmaker"] == sel_bookmaker)
+            ]
+            if not specific.empty:
+                sel_odds = float(specific.iloc[0]["outcome_price"])
+                st.markdown(
+                    f"**Selected odds:** `{sel_odds:.2f}` "
+                    f"({sel_outcome} @ {sel_bookmaker})"
+                )
+            else:
+                sel_odds = None
+                st.warning("No odds found for this combination.")
+
+            if st.button("➕ Add to Bet Slip", key="btn_add_slip"):
+                if sel_odds is not None and sel_odds > 1.0:
+                    st.session_state["bet_slip"].append(
+                        {
+                            "match": sel_match_label,
+                            "outcome": sel_outcome,
+                            "bookmaker": sel_bookmaker,
+                            "decimal_odds": sel_odds,
+                        }
+                    )
+                    st.success(
+                        f"Added: {sel_outcome} ({sel_match_label}) "
+                        f"@ {sel_odds:.2f}"
+                    )
+                else:
+                    st.error("Cannot add — no valid odds selected.")
+
+    # --- Bet Slip Display ---
+    st.markdown("---")
+    st.markdown("#### 🗒️ Your Bet Slip")
+    slip = st.session_state["bet_slip"]
+
+    if not slip:
+        st.info("Your bet slip is empty. Add selections above.")
+    else:
+        slip_df = pd.DataFrame(slip)
+        slip_df.index = range(1, len(slip_df) + 1)
+        slip_df.index.name = "#"
+        st.dataframe(
+            slip_df.rename(
+                columns={
+                    "match": "Match",
+                    "outcome": "Outcome",
+                    "bookmaker": "Bookmaker",
+                    "decimal_odds": "Odds",
+                }
+            ),
+            use_container_width=True,
+        )
+
+        col_type, col_stake = st.columns(2)
+        with col_type:
+            builder_bet_type = st.radio(
+                "Bet Type",
+                ["Single (each selection)", "Accumulator (combined)"],
+                key="builder_bet_type",
+                horizontal=True,
+            )
+        with col_stake:
+            builder_stake = st.number_input(
+                "Stake ($)", min_value=0.0, value=10.0, step=5.0,
+                key="builder_stake",
+            )
+
+        col_calc, col_clear = st.columns(2)
+        with col_calc:
+            if st.button("💰 Calculate Payout", key="btn_calc_slip"):
+                bt = (
+                    "single"
+                    if builder_bet_type.startswith("Single")
+                    else "accumulator"
+                )
+                result = bet_calc_builder.build_bet_slip(
+                    slip, builder_stake, bet_type=bt,
+                )
+                st.markdown("##### Results")
+                r1, r2, r3 = st.columns(3)
+                r1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
+                r2.metric("Total Payout", f"${result['total_payout']:.2f}")
+                r3.metric("Total Profit", f"${result['total_profit']:.2f}")
+
+                if bt == "accumulator":
+                    st.caption(
+                        "Accumulator: all selections must win for a payout."
+                    )
+                else:
+                    st.caption(
+                        "Single: stake is placed on each selection independently."
+                    )
+        with col_clear:
+            if st.button("🗑️ Clear Bet Slip", key="btn_clear_slip"):
+                st.session_state["bet_slip"] = []
+                st.rerun()
+
+# ---------------------------------------------------------------------------
+# Tab 7: Custom Bet Calculator
 # ---------------------------------------------------------------------------
 with tab_calc:
     st.subheader("Custom Bet Calculator")

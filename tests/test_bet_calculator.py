@@ -232,3 +232,70 @@ class TestDutchingCalculator:
     def test_invalid_odds_raises(self, calc: BetCalculator) -> None:
         with pytest.raises(ValueError):
             calc.dutching_calculator(100, [2.0, -1.0])
+
+
+# ---------------------------------------------------------------------------
+# build_bet_slip
+# ---------------------------------------------------------------------------
+
+class TestBuildBetSlip:
+    def test_single_bet_type(self, calc: BetCalculator) -> None:
+        selections = [
+            {"decimal_odds": 2.0, "match": "A vs B", "outcome": "Home"},
+            {"decimal_odds": 3.0, "match": "C vs D", "outcome": "Away"},
+        ]
+        result = calc.build_bet_slip(selections, stake=100, bet_type="single")
+        assert result["bet_type"] == "single"
+        assert result["stake"] == 100
+        assert len(result["selections"]) == 2
+        # single: total_payout = 100*2.0 + 100*3.0 = 500
+        assert result["total_payout"] == pytest.approx(500.0)
+        # single: total_profit = 500 - 100*2 = 300
+        assert result["total_profit"] == pytest.approx(300.0)
+
+    def test_accumulator_bet_type(self, calc: BetCalculator) -> None:
+        selections = [
+            {"decimal_odds": 2.0},
+            {"decimal_odds": 3.0},
+        ]
+        result = calc.build_bet_slip(selections, stake=10, bet_type="accumulator")
+        assert result["bet_type"] == "accumulator"
+        assert result["combined_odds"] == pytest.approx(6.0)
+        assert result["total_payout"] == pytest.approx(60.0)
+        assert result["total_profit"] == pytest.approx(50.0)
+
+    def test_implied_probability_added(self, calc: BetCalculator) -> None:
+        selections = [{"decimal_odds": 2.5}]
+        result = calc.build_bet_slip(selections, stake=50)
+        assert result["selections"][0]["implied_probability"] == pytest.approx(0.4)
+
+    def test_kelly_stake_with_win_prob(self, calc: BetCalculator) -> None:
+        selections = [{"decimal_odds": 2.0, "win_probability": 0.6}]
+        result = calc.build_bet_slip(
+            selections, stake=100, bankroll=1000, fractional_kelly=0.5,
+        )
+        # kelly_f = (0.6*1 - 0.4)/1 = 0.2; adjusted = 0.2*0.5 = 0.1
+        assert result["selections"][0]["kelly_stake"] == pytest.approx(100.0)
+
+    def test_kelly_stake_none_without_win_prob(self, calc: BetCalculator) -> None:
+        selections = [{"decimal_odds": 2.0}]
+        result = calc.build_bet_slip(selections, stake=100)
+        assert result["selections"][0]["kelly_stake"] is None
+
+    def test_empty_selections_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.build_bet_slip([], stake=100)
+
+    def test_invalid_bet_type_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.build_bet_slip([{"decimal_odds": 2.0}], stake=100, bet_type="parlay")
+
+    def test_invalid_odds_raises(self, calc: BetCalculator) -> None:
+        with pytest.raises(ValueError):
+            calc.build_bet_slip([{"decimal_odds": 0.5}], stake=100)
+
+    def test_passthrough_keys(self, calc: BetCalculator) -> None:
+        selections = [{"decimal_odds": 2.0, "match": "X vs Y", "custom_key": 42}]
+        result = calc.build_bet_slip(selections, stake=10)
+        assert result["selections"][0]["match"] == "X vs Y"
+        assert result["selections"][0]["custom_key"] == 42
