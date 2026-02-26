@@ -183,7 +183,26 @@ stake_i = total_stake × (1 / odds_i) / sum(1 / odds_j)
 
 ## Screenshots
 
-*(Launch the dashboard and capture screenshots here)*
+### 📅 Matches
+![Matches Tab](https://github.com/user-attachments/assets/e9345f32-ba72-42c4-bd39-f5c4a6db4edc)
+
+### 💡 Value Bets
+![Value Bets Tab](https://github.com/user-attachments/assets/c0da5ecb-b250-4224-b667-d5af5b023a0a)
+
+### 🔄 Arbitrage
+![Arbitrage Tab](https://github.com/user-attachments/assets/1bec98da-1120-4980-b30d-bc187f6058d2)
+
+### 📈 Odds Movement
+![Odds Movement Tab](https://github.com/user-attachments/assets/12ebd185-00e7-4074-82d2-75d080446935)
+
+### 📊 Margins
+![Margins Tab](https://github.com/user-attachments/assets/68950226-77a6-4140-ad41-c05cd59b11c1)
+
+### 🧮 Bet Calculator
+![Bet Calculator Tab](https://github.com/user-attachments/assets/4739c274-bb66-49a2-ae1f-33c47226576c)
+
+### 🎯 Custom Bet & Parlay
+![Custom Bet & Parlay Tab](https://github.com/user-attachments/assets/821eac91-6172-4e88-8d74-eb49af415db0)
 
 ---
 
