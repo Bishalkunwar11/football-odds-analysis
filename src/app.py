@@ -45,68 +45,101 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    /* \u2500\u2500 Global reset \u2500\u2500 */
+    /* ── Global reset ── */
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
     }
-    .stApp, .main, [data-testid="stAppViewContainer"],
+
+    /* ── Full-screen stadium background with dark overlay ── */
+    .stApp {
+        background:
+            linear-gradient(
+                165deg,
+                rgba(5,10,20,0.92) 0%,
+                rgba(13,27,42,0.88) 40%,
+                rgba(5,15,30,0.92) 100%
+            ),
+            url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1920&q=80')
+            center/cover no-repeat fixed !important;
+    }
+    .stApp::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 20% 50%, rgba(0,200,83,0.06) 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 20%, rgba(64,196,255,0.04) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .main, [data-testid="stAppViewContainer"],
     [data-testid="stAppViewBlockContainer"],
     [data-testid="stMain"],
     [data-testid="stMainBlockContainer"] {
-        background-color: #0D1B2A !important;
+        background: transparent !important;
     }
     header[data-testid="stHeader"] {
-        background-color: #0D1B2A !important;
+        background: rgba(5,10,20,0.7) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
     }
     .main .block-container {
         padding-top: 1rem;
     }
 
-    /* \u2500\u2500 Custom scrollbar \u2500\u2500 */
+    /* ── Custom scrollbar ── */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0D1B2A; }
-    ::-webkit-scrollbar-thumb { background: #1a2332; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: rgba(13,27,42,0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(26,35,50,0.8); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #00C853; }
 
-    /* \u2500\u2500 Tab bar \u2013 pill-style tabs \u2500\u2500 */
+    /* ── Tab bar – glassmorphism pill tabs ── */
     div[data-testid="stTabs"] [role="tablist"] {
         flex-wrap: wrap !important;
         overflow: visible !important;
         gap: 0.4rem !important;
-        border-bottom: 2px solid rgba(0,200,83,0.1) !important;
+        border-bottom: 2px solid rgba(0,200,83,0.08) !important;
         padding-bottom: 0.35rem !important;
+        background: rgba(13,27,42,0.4) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-radius: 16px !important;
+        padding: 0.5rem !important;
     }
     div[data-testid="stTabs"] button[role="tab"] {
         font-weight: 600 !important;
         font-size: 0.8rem !important;
         padding: 0.5rem 1.1rem !important;
         border-radius: 20px !important;
-        border: 1px solid transparent !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
         color: #8899AA !important;
         transition: all 0.25s ease !important;
         letter-spacing: 0.02em !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
     }
     div[data-testid="stTabs"] button[role="tab"]:hover {
         color: #E8EAED !important;
-        background: rgba(0,200,83,0.08) !important;
+        background: rgba(0,200,83,0.1) !important;
+        border-color: rgba(0,200,83,0.15) !important;
     }
     div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
         background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
         color: #0D1B2A !important;
         font-weight: 700 !important;
         border-color: transparent !important;
-        box-shadow: 0 0 16px rgba(0,200,83,0.35) !important;
+        box-shadow: 0 0 20px rgba(0,200,83,0.4) !important;
     }
 
-    /* \u2500\u2500 Native metric cards \u2013 glassmorphism \u2500\u2500 */
+    /* ── Native metric cards – glassmorphism ── */
     div[data-testid="stMetric"] {
-        background: linear-gradient(145deg, rgba(26,35,50,0.9), rgba(13,27,42,0.95));
-        border: 1px solid rgba(0,200,83,0.15);
+        background: rgba(13,27,42,0.55) !important;
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 14px;
         padding: 1rem 1.25rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
     div[data-testid="stMetric"] label {
         font-size: 0.72rem !important;
@@ -126,7 +159,7 @@ st.markdown(
         color: #00E676 !important;
     }
 
-    /* \u2500\u2500 Buttons \u2013 green gradient with glow \u2500\u2500 */
+    /* ── Buttons – green gradient with glow ── */
     div.stButton > button {
         background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
         color: #0D1B2A !important;
@@ -149,51 +182,64 @@ st.markdown(
         transform: translateY(0px) !important;
     }
 
-    /* \u2500\u2500 Sidebar \u2013 branded panel \u2500\u2500 */
+    /* ── Sidebar – glassmorphism branded panel ── */
     section[data-testid="stSidebar"] {
-        border-right: 2px solid rgba(0,200,83,0.2) !important;
+        border-right: 1px solid rgba(0,200,83,0.15) !important;
+    }
+    section[data-testid="stSidebar"] > div {
+        background: rgba(10,18,30,0.85) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
     }
     section[data-testid="stSidebar"] .stSelectbox,
     section[data-testid="stSidebar"] .stMultiSelect {
         border-radius: 10px;
     }
 
-    /* \u2500\u2500 Expanders \u2500\u2500 */
+    /* ── Expanders – glass effect ── */
     details[data-testid="stExpander"] {
-        border: 1px solid rgba(0,200,83,0.12) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
         border-radius: 12px !important;
         margin-bottom: 0.5rem !important;
-        background: rgba(26,35,50,0.4) !important;
+        background: rgba(13,27,42,0.5) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
     }
     details[data-testid="stExpander"] summary {
         font-weight: 600 !important;
     }
 
-    /* \u2500\u2500 Subheader accents \u2500\u2500 */
+    /* ── Subheader accents ── */
     .main .block-container h2 {
         border-left: 4px solid #00C853;
         padding-left: 0.75rem;
         letter-spacing: 0.02em;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
 
     hr {
-        border-color: rgba(0,200,83,0.15) !important;
+        border-color: rgba(0,200,83,0.12) !important;
     }
 
-    /* \u2500\u2500 Inputs / sliders \u2013 green accent \u2500\u2500 */
+    /* ── Inputs / sliders – green accent ── */
     .stSlider [data-testid="stThumbValue"] {
         color: #00C853 !important;
     }
 
-    /* \u2500\u2500 Hero header \u2500\u2500 */
+    /* ── Hero header – glassmorphism ── */
     .hero-header {
-        background: linear-gradient(135deg, #0D1B2A 0%, #1B2838 50%, #0f1923 100%);
-        border: 1px solid rgba(0,200,83,0.12);
-        border-radius: 16px;
+        background: rgba(13,27,42,0.55);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
         padding: 1.8rem 2rem 1.4rem 2rem;
         margin-bottom: 1.2rem;
         position: relative;
         overflow: hidden;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        box-shadow:
+            0 8px 32px rgba(0,0,0,0.4),
+            inset 0 1px 0 rgba(255,255,255,0.06);
     }
     .hero-header::before {
         content: '';
@@ -202,17 +248,26 @@ st.markdown(
         height: 3px;
         background: linear-gradient(90deg, #00C853, #FFD700, #00E676);
     }
+    .hero-header::after {
+        content: '';
+        position: absolute;
+        top: -50%; right: -20%;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(0,200,83,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
     .hero-header .hero-title {
         font-size: 1.65rem;
         font-weight: 800;
         color: #E8EAED;
         margin: 0;
         letter-spacing: -0.01em;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
     .hero-header .hero-title .accent { color: #00C853; }
     .hero-header .hero-sub {
         font-size: 0.82rem;
-        color: #8899AA;
+        color: rgba(136,153,170,0.9);
         margin-top: 0.3rem;
         font-weight: 500;
         letter-spacing: 0.03em;
@@ -224,29 +279,33 @@ st.markdown(
         border-radius: 50%;
         margin: 0 0.5rem;
         vertical-align: middle;
+        box-shadow: 0 0 6px rgba(0,200,83,0.5);
     }
 
-    /* \u2500\u2500 Match cards \u2013 sportsbook style \u2500\u2500 */
+    /* ── Match cards – glassmorphism sportsbook style ── */
     .match-card {
-        background: linear-gradient(145deg, #1a2332 0%, #0f1923 100%);
-        border: 1px solid rgba(0,200,83,0.15);
+        background: rgba(13,27,42,0.5);
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 16px;
         padding: 0;
         margin-bottom: 0.85rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         overflow: hidden;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
     .match-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(0,200,83,0.2);
+        box-shadow: 0 12px 40px rgba(0,200,83,0.15);
+        border-color: rgba(0,200,83,0.2);
     }
     .match-card .card-top {
         padding: 0.9rem 1.2rem 0.6rem 1.2rem;
     }
     .match-card .league-badge {
         display: inline-block;
-        background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,200,83,0.08));
+        background: rgba(0,200,83,0.1);
         color: #00C853;
         font-size: 0.65rem;
         font-weight: 700;
@@ -255,6 +314,8 @@ st.markdown(
         padding: 0.22rem 0.6rem;
         border-radius: 20px;
         border: 1px solid rgba(0,200,83,0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
     .match-card .teams {
         display: flex;
@@ -268,6 +329,7 @@ st.markdown(
         font-weight: 700;
         color: #E8EAED;
         flex: 1;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.3);
     }
     .match-card .team-name.away { text-align: right; }
     .match-card .vs-badge {
@@ -280,6 +342,7 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 0.05em;
         flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,200,83,0.3);
     }
     .match-card .kickoff {
         font-size: 0.7rem;
@@ -292,7 +355,8 @@ st.markdown(
     .match-card .odds-row {
         display: flex;
         gap: 0;
-        border-top: 1px solid rgba(0,200,83,0.1);
+        border-top: 1px solid rgba(255,255,255,0.05);
+        background: rgba(0,0,0,0.15);
     }
     .match-card .odds-btn {
         flex: 1;
@@ -300,7 +364,7 @@ st.markdown(
         padding: 0.55rem 0.3rem;
         transition: background 0.2s ease;
         cursor: pointer;
-        border-right: 1px solid rgba(0,200,83,0.08);
+        border-right: 1px solid rgba(255,255,255,0.04);
     }
     .match-card .odds-btn:last-child { border-right: none; }
     .match-card .odds-btn:hover {
@@ -320,16 +384,16 @@ st.markdown(
         margin-top: 0.1rem;
     }
 
-    /* \u2500\u2500 Stat panels \u2013 glassmorphism \u2500\u2500 */
+    /* ── Stat panels – glassmorphism ── */
     .stat-panel {
-        background: linear-gradient(145deg, rgba(26,35,50,0.9), rgba(13,27,42,0.95));
-        border: 1px solid rgba(0,200,83,0.12);
+        background: rgba(13,27,42,0.5);
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 14px;
         padding: 1rem 1.1rem;
         text-align: center;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
     }
     .stat-panel .stat-label {
         font-size: 0.65rem;
@@ -347,9 +411,10 @@ st.markdown(
         -webkit-text-fill-color: transparent;
     }
 
-    /* \u2500\u2500 Bet slip cards \u2500\u2500 */
+    /* ── Bet slip cards – glassmorphism ── */
     .slip-card {
-        background: linear-gradient(145deg, #1a2332, #0f1923);
+        background: rgba(13,27,42,0.5);
+        border: 1px solid rgba(255,255,255,0.06);
         border-left: 4px solid #00C853;
         border-radius: 12px;
         padding: 0.85rem 1.1rem;
@@ -357,11 +422,14 @@ st.markdown(
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         transition: transform 0.15s ease;
     }
     .slip-card:hover {
         transform: translateX(3px);
+        border-color: rgba(0,200,83,0.15);
     }
     .slip-card .slip-info { flex: 1; }
     .slip-card .slip-info .slip-match {
@@ -383,20 +451,24 @@ st.markdown(
         padding: 0.3rem 0.7rem;
         border-radius: 8px;
         margin-left: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,200,83,0.3);
     }
 
-    /* \u2500\u2500 Value bet / Arbitrage alert cards \u2500\u2500 */
+    /* ── Value bet / Arbitrage alert cards – glassmorphism ── */
     .alert-card {
-        background: linear-gradient(145deg, #1a2332, #0f1923);
-        border: 1px solid rgba(0,200,83,0.15);
+        background: rgba(13,27,42,0.5);
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 14px;
         padding: 1.05rem 1.3rem;
         margin-bottom: 0.7rem;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         transition: transform 0.15s ease;
     }
     .alert-card:hover {
         transform: translateY(-2px);
+        border-color: rgba(0,200,83,0.15);
     }
     .alert-card .alert-header {
         display: flex;
@@ -446,7 +518,7 @@ st.markdown(
         color: #E8EAED;
     }
 
-    /* \u2500\u2500 Counter badge \u2500\u2500 */
+    /* ── Counter badge ── */
     .count-badge {
         display: inline-block;
         background: linear-gradient(135deg, #00C853, #00E676);
@@ -460,7 +532,7 @@ st.markdown(
         box-shadow: 0 2px 10px rgba(0,200,83,0.3);
     }
 
-    /* \u2500\u2500 Empty state styling \u2500\u2500 */
+    /* ── Empty state styling ── */
     .empty-state {
         text-align: center;
         padding: 2.5rem 1rem;
@@ -479,7 +551,7 @@ st.markdown(
         line-height: 1.5;
     }
 
-    /* \u2500\u2500 Footer \u2500\u2500 */
+    /* ── Footer – glassmorphism ── */
     .app-footer {
         text-align: center;
         padding: 1.5rem 0 1rem 0;
@@ -488,13 +560,12 @@ st.markdown(
         border-top: 1px solid rgba(0,200,83,0.08);
         margin-top: 2rem;
         letter-spacing: 0.03em;
+        background: rgba(13,27,42,0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 12px 12px 0 0;
     }
     .app-footer .footer-accent { color: #00C853; }
-
-    /* ── Sidebar ── dark background & styled elements ── */
-    section[data-testid="stSidebar"] > div {
-        background-color: #0f1923 !important;
-    }
 
     /* ── Multiselect tags ── premium dark pills ── */
     span[data-baseweb="tag"] {
@@ -521,30 +592,34 @@ st.markdown(
         color: #FF6B6B !important;
     }
 
-    /* ── Form inputs ── dark-themed fields ── */
+    /* ── Form inputs – glassmorphism fields ── */
     .stSelectbox > div > div,
     .stMultiSelect > div > div,
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input {
-        background-color: #1a2332 !important;
+        background-color: rgba(13,27,42,0.6) !important;
         color: #E8EAED !important;
-        border: 1px solid rgba(0,200,83,0.15) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 10px !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
     }
     .stSelectbox > div > div:focus-within,
     .stMultiSelect > div > div:focus-within,
     .stTextInput > div > div > input:focus,
     .stNumberInput > div > div > input:focus {
         border-color: #00C853 !important;
-        box-shadow: 0 0 8px rgba(0,200,83,0.2) !important;
+        box-shadow: 0 0 12px rgba(0,200,83,0.25) !important;
     }
     /* Dropdown menus */
     [data-baseweb="popover"] > div,
     [data-baseweb="menu"],
     ul[role="listbox"] {
-        background-color: #1a2332 !important;
-        border: 1px solid rgba(0,200,83,0.15) !important;
+        background-color: rgba(13,27,42,0.9) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 10px !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
     }
     [data-baseweb="menu"] li,
     ul[role="listbox"] li {
@@ -557,17 +632,19 @@ st.markdown(
 
     /* ── Radio buttons ── styled chips ── */
     div[role="radiogroup"] label {
-        background: rgba(26,35,50,0.9) !important;
-        border: 1px solid rgba(0,200,83,0.12) !important;
+        background: rgba(13,27,42,0.5) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 20px !important;
         padding: 0.4rem 1rem !important;
         color: #8899AA !important;
         font-weight: 600 !important;
         font-size: 0.8rem !important;
         transition: all 0.2s ease !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
     }
     div[role="radiogroup"] label:hover {
-        border-color: rgba(0,200,83,0.3) !important;
+        border-color: rgba(0,200,83,0.2) !important;
         color: #E8EAED !important;
     }
     div[role="radiogroup"] label[data-checked="true"],
@@ -576,7 +653,7 @@ st.markdown(
         color: #0D1B2A !important;
         font-weight: 700 !important;
         border-color: transparent !important;
-        box-shadow: 0 0 12px rgba(0,200,83,0.3) !important;
+        box-shadow: 0 0 16px rgba(0,200,83,0.35) !important;
     }
 
     /* ── Slider track ── green accent ── */
@@ -605,31 +682,44 @@ st.markdown(
         }
     }
 
-    /* ── Streamlit toast/alert ── dark style ── */
+    /* ── Streamlit toast/alert – glass style ── */
     .stAlert {
-        background-color: rgba(26,35,50,0.95) !important;
+        background-color: rgba(13,27,42,0.7) !important;
         border-radius: 12px !important;
-        border: 1px solid rgba(0,200,83,0.12) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
     }
 
-    /* ── Text elements ── ensure readable on dark bg ── */
+    /* ── Text elements ── ensure readable on glass bg ── */
     .stMarkdown, .stText, p, span, label, .stCaption {
         color: #E8EAED;
     }
 
     /* ── Number input spinner buttons ── */
     .stNumberInput button {
-        background-color: #1a2332 !important;
+        background-color: rgba(13,27,42,0.6) !important;
         color: #00C853 !important;
-        border-color: rgba(0,200,83,0.15) !important;
+        border-color: rgba(255,255,255,0.08) !important;
     }
     .stNumberInput button:hover {
         background-color: rgba(0,200,83,0.12) !important;
+    }
+
+    /* ── Plotly chart containers – glass wrapper ── */
+    .stPlotlyChart {
+        background: rgba(13,27,42,0.4) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 14px !important;
+        padding: 0.5rem !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
 
 
 # ---------------------------------------------------------------------------
