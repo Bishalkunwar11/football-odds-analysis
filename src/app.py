@@ -1042,11 +1042,6 @@ with col_nav:
     st.markdown('<div class="nav-panel">', unsafe_allow_html=True)
     for key, label in NAV_SECTIONS:
         is_active = st.session_state["active_section"] == key
-        css_class = "nav-item active" if is_active else "nav-item"
-        st.markdown(
-            f'<div class="{css_class}">{label}</div>',
-            unsafe_allow_html=True,
-        )
         if st.button(label, key=f"nav_{key}", use_container_width=True,
                       type="primary" if is_active else "secondary"):
             st.session_state["active_section"] = key
