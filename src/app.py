@@ -1847,8 +1847,9 @@ with col_main:
             for o in odds_list:
                 combined *= o
             combined = round(combined, 4)
+            summary_stake = st.session_state.get("parlay_stake", 10.0)
             st.markdown(
-                render_parlay_summary(len(legs), combined, 10.0),
+                render_parlay_summary(len(legs), combined, summary_stake),
                 unsafe_allow_html=True,
             )
 
@@ -1917,7 +1918,7 @@ with col_main:
 
         # --- Display legs with remove buttons ---
         st.markdown("---")
-        legs = st.session_state["parlay_legs"]  # re-read after potential add
+        legs = st.session_state["parlay_legs"]
 
         if not legs:
             st.markdown(
@@ -1932,7 +1933,6 @@ with col_main:
             st.markdown(f"#### Your Picks ({len(legs)} leg{'s' if len(legs) != 1 else ''})")
 
             # Render each leg with a remove button
-            legs_to_remove: list[int] = []
             for i, lg in enumerate(legs):
                 leg_col, rm_col = st.columns([8, 1])
                 with leg_col:
@@ -1943,13 +1943,8 @@ with col_main:
                     )
                 with rm_col:
                     if st.button("\u2716", key=f"rm_leg_{i}", help=f"Remove {lg['label']}"):
-                        legs_to_remove.append(i)
-
-            # Process removals
-            if legs_to_remove:
-                for idx in sorted(legs_to_remove, reverse=True):
-                    st.session_state["parlay_legs"].pop(idx)
-                st.rerun()
+                        st.session_state["parlay_legs"].pop(i)
+                        st.rerun()
 
             # --- Clear all button ---
             if st.button("\U0001f5d1\ufe0f Clear All Picks", key="btn_clear_parlay"):
