@@ -84,7 +84,7 @@ st.markdown(
 
     /* ── Navigation panel ── */
     .nav-panel {
-        background: rgba(15, 20, 15, 0.75);
+        background: rgba(20, 23, 32, 0.85);
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 14px;
         padding: 0.8rem;
@@ -175,7 +175,7 @@ st.markdown(
         border-right: 1px solid rgba(0,200,83,0.15) !important;
     }
     section[data-testid="stSidebar"] > div {
-        background: rgba(15, 20, 15, 0.75) !important;
+        background: rgba(20, 23, 32, 0.9) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
     }
@@ -275,7 +275,7 @@ st.markdown(
 
     /* ── Match cards – glassmorphism sportsbook style ── */
     .match-card {
-        background: rgba(15, 20, 15, 0.75);
+        background: rgba(20, 23, 32, 0.85);
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 16px;
         padding: 0;
@@ -372,7 +372,7 @@ st.markdown(
     .match-card .odds-btn .odds-value {
         font-size: 1.05rem;
         font-weight: 800;
-        color: #00C853;
+        color: #FFD700;
         margin-top: 0.1rem;
     }
 
@@ -443,11 +443,11 @@ st.markdown(
         font-size: 1.15rem;
         font-weight: 800;
         color: #0D1B2A;
-        background: linear-gradient(135deg, #00C853, #00E676);
+        background: linear-gradient(135deg, #FFD700, #FFC107);
         padding: 0.3rem 0.7rem;
         border-radius: 8px;
         margin-left: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,200,83,0.3);
+        box-shadow: 0 2px 8px rgba(255,215,0,0.3);
     }
 
     /* ── Value bet / Arbitrage alert cards – glassmorphism ── */
@@ -707,6 +707,146 @@ st.markdown(
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
     }
+
+    /* ── Parlay Builder – DraftKings / FanDuel inspired ── */
+    .parlay-summary {
+        background: linear-gradient(135deg, rgba(20,23,32,0.9), rgba(26,29,38,0.95));
+        border: 1px solid rgba(255,215,0,0.2);
+        border-radius: 16px;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .parlay-summary::before {
+        content: '';
+        display: block;
+        height: 3px;
+        background: linear-gradient(90deg, #FFD700, #FFC107, #FF9800);
+        border-radius: 2px;
+        margin-bottom: 0.9rem;
+    }
+    .parlay-summary .parlay-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #A0AEC0;
+        margin-bottom: 0.6rem;
+    }
+    .parlay-summary .parlay-stats {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .parlay-summary .parlay-stat {
+        flex: 1;
+        min-width: 80px;
+    }
+    .parlay-summary .parlay-stat .ps-label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #8899AA;
+    }
+    .parlay-summary .parlay-stat .ps-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #FFD700;
+        margin-top: 0.1rem;
+    }
+    .parlay-summary .parlay-stat .ps-value.green {
+        color: #00E676;
+    }
+
+    .parlay-leg-card {
+        background: rgba(20, 23, 32, 0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-left: 3px solid #FFD700;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.15s ease;
+    }
+    .parlay-leg-card:hover {
+        border-color: rgba(255,215,0,0.25);
+        background: rgba(26, 29, 38, 0.9);
+    }
+    .parlay-leg-card .leg-info {
+        flex: 1;
+    }
+    .parlay-leg-card .leg-label {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #E8EAED;
+    }
+    .parlay-leg-card .leg-detail {
+        font-size: 0.7rem;
+        color: #8899AA;
+        margin-top: 0.15rem;
+    }
+    .parlay-leg-card .leg-odds {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #0D1B2A;
+        background: linear-gradient(135deg, #FFD700, #FFC107);
+        padding: 0.25rem 0.65rem;
+        border-radius: 8px;
+        margin-left: 0.75rem;
+        box-shadow: 0 2px 6px rgba(255,215,0,0.25);
+    }
+    .parlay-leg-card .leg-prob {
+        font-size: 0.68rem;
+        color: #A0AEC0;
+        margin-left: 0.5rem;
+        font-weight: 500;
+    }
+
+    .parlay-payout-box {
+        background: linear-gradient(135deg, rgba(0,200,83,0.08), rgba(0,200,83,0.03));
+        border: 1px solid rgba(0,200,83,0.2);
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        margin-top: 0.8rem;
+        text-align: center;
+    }
+    .parlay-payout-box .payout-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #8899AA;
+    }
+    .parlay-payout-box .payout-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #00E676;
+        margin-top: 0.2rem;
+        text-shadow: 0 0 20px rgba(0,200,83,0.3);
+    }
+
+    /* ── Leg number badge ── */
+    .leg-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background: rgba(255,215,0,0.15);
+        color: #FFD700;
+        font-size: 0.7rem;
+        font-weight: 800;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -814,6 +954,54 @@ def render_arb_card(
         f'<div class="alert-detail">'
         f'Market: <strong>{market}</strong><br>'
         f'{odds_parts}'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_parlay_leg(
+    index: int, label: str, odds: float, implied_prob: float,
+) -> str:
+    """Return HTML for a DraftKings-style parlay leg card."""
+    return (
+        f'<div class="parlay-leg-card">'
+        f'<span class="leg-num">{index}</span>'
+        f'<div class="leg-info">'
+        f'<div class="leg-label">{label}</div>'
+        f'<div class="leg-detail">Implied: {implied_prob:.1%}</div>'
+        f'</div>'
+        f'<span class="leg-odds">{odds:.2f}</span>'
+        f'</div>'
+    )
+
+
+def render_parlay_summary(
+    num_legs: int, combined_odds: float, stake: float,
+) -> str:
+    """Return HTML for a running parlay summary banner."""
+    payout = stake * combined_odds if combined_odds > 0 else 0
+    profit = payout - stake
+    implied = 1.0 / combined_odds if combined_odds > 0 else 0
+    return (
+        f'<div class="parlay-summary">'
+        f'<div class="parlay-title">\U0001f3af Parlay Summary</div>'
+        f'<div class="parlay-stats">'
+        f'<div class="parlay-stat">'
+        f'<div class="ps-label">Legs</div>'
+        f'<div class="ps-value">{num_legs}</div>'
+        f'</div>'
+        f'<div class="parlay-stat">'
+        f'<div class="ps-label">Combined Odds</div>'
+        f'<div class="ps-value">{combined_odds:.4f}</div>'
+        f'</div>'
+        f'<div class="parlay-stat">'
+        f'<div class="ps-label">Potential Payout</div>'
+        f'<div class="ps-value green">${payout:.2f}</div>'
+        f'</div>'
+        f'<div class="parlay-stat">'
+        f'<div class="ps-label">Potential Profit</div>'
+        f'<div class="ps-value green">${profit:.2f}</div>'
+        f'</div>'
         f'</div>'
         f'</div>'
     )
@@ -1647,22 +1835,31 @@ with col_main:
 
     # --- Custom Bet & Parlay Calculator ---
     elif active == "parlay":
-        st.subheader("\U0001f3af Custom Bet & Parlay Calculator")
-        st.markdown(
-            "Build custom parlays by manually entering selections and odds. "
-            "Supports **straight parlays**, **round-robin** combinations, "
-            "and **single-bet** payouts."
-        )
+        st.subheader("\U0001f3af Custom Parlay Builder")
 
         parlay_calc = BetCalculator()
+        legs = st.session_state["parlay_legs"]
+
+        # --- Running Parlay Summary (always visible when legs exist) ---
+        if legs:
+            odds_list = [lg["decimal_odds"] for lg in legs]
+            combined = 1.0
+            for o in odds_list:
+                combined *= o
+            combined = round(combined, 4)
+            st.markdown(
+                render_parlay_summary(len(legs), combined, 10.0),
+                unsafe_allow_html=True,
+            )
 
         # --- Add a leg ---
-        st.markdown("#### Add a Selection")
-        pc1, pc2, pc3 = st.columns([3, 2, 2])
+        st.markdown("#### Add Selection")
+        pc1, pc2 = st.columns([3, 3])
         with pc1:
             parlay_label = st.text_input(
-                "Selection label (e.g. Arsenal ML)",
+                "Selection (e.g. Arsenal ML, Over 2.5 Goals)",
                 key="parlay_label",
+                placeholder="Enter your pick...",
             )
         with pc2:
             parlay_odds_fmt = st.selectbox(
@@ -1670,42 +1867,46 @@ with col_main:
                 ["Decimal", "American", "Fractional"],
                 key="parlay_odds_fmt",
             )
-        with pc3:
-            if parlay_odds_fmt == "Decimal":
-                parlay_dec = st.number_input(
-                    "Decimal Odds", min_value=1.01, value=2.00, step=0.05,
-                    key="parlay_dec",
-                )
-            elif parlay_odds_fmt == "American":
-                parlay_amer = st.number_input(
-                    "American Odds", value=150, step=10,
-                    key="parlay_amer",
-                )
-                parlay_dec = (
-                    parlay_calc.american_to_decimal(int(parlay_amer))
-                    if parlay_amer != 0
-                    else 2.0
-                )
-            else:
-                pf1, pf2 = st.columns(2)
-                with pf1:
-                    parlay_num = st.number_input(
-                        "Numerator", min_value=1, value=3, step=1,
-                        key="parlay_fnum",
-                    )
-                with pf2:
-                    parlay_den = st.number_input(
-                        "Denominator", min_value=1, value=2, step=1,
-                        key="parlay_fden",
-                    )
-                parlay_dec = parlay_calc.fractional_to_decimal(
-                    int(parlay_num), int(parlay_den)
-                )
 
-        st.markdown(f"**Decimal odds:** `{parlay_dec:.4f}`")
+        if parlay_odds_fmt == "Decimal":
+            parlay_dec = st.number_input(
+                "Decimal Odds", min_value=1.01, value=2.00, step=0.05,
+                key="parlay_dec",
+            )
+        elif parlay_odds_fmt == "American":
+            parlay_amer = st.number_input(
+                "American Odds", value=150, step=10,
+                key="parlay_amer",
+            )
+            parlay_dec = (
+                parlay_calc.american_to_decimal(int(parlay_amer))
+                if parlay_amer != 0
+                else 2.0
+            )
+        else:
+            pf1, pf2 = st.columns(2)
+            with pf1:
+                parlay_num = st.number_input(
+                    "Numerator", min_value=1, value=3, step=1,
+                    key="parlay_fnum",
+                )
+            with pf2:
+                parlay_den = st.number_input(
+                    "Denominator", min_value=1, value=2, step=1,
+                    key="parlay_fden",
+                )
+            parlay_dec = parlay_calc.fractional_to_decimal(
+                int(parlay_num), int(parlay_den)
+            )
 
-        if st.button("\u2795 Add Leg", key="btn_add_parlay_leg"):
-            label = parlay_label.strip() or f"Leg {len(st.session_state['parlay_legs']) + 1}"
+        implied = 1.0 / parlay_dec if parlay_dec > 0 else 0
+        st.markdown(
+            f"**Odds:** `{parlay_dec:.4f}` · "
+            f"**Implied probability:** `{implied:.1%}`"
+        )
+
+        if st.button("\u2795 Add to Parlay", key="btn_add_parlay_leg"):
+            label = parlay_label.strip() or f"Leg {len(legs) + 1}"
             if parlay_dec > 1.0:
                 st.session_state["parlay_legs"].append(
                     {"label": label, "decimal_odds": round(parlay_dec, 4)}
@@ -1714,35 +1915,54 @@ with col_main:
             else:
                 st.error("Odds must be greater than 1.0.")
 
-        # --- Display legs ---
+        # --- Display legs with remove buttons ---
         st.markdown("---")
-        st.markdown("#### \U0001f5d2\ufe0f Your Parlay Legs")
-        legs = st.session_state["parlay_legs"]
+        legs = st.session_state["parlay_legs"]  # re-read after potential add
 
         if not legs:
-            st.info("No legs added yet. Use the form above to add selections.")
+            st.markdown(
+                '<div class="empty-state">'
+                '<div class="empty-icon">\U0001f3af</div>'
+                '<div class="empty-text">No selections added yet.<br>'
+                'Build your parlay by adding picks above.</div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
         else:
-            for lg in legs:
-                st.markdown(
-                    render_slip_card(
-                        match="Custom Selection",
-                        outcome=lg["label"],
-                        odds=lg["decimal_odds"],
-                    ),
-                    unsafe_allow_html=True,
-                )
+            st.markdown(f"#### Your Picks ({len(legs)} leg{'s' if len(legs) != 1 else ''})")
 
-            if st.button("\U0001f5d1\ufe0f Clear All Legs", key="btn_clear_parlay"):
+            # Render each leg with a remove button
+            legs_to_remove: list[int] = []
+            for i, lg in enumerate(legs):
+                leg_col, rm_col = st.columns([8, 1])
+                with leg_col:
+                    prob = 1.0 / lg["decimal_odds"]
+                    st.markdown(
+                        render_parlay_leg(i + 1, lg["label"], lg["decimal_odds"], prob),
+                        unsafe_allow_html=True,
+                    )
+                with rm_col:
+                    if st.button("\u2716", key=f"rm_leg_{i}", help=f"Remove {lg['label']}"):
+                        legs_to_remove.append(i)
+
+            # Process removals
+            if legs_to_remove:
+                for idx in sorted(legs_to_remove, reverse=True):
+                    st.session_state["parlay_legs"].pop(idx)
+                st.rerun()
+
+            # --- Clear all button ---
+            if st.button("\U0001f5d1\ufe0f Clear All Picks", key="btn_clear_parlay"):
                 st.session_state["parlay_legs"] = []
                 st.rerun()
 
             # --- Calculation options ---
             st.markdown("---")
-            st.markdown("#### Calculate")
+            st.markdown("#### Calculate Payout")
 
             parlay_mode = st.radio(
                 "Bet type",
-                ["Straight Parlay (Accumulator)", "Round-Robin Parlays", "Singles"],
+                ["Straight Parlay", "Round-Robin", "Singles"],
                 horizontal=True,
                 key="parlay_mode",
             )
@@ -1754,20 +1974,26 @@ with col_main:
 
             odds_list = [lg["decimal_odds"] for lg in legs]
 
-            if parlay_mode == "Straight Parlay (Accumulator)":
+            if parlay_mode == "Straight Parlay":
                 if st.button("\U0001f4b0 Calculate Parlay", key="btn_calc_parlay"):
                     result = parlay_calc.calculate_accumulator(parlay_stake, odds_list)
-                    r1, r2, r3, r4 = st.columns(4)
-                    r1.metric("Legs", result["num_legs"])
-                    r2.metric("Combined Odds", f"{result['combined_odds']:.4f}")
-                    r3.metric("Payout", f"${result['payout']:.2f}")
-                    r4.metric("Profit", f"${result['profit']:.2f}")
+                    # Payout display box
+                    st.markdown(
+                        f'<div class="parlay-payout-box">'
+                        f'<div class="payout-label">Total Payout (All Legs Win)</div>'
+                        f'<div class="payout-value">${result["payout"]:.2f}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                    r1, r2, r3 = st.columns(3)
+                    r1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
+                    r2.metric("Profit", f"${result['profit']:.2f}")
+                    r3.metric("Implied Prob.", f"{result['implied_probability']:.4%}")
                     st.caption(
-                        f"Implied probability: {result['implied_probability']:.4%}  \u00b7  "
                         "All legs must win for a payout."
                     )
 
-            elif parlay_mode == "Round-Robin Parlays":
+            elif parlay_mode == "Round-Robin":
                 max_combo = len(legs)
                 combo_size = st.slider(
                     "Legs per combo",
@@ -1782,11 +2008,18 @@ with col_main:
                     result = parlay_calc.calculate_round_robin(
                         parlay_stake, odds_list, combo_size
                     )
-                    r1, r2, r3, r4 = st.columns(4)
+                    # Payout display box
+                    st.markdown(
+                        f'<div class="parlay-payout-box">'
+                        f'<div class="payout-label">Total Payout (All Legs Win)</div>'
+                        f'<div class="payout-value">${result["total_payout_all_win"]:.2f}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                    r1, r2, r3 = st.columns(3)
                     r1.metric("Parlays", result["num_combos"])
                     r2.metric("Total Staked", f"${result['total_staked']:.2f}")
-                    r3.metric("Payout (all win)", f"${result['total_payout_all_win']:.2f}")
-                    r4.metric("Profit (all win)", f"${result['total_profit_all_win']:.2f}")
+                    r3.metric("Profit (all win)", f"${result['total_profit_all_win']:.2f}")
 
                     st.markdown("##### Individual Parlays")
                     for idx, combo in enumerate(result["combos"], 1):
