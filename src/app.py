@@ -43,24 +43,20 @@ DARK_THEME = {
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
     /* ── Global reset ── */
     html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    /* ── Full-screen stadium background with dark overlay ── */
+    /* ── Full-screen dark gradient background ── */
     .stApp {
         background:
             linear-gradient(
                 165deg,
-                rgba(5,10,20,0.92) 0%,
-                rgba(13,27,42,0.88) 40%,
-                rgba(5,15,30,0.92) 100%
-            ),
-            url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1920&q=80')
-            center/cover no-repeat fixed !important;
+                rgba(5,10,20,0.97) 0%,
+                rgba(13,27,42,0.95) 40%,
+                rgba(5,15,30,0.97) 100%
+            ) !important;
     }
     .stApp::before {
         content: '';
@@ -856,8 +852,23 @@ def _apply_dark_theme(fig):
 
 @st.cache_resource
 def get_db() -> DBManager:
-    """Return a cached database manager instance."""
-    return DBManager()
+    """Return a cached database manager instance.
+
+    On first run, if the database is empty the demo data seeder is invoked
+    automatically so the dashboard has content to display without needing a
+    live API key.
+    """
+    db = DBManager()
+    # Auto-seed demo data when the database has no matches yet.
+    if not db.get_latest_odds():
+        try:
+            from src.seed_demo_data import seed  # noqa: WPS433
+
+            seed(db.db_path)
+            logger.info("Auto-seeded demo data into %s", db.db_path)
+        except Exception:  # noqa: BLE001
+            logger.warning("Could not auto-seed demo data.", exc_info=True)
+    return db
 
 
 @st.cache_data(ttl=300)
