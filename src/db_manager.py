@@ -1,6 +1,7 @@
 """Database manager for storing and retrieving football odds (SQLite)."""
 
 import logging
+import os
 import sqlite3
 from datetime import datetime, timezone
 from typing import Any
@@ -22,6 +23,8 @@ class DBManager:
                      Use ``":memory:"`` for in-memory databases.
         """
         self.db_path = db_path
+        if db_path != ":memory:":
+            os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.init_db()
