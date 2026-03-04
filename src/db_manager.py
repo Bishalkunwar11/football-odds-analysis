@@ -168,18 +168,26 @@ class DBManager:
         Returns:
             List of row dicts.
         """
+        # Performance: use a CTE with ROW_NUMBER() instead of a subquery
+        # so SQLite can satisfy the filter directly from the window-function
+        # pass rather than building a temporary MAX-id set first.
+        # ROW_NUMBER() is available in SQLite >= 3.25 (Python >= 3.9 ships 3.31).
         query = """
+            WITH latest AS (
+                SELECT *,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY match_id, bookmaker, market, outcome_name
+                           ORDER BY id DESC
+                       ) AS rn
+                FROM odds
+            )
             SELECT m.match_id, m.sport_key, m.league,
                    m.home_team, m.away_team, m.commence_time,
                    o.bookmaker, o.market, o.outcome_name,
                    o.outcome_price, o.point, o.timestamp
-            FROM odds o
+            FROM latest o
             JOIN matches m ON o.match_id = m.match_id
-            WHERE o.id IN (
-                SELECT MAX(id)
-                FROM odds
-                GROUP BY match_id, bookmaker, market, outcome_name
-            )
+            WHERE o.rn = 1
         """
         params: tuple = ()
         if sport_key:

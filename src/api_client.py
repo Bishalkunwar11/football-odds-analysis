@@ -38,6 +38,15 @@ class OddsAPIClient:
         Returns:
             List of parsed match dicts.
         """
+        # OWASP A07 – guard against unauthenticated requests caused by a
+        # missing API key so callers get a clear error rather than a 401.
+        if not self.api_key:
+            logger.error(
+                "ODDS_API_KEY is not configured. "
+                "Set it in your .env file before fetching odds."
+            )
+            return []
+
         if markets is None:
             markets = MARKETS
 
