@@ -34,7 +34,7 @@ class DBManager:
     # ------------------------------------------------------------------
 
     def init_db(self) -> None:
-        """Create database tables if they do not already exist."""
+        """Create database tables and indexes if they do not already exist."""
         cursor = self.conn.cursor()
         cursor.executescript(
             """
@@ -59,6 +59,15 @@ class DBManager:
                 timestamp     TEXT NOT NULL,
                 FOREIGN KEY (match_id) REFERENCES matches(match_id)
             );
+
+            CREATE INDEX IF NOT EXISTS idx_matches_sport_key
+                ON matches(sport_key);
+
+            CREATE INDEX IF NOT EXISTS idx_matches_commence_time
+                ON matches(commence_time);
+
+            CREATE INDEX IF NOT EXISTS idx_odds_lookup
+                ON odds(match_id, bookmaker, market, outcome_name);
             """
         )
         self.conn.commit()
@@ -71,6 +80,9 @@ class DBManager:
     def store_odds(self, matches_data: list[dict[str, Any]]) -> None:
         """Upsert matches and insert odds rows with timestamps.
 
+        Uses batch ``executemany`` calls instead of per-row loops to
+        minimise round-trips to SQLite.
+
         Args:
             matches_data: List of flat odds rows as returned by
                           :meth:`OddsAPIClient._parse_response`.
@@ -82,49 +94,61 @@ class DBManager:
         now = datetime.now(timezone.utc).isoformat()
         cursor = self.conn.cursor()
 
+        # Batch upsert matches — deduplicated so each match_id is upserted once
+        seen_match_ids: set[str] = set()
+        match_params = []
         for row in matches_data:
-            # Upsert the match record
-            cursor.execute(
-                """
-                INSERT INTO matches
-                    (match_id, sport_key, league, home_team, away_team,
-                     commence_time, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(match_id) DO UPDATE SET
-                    league        = excluded.league,
-                    home_team     = excluded.home_team,
-                    away_team     = excluded.away_team,
-                    commence_time = excluded.commence_time
-                """,
-                (
-                    row["match_id"],
-                    row["sport_key"],
-                    row["league"],
-                    row["home_team"],
-                    row["away_team"],
-                    row["commence_time"],
-                    now,
-                ),
-            )
+            mid = row["match_id"]
+            if mid not in seen_match_ids:
+                seen_match_ids.add(mid)
+                match_params.append(
+                    (
+                        mid,
+                        row["sport_key"],
+                        row["league"],
+                        row["home_team"],
+                        row["away_team"],
+                        row["commence_time"],
+                        now,
+                    )
+                )
+        cursor.executemany(
+            """
+            INSERT INTO matches
+                (match_id, sport_key, league, home_team, away_team,
+                 commence_time, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(match_id) DO UPDATE SET
+                league        = excluded.league,
+                home_team     = excluded.home_team,
+                away_team     = excluded.away_team,
+                commence_time = excluded.commence_time
+            """,
+            match_params,
+        )
 
-            # Insert odds snapshot
-            cursor.execute(
-                """
-                INSERT INTO odds
-                    (match_id, bookmaker, market, outcome_name,
-                     outcome_price, point, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    row["match_id"],
-                    row["bookmaker"],
-                    row["market"],
-                    row["outcome_name"],
-                    row["outcome_price"],
-                    row.get("point"),
-                    now,
-                ),
+        # Batch insert odds snapshots
+        odds_params = [
+            (
+                row["match_id"],
+                row["bookmaker"],
+                row["market"],
+                row["outcome_name"],
+                row["outcome_price"],
+                row.get("point"),
+                now,
             )
+            for row in matches_data
+        ]
+        cursor.executemany(
+            """
+            INSERT INTO odds
+                (match_id, bookmaker, market, outcome_name,
+                 outcome_price, point, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            odds_params,
+        )
 
         self.conn.commit()
         logger.info("Stored %d odds rows.", len(matches_data))

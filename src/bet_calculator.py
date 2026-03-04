@@ -157,13 +157,12 @@ class BetCalculator:
             raise ValueError(f"stake must be non-negative, got {stake}")
         if not odds_list:
             raise ValueError("odds_list must not be empty.")
+        combined = 1.0
         for o in odds_list:
             if o <= 1.0:
                 raise ValueError(
                     f"All decimal odds must be > 1 for an accumulator, got {o}"
                 )
-        combined = 1.0
-        for o in odds_list:
             combined *= o
         combined = round(combined, 4)
         payout = round(stake * combined, 2)
@@ -268,13 +267,13 @@ class BetCalculator:
             )
         if not odds_list:
             raise ValueError("odds_list must not be empty.")
+        inv_sum = 0.0
         for o in odds_list:
             if o <= 0:
                 raise ValueError(
                     f"All odds must be positive, got {o}"
                 )
-
-        inv_sum = sum(1.0 / o for o in odds_list)
+            inv_sum += 1.0 / o
         stakes = [round(total_stake * (1.0 / o) / inv_sum, 2) for o in odds_list]
         # All selections yield the same payout: total_stake / inv_sum
         equal_payout = round(total_stake / inv_sum, 2)
