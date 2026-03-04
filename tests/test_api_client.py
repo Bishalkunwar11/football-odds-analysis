@@ -123,6 +123,14 @@ class TestFetchOdds:
 
         assert rows == []
 
+    def test_fetch_returns_empty_when_api_key_missing(self) -> None:
+        """OWASP A07: no HTTP request should be made with a blank API key."""
+        client = OddsAPIClient(api_key="")
+        with patch.object(client.session, "get") as mock_get:
+            rows = client.fetch_odds("soccer_epl")
+        assert rows == []
+        mock_get.assert_not_called()
+
     def test_fetch_handles_connection_error(self) -> None:
         import requests
 

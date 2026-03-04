@@ -44,14 +44,36 @@ BOOKMAKERS = [
 
 
 def _jitter(base: float, pct: float = 0.06) -> float:
-    """Apply a small random jitter to a decimal odds value."""
+    """Apply a small random jitter to a decimal odds value.
+
+    Args:
+        base: The base decimal odds to jitter.
+        pct: Maximum fractional deviation in either direction (default 6%).
+
+    Returns:
+        Jittered decimal odds rounded to two decimal places.
+    """
     return round(base * random.uniform(1 - pct, 1 + pct), 2)
 
 
 def _make_h2h_odds(
     home_fair: float, draw_fair: float, away_fair: float
 ) -> list[dict]:
-    """Generate h2h odds across all bookmakers with margin and variation."""
+    """Generate h2h odds across all bookmakers with margin and jitter.
+
+    Each bookmaker applies a random margin between 2–7% to the fair odds,
+    then a small random jitter is added to simulate real-world variation.
+
+    Args:
+        home_fair: Fair (no-margin) decimal odds for the home outcome.
+        draw_fair: Fair decimal odds for the draw outcome.
+        away_fair: Fair decimal odds for the away outcome.
+
+    Returns:
+        List of odds row dicts, three per bookmaker (Home / Draw / Away),
+        each containing ``bookmaker``, ``market``, ``outcome_name``,
+        ``outcome_price``, and ``point``.
+    """
     rows = []
     for book in BOOKMAKERS:
         # Each bookmaker applies a slightly different margin
@@ -89,7 +111,21 @@ def _make_h2h_odds(
 def _make_totals_odds(
     over_fair: float, under_fair: float, point: float = 2.5
 ) -> list[dict]:
-    """Generate totals (Over/Under) odds across all bookmakers."""
+    """Generate Over/Under totals odds across all bookmakers.
+
+    Each bookmaker applies a random margin between 2–6% to the fair odds,
+    then a small random jitter is added.
+
+    Args:
+        over_fair: Fair decimal odds for the Over outcome.
+        under_fair: Fair decimal odds for the Under outcome.
+        point: The goals line (e.g. 2.5). Defaults to 2.5.
+
+    Returns:
+        List of odds row dicts, two per bookmaker (Over / Under), each
+        containing ``bookmaker``, ``market``, ``outcome_name``,
+        ``outcome_price``, and ``point``.
+    """
     rows = []
     for book in BOOKMAKERS:
         margin = random.uniform(1.02, 1.06)
@@ -115,7 +151,17 @@ def _make_totals_odds(
 
 
 def seed(db_path: str = "data/football_odds.db") -> None:
-    """Populate the database with demo fixtures and odds snapshots."""
+    """Populate the database with demo fixtures and three odds snapshots.
+
+    Generates realistic h2h and totals odds for every fixture in
+    ``FIXTURES`` across all bookmakers in ``BOOKMAKERS``, then stores
+    three successive snapshots with small price movements to support
+    the Odds Movement dashboard tab.
+
+    Args:
+        db_path: File-system path to the SQLite database. Defaults to
+            ``"data/football_odds.db"``. Use ``":memory:"`` for tests.
+    """
     random.seed(42)
     db = DBManager(db_path)
     now = datetime.now(timezone.utc)
