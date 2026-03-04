@@ -114,15 +114,9 @@ class OddsAnalyzer:
 
         arb_rows: list[dict] = []
 
-        # Only analyse h2h (1X2) and totals markets
-        markets_to_check = match_odds_df["market"].unique()
-
         for (match_id, market), group in match_odds_df.groupby(
             ["match_id", "market"]
         ):
-            if market not in markets_to_check:
-                continue
-
             # Best price per outcome across all bookmakers
             best_prices = (
                 group.groupby("outcome_name")["outcome_price"].max()
@@ -183,7 +177,7 @@ class OddsAnalyzer:
             sharp_df = match_odds_df
 
         consensus = (
-            sharp_df.copy()
+            sharp_df
             .assign(
                 implied_prob=lambda df: 1.0 / df["outcome_price"]
             )
