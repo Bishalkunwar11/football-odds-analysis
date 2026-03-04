@@ -860,10 +860,27 @@ st.markdown(
 
 
 def render_match_card(
-    home: str, away: str, league: str, kickoff: str,
+    home: str,
+    away: str,
+    league: str,
+    kickoff: str,
     odds: dict[str, float] | None = None,
 ) -> str:
-    """Return HTML for a single sportsbook-style match card."""
+    """Return HTML for a single sportsbook-style match card.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        league: League / competition label shown in the badge.
+        kickoff: ISO kick-off time string displayed on the card.
+        odds: Optional mapping of outcome label → best decimal price.
+            When provided, an odds-button row is appended below the
+            match header. A triangular up/down indicator is shown when
+            the price is unusually high or low.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
     odds_html = ""
     if odds:
         btns = []
@@ -898,7 +915,15 @@ def render_match_card(
 
 
 def render_stat_panel(label: str, value: str) -> str:
-    """Return HTML for a small stat panel."""
+    """Return HTML for a small glassmorphism stat panel.
+
+    Args:
+        label: Short uppercase label displayed above the value.
+        value: Formatted value string (e.g. ``"42"`` or ``"5.3%"``).
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
     return (
         f'<div class="stat-panel">'
         f'<div class="stat-label">{label}</div>'
@@ -908,7 +933,17 @@ def render_stat_panel(label: str, value: str) -> str:
 
 
 def render_slip_card(match: str, outcome: str, odds: float) -> str:
-    """Return HTML for a single bet-slip selection card."""
+    """Return HTML for a single bet-slip selection card.
+
+    Args:
+        match: Match label shown in small muted text above the outcome.
+        outcome: Outcome string displayed prominently (e.g. ``"Arsenal"``,
+            ``"Over 2.5"``).
+        odds: Decimal odds shown in the gold badge on the right.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
     return (
         f'<div class="slip-card">'
         f'<div class="slip-info">'
@@ -921,10 +956,36 @@ def render_slip_card(match: str, outcome: str, odds: float) -> str:
 
 
 def render_value_card(
-    home: str, away: str, outcome: str, bookmaker: str,
-    price: float, edge: float,
+    home: str,
+    away: str,
+    outcome: str,
+    bookmaker: str,
+    price: float,
+    edge: float,
+    american_odds: str | None = None,
 ) -> str:
-    """Return HTML for a value-bet alert card."""
+    """Return HTML for a value-bet alert card.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        outcome: Outcome being bet (e.g. ``"Home"``, ``"Over 2.5"``).
+        bookmaker: Name of the bookmaker offering the value price.
+        price: Decimal odds offered by the bookmaker.
+        edge: Calculated edge over the consensus probability (0–1 scale).
+        american_odds: Optional pre-formatted American odds string
+            (e.g. ``"+150"`` or ``"-200"``). When provided, it is shown
+            in blue beside the decimal price.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    american_html = (
+        f' <span style="font-size:0.7rem;color:#40C4FF;">'
+        f"({american_odds})</span>"
+        if american_odds
+        else ""
+    )
     return (
         f'<div class="alert-card">'
         f'<div class="alert-header">'
@@ -932,7 +993,8 @@ def render_value_card(
         f'<span class="alert-badge badge-value">+{edge:.1%} EDGE</span>'
         f'</div>'
         f'<div class="alert-detail">'
-        f'<strong>{outcome}</strong> @ <strong>{price:.2f}</strong> '
+        f'<strong>{outcome}</strong> @ <strong>{price:.2f}</strong>'
+        f'{american_html} '
         f'via {bookmaker}'
         f'</div>'
         f'</div>'
@@ -940,10 +1002,24 @@ def render_value_card(
 
 
 def render_arb_card(
-    home: str, away: str, market: str, arb_pct: float,
+    home: str,
+    away: str,
+    market: str,
+    arb_pct: float,
     best_odds: dict,
 ) -> str:
-    """Return HTML for an arbitrage alert card."""
+    """Return HTML for an arbitrage alert card.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        market: Market key (e.g. ``"h2h"``, ``"totals"``).
+        arb_pct: Guaranteed profit percentage (e.g. ``1.23`` for 1.23%).
+        best_odds: Mapping of outcome label → best available decimal price.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
     odds_parts = " \u00b7 ".join(f"{k}: <strong>{v:.2f}</strong>" for k, v in best_odds.items())
     return (
         f'<div class="alert-card">'
@@ -960,9 +1036,22 @@ def render_arb_card(
 
 
 def render_parlay_leg(
-    index: int, label: str, odds: float, implied_prob: float,
+    index: int,
+    label: str,
+    odds: float,
+    implied_prob: float,
 ) -> str:
-    """Return HTML for a DraftKings-style parlay leg card."""
+    """Return HTML for a DraftKings-style parlay leg card.
+
+    Args:
+        index: 1-based leg number shown in the circle badge.
+        label: Human-readable selection label (e.g. ``"Arsenal ML"``).
+        odds: Decimal odds for this leg.
+        implied_prob: Implied win probability (0–1 scale).
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
     return (
         f'<div class="parlay-leg-card">'
         f'<span class="leg-num">{index}</span>'
@@ -976,9 +1065,23 @@ def render_parlay_leg(
 
 
 def render_parlay_summary(
-    num_legs: int, combined_odds: float, stake: float,
+    num_legs: int,
+    combined_odds: float,
+    stake: float,
 ) -> str:
-    """Return HTML for a running parlay summary banner."""
+    """Return HTML for a running parlay summary banner.
+
+    Displays a live summary showing the number of legs, combined odds,
+    potential payout, and potential profit at a glance.
+
+    Args:
+        num_legs: Total number of legs currently in the parlay.
+        combined_odds: Product of all leg odds (already computed upstream).
+        stake: Stake amount in dollars used to estimate payout/profit.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
     payout = stake * combined_odds if combined_odds > 0 else 0
     profit = payout - stake
     implied = 1.0 / combined_odds if combined_odds > 0 else 0
@@ -1077,8 +1180,65 @@ def load_upcoming_matches(sport_key: str | None = None) -> pd.DataFrame:
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
+@st.cache_data(ttl=300)
+def compute_summary_stats(
+    sport_keys: tuple[str, ...] | None = None,
+) -> dict:
+    """Compute dashboard KPIs cached for 5 minutes.
+
+    Calculates the headline numbers shown in the summary metrics bar so
+    they are not re-derived on every Streamlit re-run.
+
+    Args:
+        sport_keys: Optional tuple of sport-key strings to filter by.
+            Pass ``None`` to include all leagues.
+
+    Returns:
+        Dict with keys ``num_matches``, ``num_value_bets``,
+        ``num_arb_opps``.
+    """
+    db = get_db()
+    # Resolve to a single sport_key string for the DB helper (None = all)
+    sk = sport_keys[0] if sport_keys and len(sport_keys) == 1 else None
+    rows = db.get_latest_odds(sk)
+    if not rows:
+        return {"num_matches": 0, "num_value_bets": 0, "num_arb_opps": 0}
+
+    df = pd.DataFrame(rows)
+    # Filter when multiple sport keys are specified
+    if sport_keys and len(sport_keys) > 1:
+        df = df[df["sport_key"].isin(sport_keys)]
+
+    num_matches = df["match_id"].nunique() if not df.empty else 0
+
+    _analyzer = OddsAnalyzer()
+    try:
+        vb = _analyzer.find_value_bets(
+            df, sharp_bookmakers=SHARP_BOOKMAKERS, threshold=0.05
+        )
+        num_value_bets = len(vb) if not vb.empty else 0
+    except Exception:
+        num_value_bets = 0
+
+    try:
+        arb = _analyzer.find_arbitrage(df)
+        num_arb_opps = len(arb) if not arb.empty else 0
+    except Exception:
+        num_arb_opps = 0
+
+    return {
+        "num_matches": num_matches,
+        "num_value_bets": num_value_bets,
+        "num_arb_opps": num_arb_opps,
+    }
+
+
 def fetch_and_store(selected_leagues: list[str]) -> int:
     """Fetch odds from the API and persist them.
+
+    The API key is read from ``st.session_state["api_key_override"]`` first
+    so that a user's browser-session key is used without leaking to other
+    concurrent sessions via ``os.environ``.
 
     Args:
         selected_leagues: Display names of leagues to fetch.
@@ -1086,7 +1246,9 @@ def fetch_and_store(selected_leagues: list[str]) -> int:
     Returns:
         Number of odds rows stored.
     """
-    client = OddsAPIClient()
+    # Use the per-session key override when available (OWASP A07).
+    session_key = st.session_state.get("api_key_override") or None
+    client = OddsAPIClient(api_key=session_key) if session_key else OddsAPIClient()
     db = get_db()
     all_rows: list[dict] = []
     league_map = {v: k for k, v in LEAGUES.items()}
@@ -1115,6 +1277,8 @@ if "bet_slip" not in st.session_state:
     st.session_state["bet_slip"] = []
 if "parlay_legs" not in st.session_state:
     st.session_state["parlay_legs"] = []
+if "last_refreshed" not in st.session_state:
+    st.session_state["last_refreshed"] = None
 
 # ---------------------------------------------------------------------------
 # Sidebar
@@ -1164,9 +1328,48 @@ if st.sidebar.button("\U0001f504 Refresh Data"):
     else:
         count = fetch_and_store(selected_sport_keys)
         if count:
+            st.session_state["last_refreshed"] = pd.Timestamp.now().strftime(
+                "%H:%M:%S"
+            )
             st.sidebar.success(f"Stored {count} odds rows.")
         else:
             st.sidebar.warning("No data returned. Check your API key.")
+
+# OWASP A07 – allow users to supply an API key override directly in the
+# browser UI. The value is stored only in session_state (server RAM) and
+# is never written to disk, logs, or the DB.
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    "<span style='font-size:0.78rem;color:#8899AA;font-weight:600;"
+    "text-transform:uppercase;letter-spacing:0.06em;'>"
+    "🔑 API Key Override</span>",
+    unsafe_allow_html=True,
+)
+api_key_override = st.sidebar.text_input(
+    "API Key (optional)",
+    type="password",
+    key="sidebar_api_key",
+    help=(
+        "Enter your The-Odds-API key here to override the .env value. "
+        "Stored in session memory only — never persisted to disk."
+    ),
+    label_visibility="collapsed",
+    placeholder="Paste key to override .env…",
+)
+# Store the override in session_state only.  This is session-scoped and
+# does NOT leak to other concurrent users (unlike os.environ).
+# OWASP A07 – the key stays in RAM for this browser tab only.
+if api_key_override:
+    st.session_state["api_key_override"] = api_key_override
+    st.sidebar.caption("✅ Key active for this session.")
+elif "api_key_override" not in st.session_state:
+    st.session_state["api_key_override"] = None
+
+# Last-refresh indicator
+if st.session_state.get("last_refreshed"):
+    st.sidebar.caption(
+        f"🕐 Last refreshed: {st.session_state['last_refreshed']}"
+    )
 
 # ---------------------------------------------------------------------------
 # Main content
@@ -1208,6 +1411,57 @@ if selected_sport_keys and len(selected_sport_keys) < len(LEAGUES):
 else:
     odds_df = odds_df_all
     upcoming_df_base = upcoming_df_all
+
+# ---------------------------------------------------------------------------
+# SUMMARY METRICS BAR  (Performance skill – cached computation)
+# Clickable cards jump to the corresponding analysis section.
+# ---------------------------------------------------------------------------
+
+_sport_key_tuple = tuple(selected_sport_keys) if selected_sport_keys else None
+_stats = compute_summary_stats(_sport_key_tuple)
+
+sm_col1, sm_col2, sm_col3, sm_col4 = st.columns(4)
+with sm_col1:
+    st.metric(
+        "📅 Upcoming Matches",
+        _stats["num_matches"],
+        help="Total matches currently loaded in the database.",
+    )
+    if st.button("→ View Matches", key="jump_matches", use_container_width=True):
+        st.session_state["active_section"] = "matches"
+        st.rerun()
+with sm_col2:
+    st.metric(
+        "💡 Value Bets",
+        _stats["num_value_bets"],
+        help="Bets where bookmaker odds exceed the sharp consensus by ≥5%.",
+    )
+    if st.button("→ View Value Bets", key="jump_value", use_container_width=True):
+        st.session_state["active_section"] = "value"
+        st.rerun()
+with sm_col3:
+    st.metric(
+        "🔄 Arb Opportunities",
+        _stats["num_arb_opps"],
+        help="Markets where the best cross-bookmaker prices sum to <100%.",
+    )
+    if st.button("→ View Arbitrage", key="jump_arb", use_container_width=True):
+        st.session_state["active_section"] = "arb"
+        st.rerun()
+with sm_col4:
+    bookmakers_count = (
+        odds_df_all["bookmaker"].nunique() if not odds_df_all.empty else 0
+    )
+    st.metric(
+        "🏦 Bookmakers",
+        bookmakers_count,
+        help="Number of bookmakers with odds in the current dataset.",
+    )
+    if st.button("→ View Margins", key="jump_margins", use_container_width=True):
+        st.session_state["active_section"] = "margins"
+        st.rerun()
+
+st.markdown("<hr style='margin: 0.4rem 0 0.8rem 0;'>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # THREE-PANE LAYOUT
@@ -1254,40 +1508,60 @@ with col_main:
                 unsafe_allow_html=True,
             )
         else:
-            st.markdown(
-                f'<span class="count-badge">{len(upcoming_df)} Matches</span>',
-                unsafe_allow_html=True,
+            # Real-time team search (performance: pure pandas, no extra DB hit)
+            team_search = st.text_input(
+                "🔍 Search teams…",
+                key="match_search",
+                placeholder="e.g. Arsenal, Real Madrid",
             )
-
-            # Build best-odds lookup per match
-            best_odds_map: dict[str, dict[str, float]] = {}
-            if not odds_df.empty:
-                h2h = odds_df[odds_df["market"] == "h2h"]
-                if not h2h.empty:
-                    best = (
-                        h2h.groupby(["match_id", "outcome_name"])["outcome_price"]
-                        .max()
-                        .unstack("outcome_name")
+            if team_search.strip():
+                mask = (
+                    upcoming_df["home_team"].str.contains(
+                        team_search, case=False, na=False
                     )
-                    for mid in best.index:
-                        row_dict = best.loc[mid].dropna().to_dict()
-                        if row_dict:
-                            best_odds_map[mid] = row_dict
-
-            # Render cards in a two-column grid
-            cols = st.columns(2)
-            for idx, (_, row) in enumerate(upcoming_df.iterrows()):
-                m_id = row.get("match_id", "")
-                odds_for_match = best_odds_map.get(m_id)
-                card_html = render_match_card(
-                    home=row["home_team"],
-                    away=row["away_team"],
-                    league=row.get("league", ""),
-                    kickoff=str(row["commence_time"]),
-                    odds=odds_for_match,
+                    | upcoming_df["away_team"].str.contains(
+                        team_search, case=False, na=False
+                    )
                 )
-                with cols[idx % 2]:
-                    st.markdown(card_html, unsafe_allow_html=True)
+                upcoming_df = upcoming_df[mask]
+
+            if upcoming_df.empty:
+                st.info(f'No matches found for "{team_search}".')
+            else:
+                st.markdown(
+                    f'<span class="count-badge">{len(upcoming_df)} Matches</span>',
+                    unsafe_allow_html=True,
+                )
+
+                # Build best-odds lookup per match
+                best_odds_map: dict[str, dict[str, float]] = {}
+                if not odds_df.empty:
+                    h2h = odds_df[odds_df["market"] == "h2h"]
+                    if not h2h.empty:
+                        best = (
+                            h2h.groupby(["match_id", "outcome_name"])["outcome_price"]
+                            .max()
+                            .unstack("outcome_name")
+                        )
+                        for mid in best.index:
+                            row_dict = best.loc[mid].dropna().to_dict()
+                            if row_dict:
+                                best_odds_map[mid] = row_dict
+
+                # Render cards in a two-column grid
+                cols = st.columns(2)
+                for idx, (_, row) in enumerate(upcoming_df.iterrows()):
+                    m_id = row.get("match_id", "")
+                    odds_for_match = best_odds_map.get(m_id)
+                    card_html = render_match_card(
+                        home=row["home_team"],
+                        away=row["away_team"],
+                        league=row.get("league", ""),
+                        kickoff=str(row["commence_time"]),
+                        odds=odds_for_match,
+                    )
+                    with cols[idx % 2]:
+                        st.markdown(card_html, unsafe_allow_html=True)
 
     # --- Value Bets ---
     elif active == "value":
@@ -1314,18 +1588,54 @@ with col_main:
                     "Try lowering the threshold."
                 )
             else:
-                st.markdown(
-                    f'<span class="count-badge">{len(value_df)} Value Bets</span>',
-                    unsafe_allow_html=True,
+                # Header row: count badge + CSV export (Performance skill)
+                badge_col, dl_col = st.columns([3, 1])
+                with badge_col:
+                    st.markdown(
+                        f'<span class="count-badge">{len(value_df)} Value Bets</span>',
+                        unsafe_allow_html=True,
+                    )
+                with dl_col:
+                    st.download_button(
+                        "📥 Export CSV",
+                        data=value_df.to_csv(index=False),
+                        file_name="value_bets.csv",
+                        mime="text/csv",
+                        use_container_width=True,
+                    )
+
+                # Edge distribution histogram (Performance skill – Plotly)
+                fig_edge = px.histogram(
+                    value_df,
+                    x="edge",
+                    nbins=15,
+                    title="Edge Distribution",
+                    labels={"edge": "Edge (probability units)"},
+                    color_discrete_sequence=["#00C853"],
                 )
+                fig_edge.update_layout(bargap=0.08, showlegend=False)
+                _apply_dark_theme(fig_edge)
+                st.plotly_chart(fig_edge, use_container_width=True)
+
+                # Single BetCalculator instance reused for all rows (Performance)
+                _bet_calc_vb = BetCalculator()
                 for _, vrow in value_df.iterrows():
+                    price = float(vrow.get("outcome_price", 0))
+                    # Safely convert to American odds for display alongside decimal
+                    try:
+                        american = _bet_calc_vb.decimal_to_american(price)
+                        american_str: str | None = f"{american:+d}"
+                    except (ValueError, ZeroDivisionError):
+                        american_str = None
+
                     card = render_value_card(
                         home=vrow.get("home_team", ""),
                         away=vrow.get("away_team", ""),
                         outcome=vrow.get("outcome_name", ""),
                         bookmaker=vrow.get("bookmaker", ""),
-                        price=float(vrow.get("outcome_price", 0)),
+                        price=price,
                         edge=float(vrow.get("edge", 0)),
+                        american_odds=american_str,
                     )
                     st.markdown(card, unsafe_allow_html=True)
 
@@ -1345,10 +1655,22 @@ with col_main:
             if arb_df.empty:
                 st.success("No arbitrage opportunities found in current data.")
             else:
-                st.markdown(
-                    f'<span class="count-badge">{len(arb_df)} Opportunities</span>',
-                    unsafe_allow_html=True,
-                )
+                # Header row: count badge + CSV export
+                arb_badge_col, arb_dl_col = st.columns([3, 1])
+                with arb_badge_col:
+                    st.markdown(
+                        f'<span class="count-badge">{len(arb_df)} Opportunities</span>',
+                        unsafe_allow_html=True,
+                    )
+                with arb_dl_col:
+                    st.download_button(
+                        "📥 Export CSV",
+                        data=arb_df.drop(columns=["best_odds"], errors="ignore")
+                        .to_csv(index=False),
+                        file_name="arbitrage.csv",
+                        mime="text/csv",
+                        use_container_width=True,
+                    )
                 for _, arow in arb_df.iterrows():
                     card = render_arb_card(
                         home=arow["home_team"],
@@ -1390,31 +1712,54 @@ with col_main:
                 st.info("No historical odds for this match yet.")
             else:
                 bookmakers = sorted(hist_df["bookmaker"].unique())
-                selected_book = st.selectbox("Select Bookmaker", bookmakers)
+                # Multi-bookmaker comparison overlay (UX improvement)
+                selected_books = st.multiselect(
+                    "Compare Bookmakers",
+                    options=bookmakers,
+                    default=bookmakers[:1],
+                    help=(
+                        "Select one or more bookmakers to overlay their "
+                        "price movements on the same chart."
+                    ),
+                )
 
-                filtered = hist_df[
-                    (hist_df["bookmaker"] == selected_book)
-                    & (hist_df["market"] == "h2h")
-                ]
-
-                if filtered.empty:
-                    st.info("No h2h odds history for this bookmaker.")
+                if not selected_books:
+                    st.info("Select at least one bookmaker to display the chart.")
                 else:
-                    fig = px.line(
-                        filtered,
-                        x="timestamp",
-                        y="outcome_price",
-                        color="outcome_name",
-                        title=f"Odds Movement \u2013 {selected_book}",
-                        labels={
-                            "timestamp": "Time",
-                            "outcome_price": "Decimal Odds",
-                            "outcome_name": "Outcome",
-                        },
-                        markers=True,
-                    )
-                    _apply_dark_theme(fig)
-                    st.plotly_chart(fig, use_container_width=True)
+                    filtered = hist_df[
+                        (hist_df["bookmaker"].isin(selected_books))
+                        & (hist_df["market"] == "h2h")
+                    ]
+
+                    if filtered.empty:
+                        st.info("No h2h odds history for the selected bookmakers.")
+                    else:
+                        # Avoid a full copy — assign the new column directly
+                        filtered = filtered.assign(
+                            series=(
+                                filtered["bookmaker"]
+                                + " – "
+                                + filtered["outcome_name"]
+                            )
+                        )
+                        fig = px.line(
+                            filtered,
+                            x="timestamp",
+                            y="outcome_price",
+                            color="series",
+                            title=(
+                                f"Odds Movement – "
+                                f"{', '.join(selected_books)}"
+                            ),
+                            labels={
+                                "timestamp": "Time",
+                                "outcome_price": "Decimal Odds",
+                                "series": "Bookmaker – Outcome",
+                            },
+                            markers=True,
+                        )
+                        _apply_dark_theme(fig)
+                        st.plotly_chart(fig, use_container_width=True)
 
     # --- Margins ---
     elif active == "margins":
@@ -1473,6 +1818,25 @@ with col_main:
                     fig_bar.update_layout(showlegend=False)
                     _apply_dark_theme(fig_bar)
                     st.plotly_chart(fig_bar, use_container_width=True)
+
+                    # Sortable detail table (Performance skill – no recompute)
+                    st.markdown("##### Margin Detail Table")
+                    display_tbl = avg_margin.rename(
+                        columns={"bookmaker": "Bookmaker", "margin": "Avg Margin (%)"}
+                    ).copy()
+                    display_tbl["Avg Margin (%)"] = display_tbl[
+                        "Avg Margin (%)"
+                    ].round(3)
+                    st.dataframe(
+                        display_tbl,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "Avg Margin (%)": st.column_config.NumberColumn(
+                                format="%.3f%%"
+                            )
+                        },
+                    )
                 else:
                     st.info("Insufficient data to compute margins.")
 
@@ -2098,17 +2462,26 @@ with col_slip:
             lg["decimal_odds"] for lg in parlay_legs_list
         ]
 
-        if st.button("\U0001f4b0 Calculate Payout", key="btn_slip_pane_calc"):
-            slip_calc = BetCalculator()
-            if len(all_odds) == 1:
-                res = slip_calc.calculate_payout(slip_stake, all_odds[0])
-                st.metric("Payout", f"${res['payout']:.2f}")
-                st.metric("Profit", f"${res['profit']:.2f}")
-            else:
-                res = slip_calc.calculate_accumulator(slip_stake, all_odds)
-                st.metric("Combined Odds", f"{res['combined_odds']:.4f}")
-                st.metric("Payout", f"${res['payout']:.2f}")
-                st.metric("Profit", f"${res['profit']:.2f}")
+        # Live payout — auto-recalculates on every render without a button
+        # (Performance skill: no extra compute, just reads session state)
+        _live_calc = BetCalculator()
+        if len(all_odds) == 1:
+            _res = _live_calc.calculate_payout(slip_stake, all_odds[0])
+            st.metric("Payout", f"${_res['payout']:.2f}")
+            st.metric("Profit", f"${_res['profit']:.2f}")
+        elif len(all_odds) > 1:
+            _res = _live_calc.calculate_accumulator(slip_stake, all_odds)
+            st.metric(
+                "Combined Odds",
+                f"{_res['combined_odds']:.4f}",
+                help="Product of all selected decimal odds.",
+            )
+            st.metric("Total Payout", f"${_res['payout']:.2f}")
+            st.metric("Total Profit", f"${_res['profit']:.2f}")
+            st.caption(
+                f"{len(all_odds)} selections · "
+                f"Implied prob: {_res['implied_probability']:.2%}"
+            )
 
         if st.button("\U0001f5d1\ufe0f Clear All", key="btn_slip_pane_clear"):
             st.session_state["bet_slip"] = []
