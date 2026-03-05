@@ -747,6 +747,8 @@ This page has two modes: **Bet Builder** and **Calculator Tools**.
 
 ### 7.1 Chart Theme (Applied to All Plotly Charts)
 
+Defined in `src/app.py` and applied to every Plotly figure via `_apply_dark_theme()`:
+
 ```python
 DARK_THEME = {
     "paper_bgcolor": "#0D1B2A",    # Chart outer background
