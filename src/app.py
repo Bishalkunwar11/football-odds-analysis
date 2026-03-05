@@ -1991,6 +1991,9 @@ with col_main:
         upcoming_df = upcoming_df_base
 
         # Featured live match card (demo / static showcase)
+        # Featured live match card — static demo showcase using the first
+        # available match.  Real live-score data would require a dedicated
+        # live-scores API endpoint (not available from The-Odds-API).
         if not upcoming_df.empty and len(upcoming_df) >= 2:
             first_row = upcoming_df.iloc[0]
             st.markdown(
@@ -3028,16 +3031,24 @@ with col_slip:
             label_visibility="collapsed",
         )
 
-        # Quick-add stake buttons
-        st.markdown(
-            '<div class="stake-btns">'
-            '<div class="qbtn">+10</div>'
-            '<div class="qbtn">+50</div>'
-            '<div class="qbtn">+100</div>'
-            '<div class="qbtn">MAX</div>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
+        # Quick-add stake buttons (functional Streamlit buttons)
+        qs_cols = st.columns(4)
+        with qs_cols[0]:
+            if st.button("+10", key="qs_10", use_container_width=True):
+                st.session_state["slip_pane_stake"] = slip_stake + 10
+                st.rerun()
+        with qs_cols[1]:
+            if st.button("+50", key="qs_50", use_container_width=True):
+                st.session_state["slip_pane_stake"] = slip_stake + 50
+                st.rerun()
+        with qs_cols[2]:
+            if st.button("+100", key="qs_100", use_container_width=True):
+                st.session_state["slip_pane_stake"] = slip_stake + 100
+                st.rerun()
+        with qs_cols[3]:
+            if st.button("MAX", key="qs_max", use_container_width=True):
+                st.session_state["slip_pane_stake"] = 1000.0
+                st.rerun()
 
         # --- Odds alert (informational) ---
         if parlay_legs_list:
@@ -3070,19 +3081,24 @@ with col_slip:
                 f"{_res['implied_probability']:.2%}"
             )
 
-        # --- Place Parlay action ---
-        st.markdown(
-            '<div class="place-parlay-btn">'
-            "\u26a1 Place Parlay"
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            '<div class="save-fav-btn">'
-            "Save to Favorites"
-            "</div>",
-            unsafe_allow_html=True,
-        )
+        # --- Place Parlay / Save to Favorites actions ---
+        if st.button(
+            "\u26a1 Place Parlay",
+            key="btn_place_parlay",
+            use_container_width=True,
+            type="primary",
+        ):
+            st.success(
+                "\u2705 Parlay placed! (demo mode — no real wager)"
+            )
+        if st.button(
+            "Save to Favorites",
+            key="btn_save_fav",
+            use_container_width=True,
+        ):
+            st.info(
+                "\u2b50 Parlay saved to favorites! (demo mode)"
+            )
 
         st.markdown("")  # spacer
 
