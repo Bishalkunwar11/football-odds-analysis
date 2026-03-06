@@ -9,6 +9,13 @@
       "env": {
         "ODDS_API_KEY": "${ODDS_API_KEY}"
       }
+    },
+    "stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${GOOGLE_STITCH_API_KEY}"
+      }
     }
   }
 }
