@@ -122,7 +122,7 @@ interact with the project's data sources.
 ```
 
 To add additional servers (e.g. Google Stitch), see the full guide:
-**[docs/MCP\_SETUP.md](docs/MCP_SETUP.md)**
+**[docs/MCP_SETUP.md](docs/MCP_SETUP.md)**
 
 > **⚠️ Security:** Never hard-code API keys in MCP config files. Always use
 > `${ENV_VAR}` placeholders and store values in `.env` (which is

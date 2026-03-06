@@ -127,7 +127,7 @@ to `.vscode/mcp.json`:
 | ------- | -------------- | --- |
 | `401 Unauthorized` | Missing or invalid API key | Verify `.env` contains the correct key |
 | `Connection refused` | Wrong URL or server offline | Check the URL in `mcp.json` |
-| `Timeout` | Network issue or slow endpoint | Increase timeout; check firewall |
+| `Timeout` | Network issue or slow endpoint | Check your network and firewall settings; if the MCP client supports a timeout option, increase it |
 | AI assistant can't find server | `mcp.json` not in `.vscode/` | Move the file to `.vscode/mcp.json` |
 
 ---
