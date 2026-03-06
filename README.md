@@ -101,6 +101,35 @@ Open [http://localhost:8501](http://localhost:8501) in your browser, select leag
 
 ---
 
+## MCP Server Integration
+
+The repository ships with an MCP (Model Context Protocol) configuration so
+AI assistants such as **GitHub Copilot** and **VS Code Copilot Chat** can
+interact with the project's data sources.
+
+```jsonc
+// .vscode/mcp.json (included in repo — uses env-var references, no secrets)
+{
+  "servers": {
+    "football-odds-api": {
+      "type": "http",
+      "url": "https://api.the-odds-api.com/v4/sports/",
+      "headers": { "Content-Type": "application/json" },
+      "env": { "ODDS_API_KEY": "${ODDS_API_KEY}" }
+    }
+  }
+}
+```
+
+To add additional servers (e.g. Google Stitch), see the full guide:
+**[docs/MCP\_SETUP.md](docs/MCP_SETUP.md)**
+
+> **⚠️ Security:** Never hard-code API keys in MCP config files. Always use
+> `${ENV_VAR}` placeholders and store values in `.env` (which is
+> git-ignored).
+
+---
+
 ## Running Tests
 
 ```bash
@@ -129,6 +158,10 @@ football-odds-analysis/
 │   ├── test_api_client.py
 │   ├── test_bet_calculator.py
 │   └── test_db_manager.py
+├── .vscode/
+│   └── mcp.json            # MCP server config (env-var references only)
+├── docs/
+│   └── MCP_SETUP.md        # Full MCP connection guide
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt

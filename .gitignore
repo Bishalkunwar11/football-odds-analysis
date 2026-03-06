@@ -33,10 +33,14 @@ htmlcov/
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/mcp.json
 *.swp
 *.swo
 
 # OS
 .DS_Store
 Thumbs.db
+
+# MCP – personal overrides may contain secrets
+.vscode/mcp.local.json
