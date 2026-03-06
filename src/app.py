@@ -847,6 +847,392 @@ st.markdown(
         margin-right: 0.5rem;
         flex-shrink: 0;
     }
+
+    /* ── Enhanced Parlay Summary v2 ── gold accent bar ── */
+    .parlay-summary-v2 {
+        position: relative;
+        overflow: hidden;
+        background: rgba(20,23,32,0.9);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 1.3rem 1.5rem 1.3rem 1.8rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .parlay-summary-v2::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #FFD700, #FFC107);
+        box-shadow: 0 0 15px rgba(251,191,36,0.3);
+    }
+    .parlay-summary-v2 .ps2-tag {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #FFD700;
+        margin-bottom: 0.3rem;
+    }
+    .parlay-summary-v2 .ps2-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #E8EAED;
+        margin-bottom: 0.9rem;
+    }
+    .parlay-summary-v2 .ps2-title .star {
+        color: #FFD700;
+    }
+    .parlay-summary-v2 .ps2-stats {
+        display: flex;
+        gap: 2.5rem;
+        flex-wrap: wrap;
+    }
+    .parlay-summary-v2 .ps2-stat {
+        text-align: center;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #8899AA;
+        margin-bottom: 0.2rem;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-value {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #E8EAED;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-value.gold {
+        color: #FFD700;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-value.green {
+        color: #00E676;
+        text-shadow: 0 0 10px rgba(19,241,149,0.2);
+    }
+
+    /* ── Enhanced Parlay Leg Card v2 ── with prob bar ── */
+    .parlay-leg-v2 {
+        background: rgba(20,23,32,0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.15s ease, background 0.15s ease;
+    }
+    .parlay-leg-v2:hover {
+        border-color: rgba(0,200,83,0.2);
+        background: rgba(26,29,38,0.9);
+    }
+    .parlay-leg-v2 .leg-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .parlay-leg-v2 .leg-num-box {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: rgba(0,200,83,0.1);
+        border: 1px solid rgba(0,200,83,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #00C853;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+    .parlay-leg-v2 .leg-text .leg-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #E8EAED;
+    }
+    .parlay-leg-v2 .leg-text .leg-meta {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #8899AA;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-top: 0.1rem;
+    }
+    .parlay-leg-v2 .leg-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .parlay-leg-v2 .prob-section {
+        text-align: right;
+    }
+    .parlay-leg-v2 .prob-section .prob-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #8899AA;
+        text-transform: uppercase;
+        margin-bottom: 0.3rem;
+    }
+    .parlay-leg-v2 .prob-section .prob-value {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #E8EAED;
+        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 0.25rem;
+    }
+    .parlay-leg-v2 .prob-bar {
+        width: 60px;
+        height: 4px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-left: auto;
+    }
+    .parlay-leg-v2 .prob-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00C853, #00E676);
+        border-radius: 2px;
+    }
+    .parlay-leg-v2 .odds-badge {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #00E676;
+        font-family: 'JetBrains Mono', monospace;
+        min-width: 50px;
+        text-align: right;
+    }
+
+    /* ── Extend Parlay dashed section ── */
+    .extend-parlay {
+        background: rgba(13,27,42,0.4);
+        border: 2px dashed rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 1.5rem 1.5rem;
+        text-align: center;
+        transition: border-color 0.3s ease;
+    }
+    .extend-parlay:hover {
+        border-color: rgba(0,200,83,0.4);
+    }
+    .extend-parlay .ep-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #E8EAED;
+        margin-bottom: 0.2rem;
+    }
+    .extend-parlay .ep-sub {
+        font-size: 0.8rem;
+        color: #8899AA;
+    }
+
+    /* ── Payout Hero display ── */
+    .payout-hero {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: rgba(20,23,32,0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: inset 0 0 20px rgba(0,200,83,0.05);
+    }
+    .payout-hero .ph-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #8899AA;
+        margin-bottom: 0.4rem;
+    }
+    .payout-hero .ph-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #00E676;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: -0.02em;
+        text-shadow: 0 0 30px rgba(0,200,83,0.15);
+    }
+    .payout-hero .ph-note {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #8899AA;
+        margin-top: 0.4rem;
+    }
+
+    /* ── Quick stake buttons ── */
+    .stake-btns {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+    }
+    .stake-btns .qbtn {
+        flex: 1;
+        text-align: center;
+        padding: 0.45rem 0;
+        background: rgba(30,35,50,0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 8px;
+        color: #E8EAED;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .stake-btns .qbtn:hover {
+        background: rgba(0,200,83,0.12);
+        border-color: rgba(0,200,83,0.3);
+    }
+
+    /* ── Odds Alert banner ── */
+    .odds-alert-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        padding: 0.75rem;
+        background: rgba(255,215,0,0.05);
+        border: 1px solid rgba(255,215,0,0.2);
+        border-radius: 10px;
+        margin-bottom: 0.6rem;
+    }
+    .odds-alert-box .oa-icon {
+        color: #FFD700;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .odds-alert-box .oa-text {
+        font-size: 0.7rem;
+        color: #8899AA;
+        line-height: 1.5;
+    }
+    .odds-alert-box .oa-text .oa-label {
+        color: #FFD700;
+        font-weight: 700;
+    }
+
+    /* ── Place Parlay button ── */
+    .place-parlay-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%);
+        color: #0D1B2A;
+        font-weight: 900;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 12px 40px -10px rgba(0,200,83,0.4);
+        transition: all 0.2s ease;
+    }
+    .place-parlay-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 48px -10px rgba(0,200,83,0.5);
+    }
+    .save-fav-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.7rem;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        color: #8899AA;
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .save-fav-btn:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.15);
+    }
+
+    /* ── Featured Live Match Card ── */
+    .featured-live {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #00C853 0%, #05084a 100%);
+        padding: 1.4rem 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(0,200,83,0.2);
+    }
+    .featured-live .fl-badge {
+        display: inline-block;
+        background: #FF3D3D;
+        color: #0D1B2A;
+        font-size: 0.6rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        margin-right: 0.5rem;
+    }
+    .featured-live .fl-time {
+        color: rgba(255,255,255,0.7);
+        font-size: 0.72rem;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .featured-live .fl-teams {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 450px;
+        margin: 1rem 0;
+    }
+    .featured-live .fl-team {
+        text-align: center;
+    }
+    .featured-live .fl-team-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.4rem auto;
+        font-size: 1.5rem;
+    }
+    .featured-live .fl-team-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #FFFFFF;
+    }
+    .featured-live .fl-score {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #FFFFFF;
+        font-family: 'JetBrains Mono', monospace;
+        font-style: italic;
+        letter-spacing: -0.02em;
+    }
+    .featured-live .fl-score-label {
+        font-size: 0.6rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-top: 0.2rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -1035,31 +1421,128 @@ def render_arb_card(
     )
 
 
+def render_featured_live_card(
+    home: str,
+    away: str,
+    home_score: int,
+    away_score: int,
+    minute: str,
+    league: str,
+) -> str:
+    """Return HTML for a featured live match card.
+
+    Renders a gradient-styled card highlighting a live match with
+    the current score and minute indicator.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        home_score: Current score for the home team.
+        away_score: Current score for the away team.
+        minute: Match minute string (e.g. ``"74'"``).
+        league: League / competition label.
+
+    Returns:
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    return (
+        f'<div class="featured-live">'
+        f'<span class="fl-badge">Live Now</span>'
+        f'<span class="fl-time">{minute} - {league}</span>'
+        f'<div class="fl-teams">'
+        f'<div class="fl-team">'
+        f'<div class="fl-team-icon">\U0001f6e1\ufe0f</div>'
+        f'<div class="fl-team-name">{home}</div>'
+        f'</div>'
+        f'<div style="text-align:center;">'
+        f'<div class="fl-score">'
+        f'{home_score} - {away_score}</div>'
+        f'<div class="fl-score-label">Score</div>'
+        f'</div>'
+        f'<div class="fl-team">'
+        f'<div class="fl-team-icon">\U0001f6e1\ufe0f</div>'
+        f'<div class="fl-team-name">{away}</div>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_payout_hero(
+    payout: float,
+    stake: float,
+) -> str:
+    """Return HTML for a large payout display widget.
+
+    Shows the potential payout prominently with a note that
+    the displayed amount includes the original stake.
+
+    Args:
+        payout: Total potential payout in dollars.
+        stake: Original stake amount included in the payout.
+
+    Returns:
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    return (
+        f'<div class="payout-hero">'
+        f'<div class="ph-label">Potential Payout</div>'
+        f'<div class="ph-value">${payout:,.2f}</div>'
+        f'<div class="ph-note">'
+        f'\u2139\ufe0f Includes your ${stake:,.2f} stake'
+        f'</div>'
+        f'</div>'
+    )
+
+
 def render_parlay_leg(
     index: int,
     label: str,
     odds: float,
     implied_prob: float,
+    meta: str = "",
 ) -> str:
-    """Return HTML for a DraftKings-style parlay leg card.
+    """Return HTML for an enhanced parlay leg card with probability bar.
 
     Args:
-        index: 1-based leg number shown in the circle badge.
+        index: 1-based leg number shown in the numbered badge.
         label: Human-readable selection label (e.g. ``"Arsenal ML"``).
         odds: Decimal odds for this leg.
         implied_prob: Implied win probability (0–1 scale).
+        meta: Optional metadata string shown below the label
+            (e.g. ``"Premier League • Today 20:00"``).
 
     Returns:
-        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
     """
+    pct = max(0, min(100, round(implied_prob * 100)))
+    meta_html = (
+        f'<div class="leg-meta">{meta}</div>'
+        if meta
+        else ""
+    )
     return (
-        f'<div class="parlay-leg-card">'
-        f'<span class="leg-num">{index}</span>'
-        f'<div class="leg-info">'
-        f'<div class="leg-label">{label}</div>'
-        f'<div class="leg-detail">Implied: {implied_prob:.1%}</div>'
+        f'<div class="parlay-leg-v2">'
+        f'<div class="leg-left">'
+        f'<div class="leg-num-box">#{index}</div>'
+        f'<div class="leg-text">'
+        f'<div class="leg-name">{label}</div>'
+        f'{meta_html}'
         f'</div>'
-        f'<span class="leg-odds">{odds:.2f}</span>'
+        f'</div>'
+        f'<div class="leg-right">'
+        f'<div class="prob-section">'
+        f'<div class="prob-label">Implied Prob.</div>'
+        f'<div class="prob-value">{implied_prob:.1%}</div>'
+        f'<div class="prob-bar">'
+        f'<div class="prob-fill" style="width:{pct}%"></div>'
+        f'</div>'
+        f'</div>'
+        f'<div class="odds-badge">{odds:.2f}</div>'
+        f'</div>'
         f'</div>'
     )
 
@@ -1071,39 +1554,48 @@ def render_parlay_summary(
 ) -> str:
     """Return HTML for a running parlay summary banner.
 
-    Displays a live summary showing the number of legs, combined odds,
-    potential payout, and potential profit at a glance.
+    Displays a live summary with a gold accent bar, showing
+    the number of legs, combined odds, potential payout,
+    and net profit at a glance.
 
     Args:
         num_legs: Total number of legs currently in the parlay.
-        combined_odds: Product of all leg odds (already computed upstream).
-        stake: Stake amount in dollars used to estimate payout/profit.
+        combined_odds: Product of all leg odds (already computed
+            upstream).
+        stake: Stake amount in dollars used to estimate payout
+            and profit.
 
     Returns:
-        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
     """
     payout = stake * combined_odds if combined_odds > 0 else 0
     profit = payout - stake
-    implied = 1.0 / combined_odds if combined_odds > 0 else 0
     return (
-        f'<div class="parlay-summary">'
-        f'<div class="parlay-title">\U0001f3af Parlay Summary</div>'
-        f'<div class="parlay-stats">'
-        f'<div class="parlay-stat">'
-        f'<div class="ps-label">Legs</div>'
-        f'<div class="ps-value">{num_legs}</div>'
+        f'<div class="parlay-summary-v2">'
+        f'<div class="ps2-tag">Live Summary</div>'
+        f'<div class="ps2-title">'
+        f'<span class="star">\u2b50</span> Pro Parlay Builder'
         f'</div>'
-        f'<div class="parlay-stat">'
-        f'<div class="ps-label">Combined Odds</div>'
-        f'<div class="ps-value">{combined_odds:.4f}</div>'
+        f'<div class="ps2-stats">'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Legs</div>'
+        f'<div class="ps2-value">{num_legs}</div>'
         f'</div>'
-        f'<div class="parlay-stat">'
-        f'<div class="ps-label">Potential Payout</div>'
-        f'<div class="ps-value green">${payout:.2f}</div>'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Combined Odds</div>'
+        f'<div class="ps2-value gold">'
+        f'{combined_odds:.2f}x</div>'
         f'</div>'
-        f'<div class="parlay-stat">'
-        f'<div class="ps-label">Potential Profit</div>'
-        f'<div class="ps-value green">${profit:.2f}</div>'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Total Payout</div>'
+        f'<div class="ps2-value green">'
+        f'${payout:,.2f}</div>'
+        f'</div>'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Net Profit</div>'
+        f'<div class="ps2-value">'
+        f'${profit:,.2f}</div>'
         f'</div>'
         f'</div>'
         f'</div>'
@@ -1497,6 +1989,24 @@ with col_main:
     if active == "matches":
         st.subheader("Upcoming Matches")
         upcoming_df = upcoming_df_base
+
+        # Featured live match card (demo / static showcase)
+        # Featured live match card — static demo showcase using the first
+        # available match.  Real live-score data would require a dedicated
+        # live-scores API endpoint (not available from The-Odds-API).
+        if not upcoming_df.empty and len(upcoming_df) >= 2:
+            first_row = upcoming_df.iloc[0]
+            st.markdown(
+                render_featured_live_card(
+                    home=first_row["home_team"],
+                    away=first_row["away_team"],
+                    home_score=2,
+                    away_score=1,
+                    minute="74'",
+                    league=first_row.get("league", "Premier League"),
+                ),
+                unsafe_allow_html=True,
+            )
 
         if upcoming_df.empty:
             st.markdown(
@@ -2217,14 +2727,73 @@ with col_main:
                 unsafe_allow_html=True,
             )
 
-        # --- Add a leg ---
-        st.markdown("#### Add Selection")
+        # --- Display legs with remove buttons ---
+        legs = st.session_state["parlay_legs"]
+
+        if not legs:
+            st.markdown(
+                '<div class="empty-state">'
+                '<div class="empty-icon">\U0001f3af</div>'
+                '<div class="empty-text">No selections added yet.<br>'
+                'Build your parlay by adding picks below.</div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                "<span style='font-size:0.78rem;color:#8899AA;"
+                "font-weight:700;text-transform:uppercase;"
+                "letter-spacing:0.15em;'>Selected Legs</span>",
+                unsafe_allow_html=True,
+            )
+
+            # Render each leg with a remove button
+            for i, lg in enumerate(legs):
+                leg_col, rm_col = st.columns([8, 1])
+                with leg_col:
+                    prob = 1.0 / lg["decimal_odds"]
+                    st.markdown(
+                        render_parlay_leg(
+                            i + 1,
+                            lg["label"],
+                            lg["decimal_odds"],
+                            prob,
+                        ),
+                        unsafe_allow_html=True,
+                    )
+                with rm_col:
+                    if st.button(
+                        "\u2716",
+                        key=f"rm_leg_{i}",
+                        help=f"Remove {lg['label']}",
+                    ):
+                        st.session_state["parlay_legs"].pop(i)
+                        st.rerun()
+
+            # --- Clear all button ---
+            if st.button(
+                "\U0001f5d1\ufe0f Clear All Picks",
+                key="btn_clear_parlay",
+            ):
+                st.session_state["parlay_legs"] = []
+                st.rerun()
+
+        # --- Extend your parlay (Add a leg) ---
+        st.markdown(
+            '<div class="extend-parlay">'
+            '<div class="ep-title">Extend your parlay</div>'
+            '<div class="ep-sub">'
+            "Add another selection to increase your potential payout"
+            "</div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
         pc1, pc2 = st.columns([3, 3])
         with pc1:
             parlay_label = st.text_input(
                 "Selection (e.g. Arsenal ML, Over 2.5 Goals)",
                 key="parlay_label",
-                placeholder="Enter your pick...",
+                placeholder="Selection Name (e.g., Liverpool ML)",
             )
         with pc2:
             parlay_odds_fmt = st.selectbox(
@@ -2270,50 +2839,18 @@ with col_main:
             f"**Implied probability:** `{implied:.1%}`"
         )
 
-        if st.button("\u2795 Add to Parlay", key="btn_add_parlay_leg"):
+        if st.button("\u2795 Add Leg", key="btn_add_parlay_leg"):
             label = parlay_label.strip() or f"Leg {len(legs) + 1}"
             if parlay_dec > 1.0:
                 st.session_state["parlay_legs"].append(
-                    {"label": label, "decimal_odds": round(parlay_dec, 4)}
+                    {
+                        "label": label,
+                        "decimal_odds": round(parlay_dec, 4),
+                    }
                 )
                 st.success(f"Added: **{label}** @ {parlay_dec:.4f}")
             else:
                 st.error("Odds must be greater than 1.0.")
-
-        # --- Display legs with remove buttons ---
-        st.markdown("---")
-        legs = st.session_state["parlay_legs"]
-
-        if not legs:
-            st.markdown(
-                '<div class="empty-state">'
-                '<div class="empty-icon">\U0001f3af</div>'
-                '<div class="empty-text">No selections added yet.<br>'
-                'Build your parlay by adding picks above.</div>'
-                '</div>',
-                unsafe_allow_html=True,
-            )
-        else:
-            st.markdown(f"#### Your Picks ({len(legs)} leg{'s' if len(legs) != 1 else ''})")
-
-            # Render each leg with a remove button
-            for i, lg in enumerate(legs):
-                leg_col, rm_col = st.columns([8, 1])
-                with leg_col:
-                    prob = 1.0 / lg["decimal_odds"]
-                    st.markdown(
-                        render_parlay_leg(i + 1, lg["label"], lg["decimal_odds"], prob),
-                        unsafe_allow_html=True,
-                    )
-                with rm_col:
-                    if st.button("\u2716", key=f"rm_leg_{i}", help=f"Remove {lg['label']}"):
-                        st.session_state["parlay_legs"].pop(i)
-                        st.rerun()
-
-            # --- Clear all button ---
-            if st.button("\U0001f5d1\ufe0f Clear All Picks", key="btn_clear_parlay"):
-                st.session_state["parlay_legs"] = []
-                st.rerun()
 
             # --- Calculation options ---
             st.markdown("---")
@@ -2412,7 +2949,12 @@ with col_main:
 
 # ── Right Pane: Persistent Bet Slip ──
 with col_slip:
-    st.markdown("### \U0001f3ab Bet Slip")
+    st.markdown(
+        "<span style='font-size:0.7rem;color:#8899AA;"
+        "font-weight:700;text-transform:uppercase;"
+        "letter-spacing:0.15em;'>Bet Slip Summary</span>",
+        unsafe_allow_html=True,
+    )
 
     slip = st.session_state["bet_slip"]
     parlay_legs_list = st.session_state["parlay_legs"]
@@ -2453,37 +2995,117 @@ with col_slip:
             unsafe_allow_html=True,
         )
     else:
-        slip_stake = st.number_input(
-            "Stake ($)", min_value=0.0, value=10.0, step=5.0,
-            key="slip_pane_stake",
-        )
-
         all_odds = [s["decimal_odds"] for s in slip] + [
             lg["decimal_odds"] for lg in parlay_legs_list
         ]
 
-        # Live payout — auto-recalculates on every render without a button
-        # (Performance skill: no extra compute, just reads session state)
+        # --- Payout hero display ---
         _live_calc = BetCalculator()
+        slip_stake = st.session_state.get("slip_pane_stake", 100.0)
         if len(all_odds) == 1:
             _res = _live_calc.calculate_payout(slip_stake, all_odds[0])
+        elif len(all_odds) > 1:
+            _res = _live_calc.calculate_accumulator(
+                slip_stake, all_odds,
+            )
+        else:
+            _res = {"payout": 0.0, "profit": 0.0}
+
+        st.markdown(
+            render_payout_hero(_res["payout"], slip_stake),
+            unsafe_allow_html=True,
+        )
+
+        # --- Stake input ---
+        st.markdown(
+            "<span style='font-size:0.82rem;font-weight:700;"
+            "color:#E8EAED;'>Enter Stake</span>",
+            unsafe_allow_html=True,
+        )
+        slip_stake = st.number_input(
+            "Stake ($)",
+            min_value=0.0,
+            value=100.0,
+            step=5.0,
+            key="slip_pane_stake",
+            label_visibility="collapsed",
+        )
+
+        # Quick-add stake buttons (functional Streamlit buttons)
+        qs_cols = st.columns(4)
+        with qs_cols[0]:
+            if st.button("+10", key="qs_10", use_container_width=True):
+                st.session_state["slip_pane_stake"] = slip_stake + 10
+                st.rerun()
+        with qs_cols[1]:
+            if st.button("+50", key="qs_50", use_container_width=True):
+                st.session_state["slip_pane_stake"] = slip_stake + 50
+                st.rerun()
+        with qs_cols[2]:
+            if st.button("+100", key="qs_100", use_container_width=True):
+                st.session_state["slip_pane_stake"] = slip_stake + 100
+                st.rerun()
+        with qs_cols[3]:
+            if st.button("MAX", key="qs_max", use_container_width=True):
+                st.session_state["slip_pane_stake"] = 1000.0
+                st.rerun()
+
+        # --- Odds alert (informational) ---
+        if parlay_legs_list:
+            st.markdown(
+                '<div class="odds-alert-box">'
+                '<span class="oa-icon">\u26a0\ufe0f</span>'
+                '<div class="oa-text">'
+                '<span class="oa-label">Odds Alert:</span> '
+                "Markets may shift while you are building. "
+                "Review odds before placing."
+                "</div>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
+        # --- Live payout metrics ---
+        if len(all_odds) == 1:
             st.metric("Payout", f"${_res['payout']:.2f}")
             st.metric("Profit", f"${_res['profit']:.2f}")
         elif len(all_odds) > 1:
-            _res = _live_calc.calculate_accumulator(slip_stake, all_odds)
             st.metric(
                 "Combined Odds",
                 f"{_res['combined_odds']:.4f}",
                 help="Product of all selected decimal odds.",
             )
-            st.metric("Total Payout", f"${_res['payout']:.2f}")
             st.metric("Total Profit", f"${_res['profit']:.2f}")
             st.caption(
-                f"{len(all_odds)} selections · "
-                f"Implied prob: {_res['implied_probability']:.2%}"
+                f"{len(all_odds)} selections \u00b7 "
+                f"Implied prob: "
+                f"{_res['implied_probability']:.2%}"
             )
 
-        if st.button("\U0001f5d1\ufe0f Clear All", key="btn_slip_pane_clear"):
+        # --- Place Parlay / Save to Favorites actions ---
+        if st.button(
+            "\u26a1 Place Parlay",
+            key="btn_place_parlay",
+            use_container_width=True,
+            type="primary",
+        ):
+            st.success(
+                "\u2705 Parlay placed! (demo mode — no real wager)"
+            )
+        if st.button(
+            "Save to Favorites",
+            key="btn_save_fav",
+            use_container_width=True,
+        ):
+            st.info(
+                "\u2b50 Parlay saved to favorites! (demo mode)"
+            )
+
+        st.markdown("")  # spacer
+
+        if st.button(
+            "\U0001f5d1\ufe0f Clear All",
+            key="btn_slip_pane_clear",
+        ):
             st.session_state["bet_slip"] = []
             st.session_state["parlay_legs"] = []
             st.rerun()
