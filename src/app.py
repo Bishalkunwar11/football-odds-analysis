@@ -1281,7 +1281,7 @@ st.markdown(
     }
     .terminal-topbar .top-nav a {
         color: #8899AA;
-        font-size: 0.68rem;
+        font-size: 0.7rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.15em;
@@ -1329,7 +1329,7 @@ st.markdown(
         color: #00ff88;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: -0.02em;
+        letter-spacing: 0.02em;
     }
     .terminal-topbar .user-avatar {
         width: 36px;
@@ -3349,9 +3349,9 @@ with col_slip:
 st.markdown(
     """
     <div class="app-footer">
-        \u26bd ApexOdds Europe \u00b7 Built with
+        \u26bd ApexOdds Pro \u00b7 Built with
         <span class="footer-accent">Streamlit</span> \u00b7
-        Premium Sports Analytics
+        Value Bets Terminal
     </div>
     """,
     unsafe_allow_html=True,
