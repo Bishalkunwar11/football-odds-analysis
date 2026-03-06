@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 st.set_page_config(
-    page_title="\u26bd ApexOdds Europe",
+    page_title="ApexOdds Pro | Value Bets Terminal",
     page_icon="\u26bd",
     layout="wide",
 )
@@ -40,12 +40,43 @@ DARK_THEME = {
     "colorway": ["#00C853", "#FFD700", "#00E676", "#40C4FF", "#FF6B35", "#E040FB"],
 }
 
+# Load Google Fonts via <link> tags so they are not blocked by CSP or
+# sandbox restrictions that prevent @import inside <style> blocks.
+st.markdown(
+    '<link href="https://fonts.googleapis.com/css2?family=Inter:'
+    'wght@400;500;600;700;800;900&family=JetBrains+Mono:'
+    'wght@500;700&display=swap" rel="stylesheet">'
+    '<link href="https://fonts.googleapis.com/css2?family=Material+'
+    'Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"'
+    ' rel="stylesheet">',
+    unsafe_allow_html=True,
+)
+
 st.markdown(
     """
     <style>
     /* ── Global reset ── */
     html, body, [class*="css"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ── Material Symbols ── */
+    .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'liga';
     }
 
     /* ── Full-screen background image ── */
@@ -1233,6 +1264,226 @@ st.markdown(
         letter-spacing: 0.15em;
         margin-top: 0.2rem;
     }
+
+    /* ── Terminal Top Bar ── */
+    .terminal-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        background: rgba(13,20,30,0.95);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 16px;
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    .terminal-topbar .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    .terminal-topbar .brand-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        background: #00C853;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        font-size: 1.1rem;
+        font-weight: 900;
+    }
+    .terminal-topbar .brand-text {
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #E8EAED;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+    }
+    .terminal-topbar .brand-text .accent {
+        color: #00C853;
+    }
+    .terminal-topbar .top-nav {
+        display: none;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    @media (min-width: 1024px) {
+        .terminal-topbar .top-nav { display: flex; }
+    }
+    .terminal-topbar .top-nav a {
+        color: #8899AA;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        text-decoration: none;
+        transition: color 0.2s ease;
+        cursor: pointer;
+    }
+    .terminal-topbar .top-nav a:hover {
+        color: #E8EAED;
+    }
+    .terminal-topbar .top-nav a.active {
+        color: #00C853;
+        border-bottom: 2px solid #00C853;
+        padding-bottom: 2px;
+    }
+    .terminal-topbar .search-wrapper {
+        position: relative;
+        display: none;
+    }
+    @media (min-width: 640px) {
+        .terminal-topbar .search-wrapper { display: block; }
+    }
+    .terminal-topbar .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .terminal-topbar .search-input {
+        background: rgba(20,25,38,0.8);
+        border: none;
+        border-radius: 8px;
+        padding: 0.45rem 1rem 0.45rem 2.2rem;
+        font-size: 0.8rem;
+        color: #E8EAED;
+        width: 16rem;
+        max-width: 16rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: box-shadow 0.2s ease;
+    }
+    .terminal-topbar .search-input::placeholder {
+        color: #556677;
+    }
+    .terminal-topbar .search-input:focus {
+        box-shadow: 0 0 0 1px rgba(0,200,83,0.5);
+    }
+    .terminal-topbar .top-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .terminal-topbar .live-feed {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.7rem;
+        background: rgba(13,27,42,0.7);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 8px;
+    }
+    .terminal-topbar .live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #00ff88;
+        box-shadow: 0 0 8px #00ff88;
+        animation: pulse-live 2s ease-in-out infinite;
+    }
+    @keyframes pulse-live {
+        0%, 100% { box-shadow: 0 0 4px #00ff88; }
+        50% { box-shadow: 0 0 12px #00ff88, 0 0 20px rgba(0,255,136,0.3); }
+    }
+    .terminal-topbar .live-text {
+        font-size: 0.6rem;
+        font-family: 'JetBrains Mono', monospace;
+        color: #00ff88;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .terminal-topbar .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00C853, #40C4FF);
+        padding: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .terminal-topbar .user-avatar-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #0D1420;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #E8EAED;
+        font-size: 1rem;
+    }
+
+    /* ── Terminal Menu heading ── */
+    .terminal-menu-heading {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #556677;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        margin-bottom: 0.75rem;
+        padding-left: 0.2rem;
+    }
+
+    /* ── Subscription Box ── */
+    .subscription-box {
+        background: rgba(20,23,32,0.85);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        margin-top: 1rem;
+    }
+    .subscription-box .sub-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .subscription-box .sub-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #556677;
+        text-transform: uppercase;
+    }
+    .subscription-box .sub-tier {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #00ff88;
+        background: rgba(0,255,136,0.1);
+        border: 1px solid rgba(0,255,136,0.2);
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+    }
+    .subscription-box .sub-bar {
+        height: 6px;
+        width: 100%;
+        background: rgba(13,27,42,0.8);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 0.4rem;
+    }
+    .subscription-box .sub-bar-fill {
+        height: 100%;
+        background: #00ff88;
+        width: 75%;
+        border-radius: 3px;
+    }
+    .subscription-box .sub-days {
+        font-size: 0.68rem;
+        color: #8899AA;
+        font-weight: 500;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -1786,16 +2037,22 @@ st.sidebar.markdown(
         margin-bottom: 1rem;
         text-align: center;
     ">
-        <div style="font-size:1.8rem; margin-bottom:0.2rem;">\u26bd</div>
+        <div style="
+            width:32px; height:32px;
+            background:#00C853; border-radius:8px;
+            display:flex; align-items:center;
+            justify-content:center; margin:0 auto 0.4rem auto;
+            font-size:1.1rem; color:#FFFFFF; font-weight:900;
+        "><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" fill="white"/><rect x="13" y="1" width="10" height="10" rx="2" fill="white"/><rect x="1" y="13" width="10" height="10" rx="2" fill="white"/><rect x="13" y="13" width="10" height="10" rx="2" fill="white"/></svg></div>
         <div style="
             font-size: 0.85rem;
             font-weight: 800;
             letter-spacing: 0.12em;
-            color: #00C853;
+            color: #E8EAED;
             text-transform: uppercase;
-        ">APEXODDS</div>
+        ">APEX<span style="color:#00C853;">ODDS</span> PRO</div>
         <div style="font-size:0.68rem; color:#8899AA; margin-top:0.15rem; letter-spacing:0.05em;">
-            EUROPE
+            VALUE BETS TERMINAL
         </div>
     </div>
     """,
@@ -1863,16 +2120,83 @@ if st.session_state.get("last_refreshed"):
         f"🕐 Last refreshed: {st.session_state['last_refreshed']}"
     )
 
+# Subscription status panel – terminal design element
+st.sidebar.markdown(
+    """
+    <div class="subscription-box">
+        <div class="sub-header">
+            <span class="sub-label">Subscription</span>
+            <span class="sub-tier">ELITE</span>
+        </div>
+        <div class="sub-bar">
+            <div class="sub-bar-fill"></div>
+        </div>
+        <div class="sub-days">12 days remaining</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ---------------------------------------------------------------------------
 # Main content
 # ---------------------------------------------------------------------------
 
 st.markdown(
     """
+    <div class="terminal-topbar">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <rect x="1" y="1" width="10" height="10" rx="2" fill="white"/>
+                    <rect x="13" y="1" width="10" height="10" rx="2" fill="white"/>
+                    <rect x="1" y="13" width="10" height="10" rx="2" fill="white"/>
+                    <rect x="13" y="13" width="10" height="10" rx="2" fill="white"/>
+                </svg>
+            </div>
+            <div class="brand-text">APEX<span class="accent">ODDS</span> PRO</div>
+            <div class="top-nav" style="margin-left: 2rem;">
+                <a href="#">Live</a>
+                <a class="active" href="#">Value Bets</a>
+                <a href="#">Arbitrage</a>
+                <a href="#">Calculators</a>
+            </div>
+        </div>
+        <div class="top-right">
+            <div class="search-wrapper">
+                <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24"
+                     fill="none" stroke="#556677" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input class="search-input" placeholder="Search markets..." type="text" aria-label="Search markets" />
+            </div>
+            <div class="live-feed">
+                <div class="live-dot"></div>
+                <span class="live-text">Live Feed</span>
+            </div>
+            <div class="user-avatar">
+                <div class="user-avatar-inner">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="#E8EAED" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
     <div class="hero-header">
-        <div class="hero-title">\u26bd ApexOdds <span class="accent">Europe</span></div>
+        <div class="hero-title">\u26bd ApexOdds <span class="accent">Pro</span></div>
         <div class="hero-sub">
-            PREMIUM ANALYTICS
+            VALUE BETS TERMINAL
             <span class="dot"></span>
             REAL-TIME ODDS
             <span class="dot"></span>
@@ -1960,19 +2284,24 @@ st.markdown("<hr style='margin: 0.4rem 0 0.8rem 0;'>", unsafe_allow_html=True)
 # ---------------------------------------------------------------------------
 
 NAV_SECTIONS = [
-    ("matches", "\U0001f4c5 Matches"),
-    ("value", "\U0001f4a1 Value Bets"),
+    ("matches", "\U0001f4c5 Dashboard"),
+    ("value", "\U0001f3af Value Bets"),
+    ("movement", "\U0001f4c8 Edge Tracker"),
+    ("calc", "\U0001f4b0 Bankroll"),
     ("arb", "\U0001f504 Arbitrage"),
-    ("movement", "\U0001f4c8 Movement"),
     ("margins", "\U0001f4ca Margins"),
-    ("calc", "\U0001f9ee Bet Calculator"),
     ("parlay", "\U0001f3af Custom Parlay"),
+    ("settings", "\U00002699\U0000fe0f Settings"),
 ]
 
 col_nav, col_main, col_slip = st.columns([2, 5, 3])
 
 # ── Left Navigation Panel ──
 with col_nav:
+    st.markdown(
+        '<div class="terminal-menu-heading">Terminal Menu</div>',
+        unsafe_allow_html=True,
+    )
     st.markdown('<div class="nav-panel">', unsafe_allow_html=True)
     for key, label in NAV_SECTIONS:
         is_active = st.session_state["active_section"] == key
@@ -2947,6 +3276,51 @@ with col_main:
                     s1.metric("Total Staked", f"${total_staked:.2f}")
                     s2.metric("Total Payout (all win)", f"${total_payout:.2f}")
 
+    # --- Settings ---
+    elif active == "settings":
+        st.subheader("Settings")
+        st.markdown(
+            '<div class="alert-card">'
+            '<div class="alert-header">'
+            '<span class="alert-teams">'
+            "\u2699\ufe0f Application Settings</span>"
+            "</div>"
+            '<div class="alert-detail">'
+            "Use the <strong>sidebar panel</strong> on the left "
+            "to configure leagues, refresh data, and manage your "
+            "API key override."
+            "</div></div>",
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("##### League Selection")
+        st.info(
+            "Open the sidebar (**⚙️ Settings**) to select which "
+            "leagues to monitor and to refresh odds data."
+        )
+
+        st.markdown("##### API Key")
+        st.info(
+            "Your API key is session-scoped and stored in memory "
+            "only. Paste it in the sidebar **🔑 API Key Override** "
+            "field. It is never written to disk or logs."
+        )
+
+        st.markdown("##### Subscription")
+        st.markdown(
+            '<div class="subscription-box">'
+            '<div class="sub-header">'
+            '<span class="sub-label">Subscription</span>'
+            '<span class="sub-tier">ELITE</span>'
+            "</div>"
+            '<div class="sub-bar">'
+            '<div class="sub-bar-fill"></div>'
+            "</div>"
+            '<div class="sub-days">12 days remaining</div>'
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
 # ── Right Pane: Persistent Bet Slip ──
 with col_slip:
     st.markdown(
@@ -3116,9 +3490,9 @@ with col_slip:
 st.markdown(
     """
     <div class="app-footer">
-        \u26bd ApexOdds Europe \u00b7 Built with
+        \u26bd ApexOdds Pro \u00b7 Built with
         <span class="footer-accent">Streamlit</span> \u00b7
-        Premium Sports Analytics
+        Value Bets Terminal
     </div>
     """,
     unsafe_allow_html=True,
