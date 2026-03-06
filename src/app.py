@@ -43,6 +43,10 @@ DARK_THEME = {
 st.markdown(
     """
     <style>
+    /* ── Google Fonts ── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
     /* ── Global reset ── */
     html, body, [class*="css"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -1297,6 +1301,35 @@ st.markdown(
         border-bottom: 2px solid #00C853;
         padding-bottom: 2px;
     }
+    .terminal-topbar .search-wrapper {
+        position: relative;
+    }
+    .terminal-topbar .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #556677;
+        font-size: 0.9rem;
+    }
+    .terminal-topbar .search-input {
+        background: rgba(20,25,38,0.8);
+        border: none;
+        border-radius: 8px;
+        padding: 0.45rem 1rem 0.45rem 2.2rem;
+        font-size: 0.8rem;
+        color: #E8EAED;
+        width: 16rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: box-shadow 0.2s ease;
+    }
+    .terminal-topbar .search-input::placeholder {
+        color: #556677;
+    }
+    .terminal-topbar .search-input:focus {
+        box-shadow: 0 0 0 1px rgba(0,200,83,0.5);
+    }
     .terminal-topbar .top-right {
         display: flex;
         align-items: center;
@@ -1971,7 +2004,7 @@ st.sidebar.markdown(
             display:flex; align-items:center;
             justify-content:center; margin:0 auto 0.4rem auto;
             font-size:1.1rem; color:#FFFFFF; font-weight:900;
-        ">&#9783;</div>
+        "><span class="material-symbols-outlined" style="font-size:1.1rem;color:#fff;">grid_view</span></div>
         <div style="
             font-size: 0.85rem;
             font-weight: 800;
@@ -2073,7 +2106,9 @@ st.markdown(
     """
     <div class="terminal-topbar">
         <div class="brand">
-            <div class="brand-icon">&#9783;</div>
+            <div class="brand-icon">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#fff;">grid_view</span>
+            </div>
             <div class="brand-text">APEX<span class="accent">ODDS</span> PRO</div>
             <div class="top-nav" style="margin-left: 2rem;">
                 <a href="#">Live</a>
@@ -2083,12 +2118,18 @@ st.markdown(
             </div>
         </div>
         <div class="top-right">
+            <div class="search-wrapper">
+                <span class="material-symbols-outlined search-icon">search</span>
+                <input class="search-input" placeholder="Search markets..." type="text" />
+            </div>
             <div class="live-feed">
                 <div class="live-dot"></div>
                 <span class="live-text">Live Feed</span>
             </div>
             <div class="user-avatar">
-                <div class="user-avatar-inner">&#9786;</div>
+                <div class="user-avatar-inner">
+                    <span class="material-symbols-outlined" style="font-size:1.1rem;">person</span>
+                </div>
             </div>
         </div>
     </div>
@@ -2189,13 +2230,14 @@ st.markdown("<hr style='margin: 0.4rem 0 0.8rem 0;'>", unsafe_allow_html=True)
 # ---------------------------------------------------------------------------
 
 NAV_SECTIONS = [
-    ("matches", "\U0001f4c5 Matches"),
-    ("value", "\U0001f4a1 Value Bets"),
+    ("matches", "\U0001f4c5 Dashboard"),
+    ("value", "\U0001f3af Value Bets"),
+    ("movement", "\U0001f4c8 Edge Tracker"),
+    ("calc", "\U0001f4b0 Bankroll"),
     ("arb", "\U0001f504 Arbitrage"),
-    ("movement", "\U0001f4c8 Movement"),
     ("margins", "\U0001f4ca Margins"),
-    ("calc", "\U0001f9ee Bet Calculator"),
     ("parlay", "\U0001f3af Custom Parlay"),
+    ("settings", "\u2699\ufe0f Settings"),
 ]
 
 col_nav, col_main, col_slip = st.columns([2, 5, 3])
@@ -3179,6 +3221,51 @@ with col_main:
                     s1, s2 = st.columns(2)
                     s1.metric("Total Staked", f"${total_staked:.2f}")
                     s2.metric("Total Payout (all win)", f"${total_payout:.2f}")
+
+    # --- Settings ---
+    elif active == "settings":
+        st.subheader("Settings")
+        st.markdown(
+            '<div class="alert-card">'
+            '<div class="alert-header">'
+            '<span class="alert-teams">'
+            "\u2699\ufe0f Application Settings</span>"
+            "</div>"
+            '<div class="alert-detail">'
+            "Use the <strong>sidebar panel</strong> on the left "
+            "to configure leagues, refresh data, and manage your "
+            "API key override."
+            "</div></div>",
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("##### League Selection")
+        st.info(
+            "Open the sidebar (**⚙️ Settings**) to select which "
+            "leagues to monitor and to refresh odds data."
+        )
+
+        st.markdown("##### API Key")
+        st.info(
+            "Your API key is session-scoped and stored in memory "
+            "only. Paste it in the sidebar **🔑 API Key Override** "
+            "field. It is never written to disk or logs."
+        )
+
+        st.markdown("##### Subscription")
+        st.markdown(
+            '<div class="subscription-box">'
+            '<div class="sub-header">'
+            '<span class="sub-label">Subscription</span>'
+            '<span class="sub-tier">ELITE</span>'
+            "</div>"
+            '<div class="sub-bar">'
+            '<div class="sub-bar-fill"></div>'
+            "</div>"
+            '<div class="sub-days">12 days remaining</div>'
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
 # ── Right Pane: Persistent Bet Slip ──
 with col_slip:
