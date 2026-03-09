@@ -37,6 +37,9 @@ htmlcov/
 *.swp
 *.swo
 
+# Generated integration files
+integrations/
+
 # OS
 .DS_Store
 Thumbs.db
