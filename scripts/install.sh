@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# install.sh — Install agents into your project as GitHub Copilot agents.
+# install.sh — Install agents into your project as GitHub Copilot agents
+#              or instructions.
 #
-# Reads converted files from integrations/copilot/ and copies them to the
+# Reads converted files from integrations/<tool>/ and copies them to the
 # appropriate config directory. Run scripts/convert.sh first if integrations/
 # is missing or stale.
 #
@@ -10,8 +11,9 @@
 #   ./scripts/install.sh [--tool <name>] [--help]
 #
 # Tools:
-#   copilot  — Copy agents to .github/agents/ in current directory
-#   all      — Install for all tools (default)
+#   copilot       — Copy agents to .github/agents/ in current directory
+#   instructions  — Copy instructions to .github/instructions/ in current dir
+#   all           — Install for all tools (default)
 #
 # Flags:
 #   --tool <name>     Install only the specified tool
@@ -42,11 +44,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INTEGRATIONS="$REPO_ROOT/integrations"
 
-ALL_TOOLS=(copilot)
+ALL_TOOLS=(copilot instructions)
 
 # --- Usage ---
 usage() {
-  sed -n '3,18p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '3,19p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
 }
 
@@ -82,9 +84,31 @@ install_copilot() {
   warn "Copilot: project-scoped. Run from your project root to install there."
 }
 
+install_instructions() {
+  local src="$INTEGRATIONS/instructions"
+  local dest="${PWD}/.github/instructions"
+  local count=0
+
+  if [[ ! -d "$src" ]]; then
+    err "integrations/instructions missing. Run convert.sh --tool instructions first."
+    return 1
+  fi
+
+  mkdir -p "$dest"
+
+  local f
+  while IFS= read -r -d '' f; do
+    cp "$f" "$dest/"
+    (( count++ )) || true
+  done < <(find "$src" -maxdepth 1 -name "*.md" -type f -print0)
+
+  ok "Instructions: $count files -> $dest"
+}
+
 install_tool() {
   case "$1" in
     copilot) install_copilot ;;
+    instructions) install_instructions ;;
   esac
 }
 

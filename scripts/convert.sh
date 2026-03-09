@@ -10,8 +10,9 @@
 #   ./scripts/convert.sh [--tool <name>] [--out <dir>] [--help]
 #
 # Tools:
-#   copilot  — GitHub Copilot agent files (.github/agents/*.agent.md)
-#   all      — All tools (default)
+#   copilot       — GitHub Copilot agent files (.github/agents/*.agent.md)
+#   instructions  — GitHub Copilot instructions (.github/instructions/*.md)
+#   all           — All tools (default)
 #
 # Output is written to integrations/<tool>/ relative to the repo root.
 # This script never touches user config dirs — see install.sh for that.
@@ -43,7 +44,7 @@ AGENT_DIRS=(
 
 # --- Usage ---
 usage() {
-  sed -n '3,17p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '3,18p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
 }
 
@@ -94,6 +95,17 @@ ${body}
 HEREDOC
 }
 
+# --- Instructions converter ---
+
+convert_instructions() {
+  local file="$1"
+  local basename
+  basename="$(basename "$file")"
+
+  mkdir -p "$OUT_DIR/instructions"
+  cp "$file" "$OUT_DIR/instructions/$basename"
+}
+
 # --- Main loop ---
 
 run_conversions() {
@@ -116,6 +128,7 @@ run_conversions() {
 
       case "$tool" in
         copilot) convert_copilot "$file" ;;
+        instructions) convert_instructions "$file" ;;
       esac
 
       (( count++ )) || true
@@ -139,7 +152,7 @@ main() {
     esac
   done
 
-  local valid_tools=("copilot" "all")
+  local valid_tools=("copilot" "instructions" "all")
   local valid=false
   for t in "${valid_tools[@]}"; do [[ "$t" == "$tool" ]] && valid=true && break; done
   if ! $valid; then
@@ -154,7 +167,7 @@ main() {
 
   local tools_to_run=()
   if [[ "$tool" == "all" ]]; then
-    tools_to_run=("copilot")
+    tools_to_run=("copilot" "instructions")
   else
     tools_to_run=("$tool")
   fi

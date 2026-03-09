@@ -171,6 +171,51 @@ class TestConvertScript(unittest.TestCase):
         # Should be lowercase kebab-case, no double hyphens
         self.assertEqual(files[0], "my-special-agent-name.agent.md")
 
+    def test_converts_agent_to_instructions_format(self) -> None:
+        """Agent .md files are copied as-is for the instructions tool."""
+        _create_agent_file(
+            self.eng_dir, "test-agent.md",
+            "Test Developer",
+            "A test developer agent",
+            "# Test Agent\n\nBody content here.",
+        )
+        result = self._run_convert("--tool", "instructions")
+        self.assertEqual(result.returncode, 0)
+
+        out_file = os.path.join(
+            self.tmpdir, "integrations", "instructions",
+            "test-agent.md",
+        )
+        self.assertTrue(os.path.exists(out_file))
+
+        with open(out_file, "r") as f:
+            content = f.read()
+        # File is copied as-is — original frontmatter preserved
+        self.assertIn("name: Test Developer", content)
+        self.assertIn("description: A test developer agent", content)
+        self.assertIn("# Test Agent", content)
+
+    def test_converts_multiple_instructions(self) -> None:
+        """Multiple agent files are all copied for the instructions tool."""
+        _create_agent_file(
+            self.eng_dir, "agent-a.md", "Agent Alpha",
+            "First agent", "Body A",
+        )
+        _create_agent_file(
+            self.eng_dir, "agent-b.md", "Agent Beta",
+            "Second agent", "Body B",
+        )
+
+        result = self._run_convert("--tool", "instructions")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Converted 2 agents", result.stdout)
+
+        out_dir = os.path.join(
+            self.tmpdir, "integrations", "instructions"
+        )
+        files = sorted(os.listdir(out_dir))
+        self.assertEqual(files, ["agent-a.md", "agent-b.md"])
+
 
 class TestInstallScript(unittest.TestCase):
     """Tests for scripts/install.sh."""
@@ -288,6 +333,69 @@ class TestInstallScript(unittest.TestCase):
         self.assertFalse(os.path.exists(dest))
 
         result = self._run_install("--tool", "copilot")
+        self.assertEqual(result.returncode, 0)
+        self.assertTrue(os.path.isdir(dest))
+
+    def test_installs_instructions(self) -> None:
+        """Instruction files are copied to .github/instructions/."""
+        # Create integrations/instructions/ with a sample file
+        inst_src = os.path.join(
+            self.tmpdir, "integrations", "instructions"
+        )
+        os.makedirs(inst_src)
+        with open(os.path.join(inst_src, "test-agent.md"), "w") as f:
+            f.write(
+                "---\nname: Test\ndescription: A test\n---\n\nBody.\n"
+            )
+
+        result = self._run_install("--tool", "instructions")
+        self.assertEqual(result.returncode, 0)
+
+        installed = os.path.join(
+            self.project_dir, ".github", "instructions", "test-agent.md"
+        )
+        self.assertTrue(os.path.exists(installed))
+
+        with open(installed, "r") as f:
+            content = f.read()
+        self.assertIn("name: Test", content)
+        self.assertIn("Body.", content)
+
+    def test_installs_multiple_instructions(self) -> None:
+        """Multiple instruction files are all installed."""
+        inst_src = os.path.join(
+            self.tmpdir, "integrations", "instructions"
+        )
+        os.makedirs(inst_src)
+        for name in ("first.md", "second.md"):
+            with open(os.path.join(inst_src, name), "w") as f:
+                f.write(f"---\nname: {name}\n---\nBody\n")
+
+        result = self._run_install("--tool", "instructions")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("2 files", result.stdout)
+
+        dest = os.path.join(
+            self.project_dir, ".github", "instructions"
+        )
+        files = sorted(os.listdir(dest))
+        self.assertEqual(files, ["first.md", "second.md"])
+
+    def test_creates_github_instructions_directory(self) -> None:
+        """The .github/instructions/ directory is created if missing."""
+        inst_src = os.path.join(
+            self.tmpdir, "integrations", "instructions"
+        )
+        os.makedirs(inst_src)
+        with open(os.path.join(inst_src, "agent.md"), "w") as f:
+            f.write("---\nname: Test\n---\nBody\n")
+
+        dest = os.path.join(
+            self.project_dir, ".github", "instructions"
+        )
+        self.assertFalse(os.path.exists(dest))
+
+        result = self._run_install("--tool", "instructions")
         self.assertEqual(result.returncode, 0)
         self.assertTrue(os.path.isdir(dest))
 
