@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-# --- Colour helpers ---
+# --- Color helpers ---
 if [[ -t 1 ]]; then
   GREEN=$'\033[0;32m'; YELLOW=$'\033[1;33m'; RED=$'\033[0;31m'; BOLD=$'\033[1m'; RESET=$'\033[0m'
 else

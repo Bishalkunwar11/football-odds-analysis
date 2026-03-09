@@ -184,15 +184,15 @@ class TestInstallScript(unittest.TestCase):
         )
         os.makedirs(self.agents_dir)
         # Create sample converted agent
-        agent_content = textwrap.dedent("""\
-            ---
-            description: A test agent for installation
-            ---
-
-            # Test Agent
-
-            Body content.
-        """)
+        agent_content = (
+            "---\n"
+            "description: A test agent for installation\n"
+            "---\n"
+            "\n"
+            "# Test Agent\n"
+            "\n"
+            "Body content.\n"
+        )
         with open(
             os.path.join(self.agents_dir, "test-agent.agent.md"), "w"
         ) as f:

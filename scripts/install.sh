@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-# --- Colour helpers ---
+# --- Color helpers ---
 if [[ -t 1 ]]; then
   C_GREEN=$'\033[0;32m'
   C_YELLOW=$'\033[1;33m'
