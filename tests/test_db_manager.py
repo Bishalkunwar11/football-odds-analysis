@@ -170,3 +170,64 @@ class TestGetUpcomingMatches:
     def test_empty_db_returns_empty(self, db: DBManager) -> None:
         rows = db.get_upcoming_matches()
         assert rows == []
+
+
+class TestFeedback:
+    def test_save_feedback_returns_id(self, db: DBManager) -> None:
+        row_id = db.save_feedback("Bug Report", 4, "Found a glitch on mobile.")
+        assert isinstance(row_id, int)
+        assert row_id >= 1
+
+    def test_save_feedback_increments_id(self, db: DBManager) -> None:
+        id1 = db.save_feedback("General Feedback", 5, "Excellent app!")
+        id2 = db.save_feedback("Feature Request", 3, "Add dark mode please.")
+        assert id2 > id1
+
+    def test_get_feedback_returns_submitted_entries(self, db: DBManager) -> None:
+        db.save_feedback("General Feedback", 5, "Love it!")
+        db.save_feedback("Bug Report", 2, "Crash on startup.")
+        rows = db.get_feedback()
+        assert len(rows) == 2
+
+    def test_get_feedback_newest_first(self, db: DBManager) -> None:
+        db.save_feedback("General Feedback", 5, "First entry.")
+        db.save_feedback("Feature Request", 4, "Second entry.")
+        rows = db.get_feedback()
+        # Newest first: second entry's submitted_at >= first entry's
+        assert rows[0]["submitted_at"] >= rows[1]["submitted_at"]
+
+    def test_get_feedback_respects_limit(self, db: DBManager) -> None:
+        for i in range(10):
+            db.save_feedback("General Feedback", 3, f"Entry {i}")
+        rows = db.get_feedback(limit=5)
+        assert len(rows) == 5
+
+    def test_get_feedback_empty_db(self, db: DBManager) -> None:
+        rows = db.get_feedback()
+        assert rows == []
+
+    def test_get_feedback_row_shape(self, db: DBManager) -> None:
+        db.save_feedback("UI / UX", 4, "Clean interface.")
+        rows = db.get_feedback()
+        assert len(rows) == 1
+        row = rows[0]
+        assert set(row.keys()) == {"id", "category", "rating", "message", "submitted_at"}
+        assert row["category"] == "UI / UX"
+        assert row["rating"] == 4
+        assert row["message"] == "Clean interface."
+
+    def test_save_feedback_invalid_rating_low(self, db: DBManager) -> None:
+        with pytest.raises(ValueError, match="rating must be between 1 and 5 \\(inclusive\\)"):
+            db.save_feedback("General Feedback", 0, "Bad rating.")
+
+    def test_save_feedback_invalid_rating_high(self, db: DBManager) -> None:
+        with pytest.raises(ValueError, match="rating must be between 1 and 5 \\(inclusive\\)"):
+            db.save_feedback("General Feedback", 6, "Bad rating.")
+
+    def test_feedback_table_created(self, db: DBManager) -> None:
+        cursor = db.conn.cursor()
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        )
+        tables = {row[0] for row in cursor.fetchall()}
+        assert "feedback" in tables
