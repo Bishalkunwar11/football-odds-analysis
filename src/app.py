@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 st.set_page_config(
-    page_title="ApexOdds Pro | Value Bets Terminal",
+    page_title="ApexOdds Pro | Premium Analytics",
     page_icon="\u26bd",
     layout="wide",
 )
@@ -2156,7 +2156,7 @@ st.markdown(
             </div>
             <div class="brand-text">APEX<span class="accent">ODDS</span> PRO</div>
             <div class="top-nav" style="margin-left: 2rem;">
-                <a href="#">Live</a>
+                <a href="#">Matches</a>
                 <a class="active" href="#">Value Bets</a>
                 <a href="#">Arbitrage</a>
                 <a href="#">Calculators</a>
@@ -2197,7 +2197,7 @@ st.markdown(
     <div class="hero-header">
         <div class="hero-title">\u26bd ApexOdds <span class="accent">Pro</span></div>
         <div class="hero-sub">
-            VALUE BETS TERMINAL
+            PREMIUM ANALYTICS
             <span class="dot"></span>
             REAL-TIME ODDS
             <span class="dot"></span>
@@ -2285,10 +2285,10 @@ st.markdown("<hr style='margin: 0.4rem 0 0.8rem 0;'>", unsafe_allow_html=True)
 # ---------------------------------------------------------------------------
 
 NAV_SECTIONS = [
-    ("matches", "\U0001f4c5 Dashboard"),
-    ("value", "\U0001f3af Value Bets"),
-    ("movement", "\U0001f4c8 Edge Tracker"),
-    ("calc", "\U0001f4b0 Bankroll"),
+    ("matches", "\U0001f4c5 Matches"),
+    ("value", "\U0001f4a1 Value Bets"),
+    ("movement", "\U0001f4c8 Movement"),
+    ("calc", "\U0001f9ee Bet Calculator"),
     ("arb", "\U0001f504 Arbitrage"),
     ("margins", "\U0001f4ca Margins"),
     ("parlay", "\U0001f3af Custom Parlay"),
@@ -3599,7 +3599,7 @@ st.markdown(
     <div class="app-footer">
         \u26bd ApexOdds Pro \u00b7 Built with
         <span class="footer-accent">Streamlit</span> \u00b7
-        Value Bets Terminal
+        Premium Sports Analytics
     </div>
     """,
     unsafe_allow_html=True,
