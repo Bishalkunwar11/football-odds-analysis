@@ -82,7 +82,11 @@ st.markdown(
 
     /* ── Full-screen background image ── */
     .stApp {
-        background: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+        background-color: #0D1B2A;
+        background-image: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
         background-size: cover;
     }
     .stApp::before {
