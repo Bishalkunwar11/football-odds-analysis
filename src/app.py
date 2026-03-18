@@ -81,7 +81,11 @@ st.markdown(
 
     /* ── Full-screen background image ── */
     .stApp {
-        background: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+        background-color: #0D1B2A;
+        background-image: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
         background-size: cover;
     }
     .stApp::before {
@@ -2285,9 +2289,9 @@ st.markdown("<hr style='margin: 0.4rem 0 0.8rem 0;'>", unsafe_allow_html=True)
 
 NAV_SECTIONS = [
     ("matches", "\U0001f4c5 Dashboard"),
-    ("value", "\U0001f3af Value Bets"),
+    ("value", "\U0001f4a1 Value Bets"),
     ("movement", "\U0001f4c8 Edge Tracker"),
-    ("calc", "\U0001f4b0 Bankroll"),
+    ("calc", "\U0001f9ee Bet Calculator"),
     ("arb", "\U0001f504 Arbitrage"),
     ("margins", "\U0001f4ca Margins"),
     ("parlay", "\U0001f3af Custom Parlay"),
@@ -3492,7 +3496,7 @@ st.markdown(
     <div class="app-footer">
         \u26bd ApexOdds Pro \u00b7 Built with
         <span class="footer-accent">Streamlit</span> \u00b7
-        Value Bets Terminal
+        Premium Sports Analytics
     </div>
     """,
     unsafe_allow_html=True,
