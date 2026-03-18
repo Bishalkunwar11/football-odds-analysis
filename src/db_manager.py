@@ -60,6 +60,14 @@ class DBManager:
                 FOREIGN KEY (match_id) REFERENCES matches(match_id)
             );
 
+            CREATE TABLE IF NOT EXISTS feedback (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                category     TEXT NOT NULL,
+                rating       INTEGER NOT NULL,
+                message      TEXT NOT NULL,
+                submitted_at TEXT NOT NULL
+            );
+
             CREATE INDEX IF NOT EXISTS idx_matches_sport_key
                 ON matches(sport_key);
 
@@ -68,6 +76,9 @@ class DBManager:
 
             CREATE INDEX IF NOT EXISTS idx_odds_lookup
                 ON odds(match_id, bookmaker, market, outcome_name);
+
+            CREATE INDEX IF NOT EXISTS idx_feedback_submitted_at
+                ON feedback(submitted_at);
             """
         )
         self.conn.commit()
@@ -251,6 +262,67 @@ class DBManager:
 
         cursor = self.conn.cursor()
         cursor.execute(query, params)
+        return [dict(r) for r in cursor.fetchall()]
+
+    # ------------------------------------------------------------------
+    # Feedback
+    # ------------------------------------------------------------------
+
+    def save_feedback(
+        self, category: str, rating: int, message: str
+    ) -> int:
+        """Insert a user feedback record and return the new row id.
+
+        Args:
+            category: Feedback category (e.g. "Bug Report").
+            rating: Star rating between 1 and 5 (inclusive).
+            message: Free-text feedback message.
+
+        Returns:
+            The auto-incremented id of the inserted row.
+
+        Raises:
+            ValueError: If *rating* is outside the valid 1-5 range.
+        """
+        if rating < 1 or rating > 5:
+            raise ValueError(f"rating must be between 1 and 5 (inclusive), got {rating}")
+
+        submitted_at = datetime.now(timezone.utc).isoformat()
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO feedback (category, rating, message, submitted_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (category, rating, message, submitted_at),
+        )
+        self.conn.commit()
+        row_id = cursor.lastrowid
+        logger.info("Feedback saved (id=%s, category=%s, rating=%s)", row_id, category, rating)
+        return row_id  # type: ignore[return-value]
+
+    def get_feedback(
+        self, limit: int = 50
+    ) -> list[dict[str, Any]]:
+        """Return the most recent feedback entries, newest first.
+
+        Args:
+            limit: Maximum number of rows to return. Defaults to 50.
+
+        Returns:
+            List of feedback row dicts with keys ``id``, ``category``,
+            ``rating``, ``message``, and ``submitted_at``.
+        """
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, category, rating, message, submitted_at
+            FROM feedback
+            ORDER BY submitted_at DESC
+            LIMIT ?
+            """,
+            (limit,),
+        )
         return [dict(r) for r in cursor.fetchall()]
 
     # ------------------------------------------------------------------
