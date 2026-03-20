@@ -3306,12 +3306,11 @@ with col_main:
 
         # --- Extend your parlay (Add a leg) ---
         st.markdown(
-            '<div class="extend-parlay">'
-            '<div class="ep-title">Extend your parlay</div>'
-            '<div class="ep-sub">'
-            "Add another selection to increase your potential payout"
-            "</div>"
-            "</div>",
+            render_calculator_card(
+                "➕",
+                "Add a Leg",
+                "Extend your parlay by adding another selection"
+            ),
             unsafe_allow_html=True,
         )
         pc1, pc2 = st.columns([3, 3])
@@ -3365,7 +3364,7 @@ with col_main:
             f"**Implied probability:** `{implied:.1%}`"
         )
 
-        if st.button("\u2795 Add Leg", key="btn_add_parlay_leg"):
+        if st.button("➕ Add Leg to Parlay", key="btn_add_parlay_leg", use_container_width=True):
             label = parlay_label.strip() or f"Leg {len(legs) + 1}"
             if parlay_dec > 1.0:
                 st.session_state["parlay_legs"].append(
@@ -3377,10 +3376,18 @@ with col_main:
                 st.success(f"Added: **{label}** @ {parlay_dec:.4f}")
             else:
                 st.error("Odds must be greater than 1.0.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-            # --- Calculation options ---
-            st.markdown("---")
-            st.markdown("#### Calculate Payout")
+        # --- Calculation options (only show when legs exist) ---
+        if legs:
+            st.markdown(
+                render_calculator_card(
+                    "💰",
+                    "Calculate Payout",
+                    "Choose your bet type and calculate potential returns"
+                ),
+                unsafe_allow_html=True,
+            )
 
             parlay_mode = st.radio(
                 "Bet type",
@@ -3397,22 +3404,21 @@ with col_main:
             odds_list = [lg["decimal_odds"] for lg in legs]
 
             if parlay_mode == "Straight Parlay":
-                if st.button("\U0001f4b0 Calculate Parlay", key="btn_calc_parlay"):
+                if st.button("💸 Calculate Parlay", key="btn_calc_parlay", use_container_width=True):
                     result = parlay_calc.calculate_accumulator(parlay_stake, odds_list)
                     # Payout display box
                     st.markdown(
-                        f'<div class="parlay-payout-box">'
-                        f'<div class="payout-label">Total Payout (All Legs Win)</div>'
-                        f'<div class="payout-value">${result["payout"]:.2f}</div>'
-                        f'</div>',
+                        '<div class="calc-result-box">'
+                        '<div class="calc-grid-3">'
+                        f'<div><div class="calc-result-label">Combined Odds</div><div class="calc-result-value">{result["combined_odds"]:.2f}x</div></div>'
+                        f'<div><div class="calc-result-label">Total Payout</div><div class="calc-result-value">${result["payout"]:.2f}</div></div>'
+                        f'<div><div class="calc-result-label">Profit</div><div class="calc-result-value">${result["profit"]:.2f}</div></div>'
+                        '</div>'
+                        '<div style="margin-top: 0.6rem; font-size: 0.72rem; color: #8899AA; text-align: center;">'
+                        f'⚠️ All {len(legs)} legs must win for a payout · Implied probability: {result["implied_probability"]:.1%}'
+                        '</div>'
+                        '</div>',
                         unsafe_allow_html=True,
-                    )
-                    r1, r2, r3 = st.columns(3)
-                    r1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
-                    r2.metric("Profit", f"${result['profit']:.2f}")
-                    r3.metric("Implied Prob.", f"{result['implied_probability']:.4%}")
-                    st.caption(
-                        "All legs must win for a payout."
                     )
 
             elif parlay_mode == "Round-Robin":
@@ -3426,30 +3432,32 @@ with col_main:
                 )
                 if combo_size > len(legs):
                     st.warning("Combo size cannot exceed the number of legs.")
-                elif st.button("\U0001f4b0 Calculate Round-Robin", key="btn_calc_rr"):
+                elif st.button("💸 Calculate Round-Robin", key="btn_calc_rr", use_container_width=True):
                     result = parlay_calc.calculate_round_robin(
                         parlay_stake, odds_list, combo_size
                     )
                     # Payout display box
                     st.markdown(
-                        f'<div class="parlay-payout-box">'
-                        f'<div class="payout-label">Total Payout (All Legs Win)</div>'
-                        f'<div class="payout-value">${result["total_payout_all_win"]:.2f}</div>'
-                        f'</div>',
+                        '<div class="calc-result-box">'
+                        '<div class="calc-grid-3">'
+                        f'<div><div class="calc-result-label">Parlays</div><div class="calc-result-value">{result["num_combos"]}</div></div>'
+                        f'<div><div class="calc-result-label">Total Payout</div><div class="calc-result-value">${result["total_payout_all_win"]:.2f}</div></div>'
+                        f'<div><div class="calc-result-label">Profit</div><div class="calc-result-value">${result["total_profit_all_win"]:.2f}</div></div>'
+                        '</div>'
+                        '<div style="margin-top: 0.6rem; font-size: 0.72rem; color: #8899AA; text-align: center;">'
+                        f'Total Staked: ${result["total_staked"]:.2f} · {result["num_combos"]} parlays of {combo_size} legs each'
+                        '</div>'
+                        '</div>',
                         unsafe_allow_html=True,
                     )
-                    r1, r2, r3 = st.columns(3)
-                    r1.metric("Parlays", result["num_combos"])
-                    r2.metric("Total Staked", f"${result['total_staked']:.2f}")
-                    r3.metric("Profit (all win)", f"${result['total_profit_all_win']:.2f}")
 
-                    st.markdown("##### Individual Parlays")
+                    st.markdown("**Individual Parlays:**")
                     for idx, combo in enumerate(result["combos"], 1):
                         combo_labels = [legs[i]["label"] for i in combo["legs"]]
                         with st.expander(
                             f"Parlay {idx}: {' + '.join(combo_labels)}  "
-                            f"\u2014 Odds {combo['combined_odds']:.4f}  "
-                            f"\u2192 ${combo['payout']:.2f}"
+                            f"— Odds {combo['combined_odds']:.4f}  "
+                            f"→ ${combo['payout']:.2f}"
                         ):
                             for i in combo["legs"]:
                                 st.markdown(
@@ -3457,8 +3465,8 @@ with col_main:
                                 )
 
             else:  # Singles
-                if st.button("\U0001f4b0 Calculate Singles", key="btn_calc_singles"):
-                    st.markdown("##### Single-Bet Payouts")
+                if st.button("💸 Calculate Singles", key="btn_calc_singles", use_container_width=True):
+                    st.markdown("**Single-Bet Payouts:**")
                     total_payout = 0.0
                     for i, lg in enumerate(legs):
                         res = parlay_calc.calculate_payout(parlay_stake, lg["decimal_odds"])
@@ -3468,10 +3476,16 @@ with col_main:
                         c2.metric("Payout", f"${res['payout']:.2f}")
                         c3.metric("Profit", f"${res['profit']:.2f}")
                     total_staked = parlay_stake * len(legs)
-                    st.markdown("---")
-                    s1, s2 = st.columns(2)
-                    s1.metric("Total Staked", f"${total_staked:.2f}")
-                    s2.metric("Total Payout (all win)", f"${total_payout:.2f}")
+                    st.markdown(
+                        '<div class="calc-result-box" style="margin-top: 1rem;">'
+                        '<div class="calc-grid-2">'
+                        f'<div><div class="calc-result-label">Total Staked</div><div class="calc-result-value">${total_staked:.2f}</div></div>'
+                        f'<div><div class="calc-result-label">Total Payout (all win)</div><div class="calc-result-value">${total_payout:.2f}</div></div>'
+                        '</div>'
+                        '</div>',
+                        unsafe_allow_html=True,
+                    )
+            st.markdown('</div>', unsafe_allow_html=True)
 
     # --- Settings ---
     elif active == "settings":
