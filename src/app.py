@@ -1488,6 +1488,82 @@ st.markdown(
         color: #8899AA;
         font-weight: 500;
     }
+
+    /* ── Calculator Cards – glassmorphism ── */
+    .calculator-card {
+        background: rgba(20, 23, 32, 0.85);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 1.3rem 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.25s ease;
+    }
+    .calculator-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0,200,83,0.15);
+        border-color: rgba(0,200,83,0.2);
+    }
+    .calculator-card .calc-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .calculator-card .calc-card-icon {
+        font-size: 1.5rem;
+        filter: drop-shadow(0 0 8px rgba(0,200,83,0.3));
+    }
+    .calculator-card .calc-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #E8EAED;
+        letter-spacing: 0.01em;
+    }
+    .calculator-card .calc-card-subtitle {
+        font-size: 0.72rem;
+        color: #8899AA;
+        margin-top: 0.2rem;
+    }
+    .calculator-card .calc-result-box {
+        background: rgba(0,200,83,0.08);
+        border: 1px solid rgba(0,200,83,0.2);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        margin-top: 1rem;
+    }
+    .calculator-card .calc-result-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #8899AA;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.3rem;
+    }
+    .calculator-card .calc-result-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #00C853, #00E676);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0,200,83,0.3);
+    }
+    .calc-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
+    .calc-grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -1852,6 +1928,33 @@ def render_parlay_summary(
         f'<div class="ps2-value">'
         f'${profit:,.2f}</div>'
         f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_calculator_card(
+    icon: str,
+    title: str,
+    subtitle: str,
+) -> str:
+    """Return HTML for a calculator card header.
+
+    Args:
+        icon: Emoji icon for the calculator (e.g. "💰").
+        title: Calculator title (e.g. "Single Bet Calculator").
+        subtitle: Brief description of the calculator's purpose.
+
+    Returns:
+        Opening HTML for a calculator card, to be closed with </div>.
+    """
+    return (
+        f'<div class="calculator-card">'
+        f'<div class="calc-card-header">'
+        f'<div class="calc-card-icon">{icon}</div>'
+        f'<div>'
+        f'<div class="calc-card-title">{title}</div>'
+        f'<div class="calc-card-subtitle">{subtitle}</div>'
         f'</div>'
         f'</div>'
     )
@@ -2851,194 +2954,284 @@ with col_main:
         else:  # Calculator Tools
             bet_calc = BetCalculator()
 
-            calc_section = st.radio(
-                "Select Calculator",
-                [
-                    "Single Bet",
-                    "Accumulator / Parlay",
-                    "Odds Converter",
-                    "Kelly Criterion",
-                    "Dutching",
-                ],
-                horizontal=True,
-                key="calc_section",
+            st.markdown(
+                '<div style="margin-bottom: 1.5rem;">'
+                '<span style="font-size: 0.85rem; color: #8899AA;">Choose a calculator below to start computing payouts, convert odds formats, or optimize your stake sizing.</span>'
+                '</div>',
+                unsafe_allow_html=True,
             )
 
             # --- Single Bet ---
-            if calc_section == "Single Bet":
-                st.markdown("#### Single Bet Payout")
-                col1, col2 = st.columns(2)
-                with col1:
-                    sb_stake = st.number_input(
-                        "Stake", min_value=0.0, value=100.0, step=10.0,
-                        key="sb_stake",
-                    )
-                with col2:
-                    sb_odds = st.number_input(
-                        "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
-                        key="sb_odds",
-                    )
-                if st.button("Calculate Payout", key="btn_single"):
-                    result = bet_calc.calculate_payout(sb_stake, sb_odds)
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric("Payout", f"${result['payout']:.2f}")
-                    c2.metric("Profit", f"${result['profit']:.2f}")
-                    c3.metric("Implied Probability", f"{result['implied_probability']:.2%}")
+            st.markdown(
+                render_calculator_card(
+                    "💰",
+                    "Single Bet Calculator",
+                    "Calculate payout, profit, and implied probability for a single selection"
+                ),
+                unsafe_allow_html=True,
+            )
+            col1, col2 = st.columns(2)
+            with col1:
+                sb_stake = st.number_input(
+                    "Stake ($)", min_value=0.0, value=100.0, step=10.0,
+                    key="sb_stake",
+                )
+            with col2:
+                sb_odds = st.number_input(
+                    "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
+                    key="sb_odds",
+                )
+
+            if st.button("💸 Calculate Payout", key="btn_single", use_container_width=True):
+                result = bet_calc.calculate_payout(sb_stake, sb_odds)
+                st.markdown(
+                    '<div class="calc-result-box">'
+                    '<div class="calc-grid-3">'
+                    f'<div><div class="calc-result-label">Payout</div><div class="calc-result-value">${result["payout"]:.2f}</div></div>'
+                    f'<div><div class="calc-result-label">Profit</div><div class="calc-result-value">${result["profit"]:.2f}</div></div>'
+                    f'<div><div class="calc-result-label">Implied Prob.</div><div class="calc-result-value">{result["implied_probability"]:.1%}</div></div>'
+                    '</div>'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # --- Accumulator / Parlay ---
-            elif calc_section == "Accumulator / Parlay":
-                st.markdown("#### Accumulator / Parlay Calculator")
+            st.markdown(
+                render_calculator_card(
+                    "📊",
+                    "Accumulator / Parlay Calculator",
+                    "Combine multiple selections into a single bet with multiplied odds"
+                ),
+                unsafe_allow_html=True,
+            )
+            col_stake, col_legs = st.columns(2)
+            with col_stake:
                 acc_stake = st.number_input(
-                    "Stake", min_value=0.0, value=10.0, step=5.0,
+                    "Stake ($)", min_value=0.0, value=10.0, step=5.0,
                     key="acc_stake",
                 )
+            with col_legs:
                 num_legs = st.number_input(
                     "Number of Legs", min_value=2, max_value=20, value=3, step=1,
                     key="acc_legs",
                 )
-                leg_odds: list[float] = []
-                cols = st.columns(min(int(num_legs), 5))
-                for i in range(int(num_legs)):
-                    with cols[i % len(cols)]:
-                        val = st.number_input(
-                            f"Leg {i + 1} Odds", min_value=1.01, value=2.0, step=0.05,
-                            key=f"acc_leg_{i}",
-                        )
-                        leg_odds.append(val)
-                if st.button("Calculate Accumulator", key="btn_acc"):
-                    result = bet_calc.calculate_accumulator(acc_stake, leg_odds)
-                    c1, c2, c3, c4 = st.columns(4)
-                    c1.metric("Combined Odds", f"{result['combined_odds']:.4f}")
-                    c2.metric("Payout", f"${result['payout']:.2f}")
-                    c3.metric("Profit", f"${result['profit']:.2f}")
-                    c4.metric("Implied Prob.", f"{result['implied_probability']:.4%}")
+
+            leg_odds: list[float] = []
+            cols = st.columns(min(int(num_legs), 5))
+            for i in range(int(num_legs)):
+                with cols[i % len(cols)]:
+                    val = st.number_input(
+                        f"Leg {i + 1} Odds", min_value=1.01, value=2.0, step=0.05,
+                        key=f"acc_leg_{i}",
+                    )
+                    leg_odds.append(val)
+
+            if st.button("🎯 Calculate Accumulator", key="btn_acc", use_container_width=True):
+                result = bet_calc.calculate_accumulator(acc_stake, leg_odds)
+                st.markdown(
+                    '<div class="calc-result-box">'
+                    '<div class="calc-grid-3">'
+                    f'<div><div class="calc-result-label">Combined Odds</div><div class="calc-result-value">{result["combined_odds"]:.2f}x</div></div>'
+                    f'<div><div class="calc-result-label">Payout</div><div class="calc-result-value">${result["payout"]:.2f}</div></div>'
+                    f'<div><div class="calc-result-label">Profit</div><div class="calc-result-value">${result["profit"]:.2f}</div></div>'
+                    '</div>'
+                    '<div style="margin-top: 0.6rem; font-size: 0.72rem; color: #8899AA; text-align: center;">'
+                    '⚠️ All selections must win for a payout'
+                    '</div>'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # --- Odds Converter ---
-            elif calc_section == "Odds Converter":
-                st.markdown("#### Odds Format Converter")
-                fmt = st.selectbox(
-                    "Input Format",
-                    ["Decimal", "American", "Fractional"],
-                    key="odds_fmt",
+            st.markdown(
+                render_calculator_card(
+                    "🔄",
+                    "Odds Format Converter",
+                    "Convert between decimal, American, and fractional odds formats"
+                ),
+                unsafe_allow_html=True,
+            )
+            fmt = st.selectbox(
+                "Input Format",
+                ["Decimal", "American", "Fractional"],
+                key="odds_fmt",
+            )
+            if fmt == "Decimal":
+                dec = st.number_input(
+                    "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
+                    key="conv_dec",
                 )
-                if fmt == "Decimal":
-                    dec = st.number_input(
-                        "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
-                        key="conv_dec",
+                if st.button("⚡ Convert", key="btn_conv", use_container_width=True):
+                    num, den = bet_calc.decimal_to_fractional(dec)
+                    american = bet_calc.decimal_to_american(dec)
+                    st.markdown(
+                        '<div class="calc-result-box">'
+                        '<div class="calc-grid-3">'
+                        f'<div><div class="calc-result-label">Decimal</div><div class="calc-result-value">{dec:.2f}</div></div>'
+                        f'<div><div class="calc-result-label">Fractional</div><div class="calc-result-value">{num}/{den}</div></div>'
+                        f'<div><div class="calc-result-label">American</div><div class="calc-result-value">{american:+d}</div></div>'
+                        '</div>'
+                        '</div>',
+                        unsafe_allow_html=True,
                     )
-                    if st.button("Convert", key="btn_conv"):
-                        num, den = bet_calc.decimal_to_fractional(dec)
-                        american = bet_calc.decimal_to_american(dec)
-                        c1, c2, c3 = st.columns(3)
-                        c1.metric("Decimal", f"{dec:.2f}")
-                        c2.metric("Fractional", f"{num}/{den}")
-                        c3.metric("American", f"{american:+d}")
-                elif fmt == "American":
-                    amer = st.number_input(
-                        "American Odds", value=150, step=10, key="conv_amer",
+            elif fmt == "American":
+                amer = st.number_input(
+                    "American Odds", value=150, step=10, key="conv_amer",
+                )
+                if amer == 0:
+                    st.warning("American odds cannot be zero.")
+                elif st.button("⚡ Convert", key="btn_conv_a", use_container_width=True):
+                    dec = bet_calc.american_to_decimal(int(amer))
+                    num, den = bet_calc.decimal_to_fractional(dec)
+                    st.markdown(
+                        '<div class="calc-result-box">'
+                        '<div class="calc-grid-3">'
+                        f'<div><div class="calc-result-label">Decimal</div><div class="calc-result-value">{dec:.4f}</div></div>'
+                        f'<div><div class="calc-result-label">Fractional</div><div class="calc-result-value">{num}/{den}</div></div>'
+                        f'<div><div class="calc-result-label">American</div><div class="calc-result-value">{int(amer):+d}</div></div>'
+                        '</div>'
+                        '</div>',
+                        unsafe_allow_html=True,
                     )
-                    if amer == 0:
-                        st.warning("American odds cannot be zero.")
-                    elif st.button("Convert", key="btn_conv_a"):
-                        dec = bet_calc.american_to_decimal(int(amer))
-                        num, den = bet_calc.decimal_to_fractional(dec)
-                        c1, c2, c3 = st.columns(3)
-                        c1.metric("Decimal", f"{dec:.4f}")
-                        c2.metric("Fractional", f"{num}/{den}")
-                        c3.metric("American", f"{int(amer):+d}")
-                else:  # Fractional
-                    fc1, fc2 = st.columns(2)
-                    with fc1:
-                        fnum = st.number_input(
-                            "Numerator", min_value=1, value=3, step=1,
-                            key="conv_fnum",
-                        )
-                    with fc2:
-                        fden = st.number_input(
-                            "Denominator", min_value=1, value=2, step=1,
-                            key="conv_fden",
-                        )
-                    if st.button("Convert", key="btn_conv_f"):
-                        dec = bet_calc.fractional_to_decimal(int(fnum), int(fden))
-                        american = bet_calc.decimal_to_american(dec)
-                        c1, c2, c3 = st.columns(3)
-                        c1.metric("Decimal", f"{dec:.4f}")
-                        c2.metric("Fractional", f"{int(fnum)}/{int(fden)}")
-                        c3.metric("American", f"{american:+d}")
+            else:  # Fractional
+                fc1, fc2 = st.columns(2)
+                with fc1:
+                    fnum = st.number_input(
+                        "Numerator", min_value=1, value=3, step=1,
+                        key="conv_fnum",
+                    )
+                with fc2:
+                    fden = st.number_input(
+                        "Denominator", min_value=1, value=2, step=1,
+                        key="conv_fden",
+                    )
+                if st.button("⚡ Convert", key="btn_conv_f", use_container_width=True):
+                    dec = bet_calc.fractional_to_decimal(int(fnum), int(fden))
+                    american = bet_calc.decimal_to_american(dec)
+                    st.markdown(
+                        '<div class="calc-result-box">'
+                        '<div class="calc-grid-3">'
+                        f'<div><div class="calc-result-label">Decimal</div><div class="calc-result-value">{dec:.4f}</div></div>'
+                        f'<div><div class="calc-result-label">Fractional</div><div class="calc-result-value">{int(fnum)}/{int(fden)}</div></div>'
+                        f'<div><div class="calc-result-label">American</div><div class="calc-result-value">{american:+d}</div></div>'
+                        '</div>'
+                        '</div>',
+                        unsafe_allow_html=True,
+                    )
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # --- Kelly Criterion ---
-            elif calc_section == "Kelly Criterion":
-                st.markdown("#### Kelly Criterion Stake Calculator")
-                kc1, kc2 = st.columns(2)
-                with kc1:
-                    kc_odds = st.number_input(
-                        "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
-                        key="kc_odds",
+            st.markdown(
+                render_calculator_card(
+                    "🎓",
+                    "Kelly Criterion Optimizer",
+                    "Calculate optimal stake size based on your edge and bankroll"
+                ),
+                unsafe_allow_html=True,
+            )
+            kc1, kc2 = st.columns(2)
+            with kc1:
+                kc_odds = st.number_input(
+                    "Decimal Odds", min_value=1.01, value=2.50, step=0.05,
+                    key="kc_odds",
+                )
+                kc_prob = st.slider(
+                    "Estimated Win Probability",
+                    0.01, 0.99, 0.50, 0.01,
+                    key="kc_prob",
+                )
+            with kc2:
+                kc_bankroll = st.number_input(
+                    "Bankroll ($)", min_value=1.0, value=1000.0, step=50.0,
+                    key="kc_bankroll",
+                )
+                kc_frac = st.slider(
+                    "Kelly Fraction (1 = full Kelly)",
+                    0.1, 1.0, 0.5, 0.1,
+                    key="kc_frac",
+                )
+
+            if st.button("🧮 Calculate Kelly Stake", key="btn_kelly", use_container_width=True):
+                result = bet_calc.kelly_criterion(
+                    kc_odds, kc_prob, kc_bankroll, kc_frac
+                )
+                st.markdown(
+                    '<div class="calc-result-box">'
+                    '<div class="calc-grid-3">'
+                    f'<div><div class="calc-result-label">Your Edge</div><div class="calc-result-value">{result["edge"]:.2%}</div></div>'
+                    f'<div><div class="calc-result-label">Kelly %</div><div class="calc-result-value">{result["kelly_fraction"]:.2%}</div></div>'
+                    f'<div><div class="calc-result-label">Stake</div><div class="calc-result-value">${result["recommended_stake"]:.2f}</div></div>'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+                if result["edge"] <= 0:
+                    st.markdown(
+                        '<div style="margin-top: 0.6rem; font-size: 0.72rem; color: #FF6B6B; text-align: center;">'
+                        '⚠️ No positive edge detected — Kelly recommends no bet'
+                        '</div>',
+                        unsafe_allow_html=True,
                     )
-                    kc_prob = st.slider(
-                        "Estimated Win Probability",
-                        0.01, 0.99, 0.50, 0.01,
-                        key="kc_prob",
-                    )
-                with kc2:
-                    kc_bankroll = st.number_input(
-                        "Bankroll", min_value=1.0, value=1000.0, step=50.0,
-                        key="kc_bankroll",
-                    )
-                    kc_frac = st.slider(
-                        "Kelly Fraction (1 = full Kelly)",
-                        0.1, 1.0, 0.5, 0.1,
-                        key="kc_frac",
-                    )
-                if st.button("Calculate Kelly Stake", key="btn_kelly"):
-                    result = bet_calc.kelly_criterion(
-                        kc_odds, kc_prob, kc_bankroll, kc_frac
-                    )
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric("Edge", f"{result['edge']:.2%}")
-                    c2.metric("Kelly Fraction", f"{result['kelly_fraction']:.4f}")
-                    c3.metric(
-                        "Recommended Stake",
-                        f"${result['recommended_stake']:.2f}",
-                    )
-                    if result["edge"] <= 0:
-                        st.warning(
-                            "\u26a0\ufe0f No positive edge detected \u2014 Kelly recommends no bet."
-                        )
+                st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # --- Dutching ---
-            else:
-                st.markdown("#### Dutching Calculator")
+            st.markdown(
+                render_calculator_card(
+                    "⚖️",
+                    "Dutching Calculator",
+                    "Distribute stake across multiple outcomes for equal profit"
+                ),
+                unsafe_allow_html=True,
+            )
+            col_dt_stake, col_dt_num = st.columns(2)
+            with col_dt_stake:
                 dt_stake = st.number_input(
-                    "Total Stake", min_value=1.0, value=100.0, step=10.0,
+                    "Total Stake ($)", min_value=1.0, value=100.0, step=10.0,
                     key="dt_stake",
                 )
+            with col_dt_num:
                 dt_num = st.number_input(
                     "Number of Selections", min_value=2, max_value=10, value=3, step=1,
                     key="dt_num",
                 )
-                dt_odds: list[float] = []
-                cols_dt = st.columns(min(int(dt_num), 5))
-                for i in range(int(dt_num)):
-                    with cols_dt[i % len(cols_dt)]:
-                        val = st.number_input(
-                            f"Selection {i + 1} Odds",
-                            min_value=1.01, value=3.00, step=0.10,
-                            key=f"dt_odds_{i}",
+
+            dt_odds: list[float] = []
+            cols_dt = st.columns(min(int(dt_num), 5))
+            for i in range(int(dt_num)):
+                with cols_dt[i % len(cols_dt)]:
+                    val = st.number_input(
+                        f"Selection {i + 1} Odds",
+                        min_value=1.01, value=3.00, step=0.10,
+                        key=f"dt_odds_{i}",
+                    )
+                    dt_odds.append(val)
+
+            if st.button("⚡ Calculate Dutching", key="btn_dutch", use_container_width=True):
+                result = bet_calc.dutching_calculator(dt_stake, dt_odds)
+                st.markdown(
+                    '<div class="calc-result-box">'
+                    '<div class="calc-grid-3">'
+                    f'<div><div class="calc-result-label">Equal Payout</div><div class="calc-result-value">${result["equal_payout"]:.2f}</div></div>'
+                    f'<div><div class="calc-result-label">Profit</div><div class="calc-result-value">${result["profit"]:.2f}</div></div>'
+                    f'<div><div class="calc-result-label">Market Margin</div><div class="calc-result-value">{result["margin"]:.2%}</div></div>'
+                    '</div>'
+                    '<div style="margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06);">',
+                    unsafe_allow_html=True,
+                )
+                st.markdown("**Individual Stakes:**")
+                stake_cols = st.columns(min(int(dt_num), 3))
+                for i, s in enumerate(result["stakes"]):
+                    with stake_cols[i % len(stake_cols)]:
+                        st.metric(
+                            f"Selection {i + 1}",
+                            f"${s:.2f}",
+                            delta=f"@ {dt_odds[i]:.2f}",
+                            delta_color="off",
                         )
-                        dt_odds.append(val)
-                if st.button("Calculate Dutching", key="btn_dutch"):
-                    result = bet_calc.dutching_calculator(dt_stake, dt_odds)
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric("Equal Payout", f"${result['equal_payout']:.2f}")
-                    c2.metric("Profit", f"${result['profit']:.2f}")
-                    c3.metric("Market Margin", f"{result['margin']:.2%}")
-                    st.markdown("**Individual Stakes:**")
-                    stake_data = {
-                        f"Selection {i + 1} (@ {dt_odds[i]:.2f})": f"${s:.2f}"
-                        for i, s in enumerate(result["stakes"])
-                    }
-                    st.json(stake_data)
+                st.markdown('</div></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
     # --- Custom Bet & Parlay Calculator ---
     elif active == "parlay":
