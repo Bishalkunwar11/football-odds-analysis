@@ -2766,7 +2766,7 @@ def compute_summary_stats(
 
     num_matches = df["match_id"].nunique() if not df.empty else 0
 
-    _analyzer = OddsAnalyzer()
+    _analyzer = get_analyzer()
     try:
         vb = _analyzer.find_value_bets(
             df, sharp_bookmakers=SHARP_BOOKMAKERS, threshold=0.05
@@ -2786,6 +2786,12 @@ def compute_summary_stats(
         "num_value_bets": num_value_bets,
         "num_arb_opps": num_arb_opps,
     }
+
+
+@st.cache_resource
+def get_analyzer() -> OddsAnalyzer:
+    """Return a cached analyzer instance used by KPI computations."""
+    return OddsAnalyzer()
 
 
 def fetch_and_store(selected_leagues: list[str]) -> int:
@@ -2819,6 +2825,7 @@ def fetch_and_store(selected_leagues: list[str]) -> int:
         # Clear caches so new data is reflected immediately
         load_latest_odds.clear()
         load_upcoming_matches.clear()
+        compute_summary_stats.clear()
 
     return len(all_rows)
 
