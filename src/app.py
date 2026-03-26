@@ -2183,6 +2183,359 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# ---------------------------------------------------------------------------
+# Premium UI – immersive, motion-driven layer (premium-frontend-ui skill)
+# Principles applied: fluid typography, atmospheric depth, staggered entrance
+# animations, hardware-accelerated micro-interactions, and accessibility.
+# ---------------------------------------------------------------------------
+st.markdown(
+    """
+    <style>
+    /* ── 1. FLUID TYPOGRAPHY ENGINE ─────────────────────────────────────────
+       Headlines scale smoothly between mobile (min) and desktop (max).
+       Only transform/opacity are animated; width/height/margin are avoided.
+    ──────────────────────────────────────────────────────────────────────── */
+    .hero-header .hero-title {
+        font-size: clamp(1.2rem, 3.5vw, 1.9rem) !important;
+        letter-spacing: clamp(-0.03em, -0.01em, 0em) !important;
+        line-height: 1.15 !important;
+    }
+    .section-title {
+        font-size: clamp(0.9rem, 2.2vw, 1.12rem) !important;
+    }
+    .smc-value {
+        font-size: clamp(1.5rem, 3vw, 2.2rem) !important;
+    }
+    .payout-hero .ph-value {
+        font-size: clamp(1.8rem, 4vw, 2.8rem) !important;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-value {
+        font-size: clamp(1rem, 2.5vw, 1.25rem) !important;
+    }
+
+    /* ── 2. ATMOSPHERIC DEPTH LAYERS ────────────────────────────────────────
+       Layered radial gradients and a grain film to remove digital sterility.
+    ──────────────────────────────────────────────────────────────────────── */
+    .stApp::after {
+        content: "" !important;
+        position: fixed !important;
+        inset: 0 !important;
+        pointer-events: none !important;
+        z-index: 0 !important;
+        opacity: 0.028 !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E") !important;
+        background-repeat: repeat !important;
+        background-size: 160px 160px !important;
+        mix-blend-mode: overlay !important;
+    }
+
+    /* ── 3. STAGGERED ENTRANCE ANIMATION SYSTEM ─────────────────────────────
+       Cards animate in with a composited translate + fade (no layout triggers).
+       Reduced-motion users get no animation.
+    ──────────────────────────────────────────────────────────────────────── */
+    @keyframes card-rise {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0);     }
+    }
+    @keyframes fade-in-quick {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    @keyframes slide-in-left {
+        from { opacity: 0; transform: translateX(-14px); }
+        to   { opacity: 1; transform: translateX(0);      }
+    }
+    @keyframes shimmer-sweep {
+        0%   { background-position: -200% center; }
+        100% { background-position:  200% center; }
+    }
+    @keyframes accent-grow {
+        from { transform: scaleX(0); transform-origin: left; }
+        to   { transform: scaleX(1); transform-origin: left; }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .match-card        { animation: card-rise  0.4s ease both; }
+        .alert-card        { animation: card-rise  0.35s ease both; }
+        .calculator-card   { animation: card-rise  0.4s ease both; }
+        .parlay-leg-v2     { animation: slide-in-left 0.32s ease both; }
+        .slip-card         { animation: slide-in-left 0.28s ease both; }
+        .section-banner    { animation: fade-in-quick 0.3s ease both; }
+        .summary-metric-card { animation: card-rise 0.45s ease both; }
+        .hero-header       { animation: fade-in-quick 0.5s ease both; }
+        .terminal-topbar   { animation: fade-in-quick 0.35s ease both; }
+
+        /* stagger each card using nth-child delay */
+        .match-card:nth-child(1) { animation-delay: 0.05s; }
+        .match-card:nth-child(2) { animation-delay: 0.10s; }
+        .match-card:nth-child(3) { animation-delay: 0.15s; }
+        .match-card:nth-child(4) { animation-delay: 0.20s; }
+        .match-card:nth-child(5) { animation-delay: 0.25s; }
+        .alert-card:nth-child(1) { animation-delay: 0.05s; }
+        .alert-card:nth-child(2) { animation-delay: 0.12s; }
+        .alert-card:nth-child(3) { animation-delay: 0.19s; }
+        .parlay-leg-v2:nth-child(1) { animation-delay: 0.04s; }
+        .parlay-leg-v2:nth-child(2) { animation-delay: 0.10s; }
+        .parlay-leg-v2:nth-child(3) { animation-delay: 0.16s; }
+        .parlay-leg-v2:nth-child(4) { animation-delay: 0.22s; }
+        .slip-card:nth-child(1) { animation-delay: 0.06s; }
+        .slip-card:nth-child(2) { animation-delay: 0.12s; }
+        .slip-card:nth-child(3) { animation-delay: 0.18s; }
+    }
+
+    /* ── 4. HERO ARCHITECTURE – accent line animation ────────────────────── */
+    .hero-header::before {
+        animation: accent-grow 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both !important;
+    }
+    .section-banner::before {
+        animation: accent-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both !important;
+    }
+
+    /* ── 5. SHIMMER ON KEY FINANCIAL VALUES ──────────────────────────────── */
+    @media (prefers-reduced-motion: no-preference) {
+        .payout-hero .ph-value,
+        .smc-value,
+        .parlay-summary-v2 .ps2-stat .ps2-value.gold,
+        .parlay-summary-v2 .ps2-stat .ps2-value.green {
+            background-size: 200% auto !important;
+            animation: shimmer-sweep 3.5s linear 1s infinite !important;
+        }
+        .payout-hero .ph-value {
+            background: linear-gradient(90deg,
+                #00C853 0%, #00E676 35%, #40C4FF 50%, #00E676 65%, #00C853 100%
+            ) !important;
+            background-size: 200% auto !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+        }
+        .parlay-summary-v2 .ps2-stat .ps2-value.gold {
+            background: linear-gradient(90deg,
+                #FFB800 0%, #FFD700 35%, #FFF59D 50%, #FFD700 65%, #FFB800 100%
+            ) !important;
+            background-size: 200% auto !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+        }
+    }
+
+    /* ── 6. DIMENSIONAL HOVER STATES – tactile card feedback ─────────────── */
+    /* will-change applied only on hover to conserve memory when idle.       */
+    .match-card {
+        transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.22s ease,
+                    border-color 0.22s ease !important;
+    }
+    .match-card:hover {
+        will-change: transform;
+        transform: translateY(-5px) scale(1.005) !important;
+        box-shadow: 0 18px 48px rgba(0, 200, 83, 0.18),
+                    0 4px 12px rgba(0, 0, 0, 0.4) !important;
+        border-color: rgba(0, 200, 83, 0.28) !important;
+    }
+    .alert-card {
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.2s ease,
+                    border-color 0.2s ease !important;
+    }
+    .alert-card:hover {
+        will-change: transform;
+        transform: translateY(-4px) !important;
+        box-shadow: 0 16px 40px rgba(0, 200, 83, 0.16),
+                    0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    }
+    .calculator-card {
+        transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.22s ease,
+                    border-color 0.22s ease !important;
+    }
+    .calculator-card:hover {
+        will-change: transform;
+        transform: translateY(-4px) scale(1.003) !important;
+        box-shadow: 0 20px 50px rgba(0, 200, 83, 0.18),
+                    0 5px 14px rgba(0, 0, 0, 0.38) !important;
+        border-color: rgba(0, 200, 83, 0.25) !important;
+    }
+    .summary-metric-card {
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.2s ease !important;
+    }
+    .summary-metric-card:hover {
+        will-change: transform;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+    }
+    .slip-card {
+        transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    border-color 0.18s ease !important;
+    }
+    .slip-card:hover {
+        will-change: transform;
+        transform: translateX(5px) !important;
+        border-left-color: rgba(0, 200, 83, 0.7) !important;
+    }
+
+    /* ── 7. ENHANCED GLASSMORPHISM ───────────────────────────────────────── */
+    .hero-header {
+        background: rgba(5, 20, 42, 0.62) !important;
+        backdrop-filter: blur(28px) saturate(160%) !important;
+        -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.09),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+            0 24px 56px rgba(0, 0, 0, 0.48) !important;
+    }
+    .terminal-topbar {
+        background: rgba(4, 16, 32, 0.74) !important;
+        backdrop-filter: blur(24px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            0 8px 32px rgba(0, 0, 0, 0.42) !important;
+    }
+    .nav-panel {
+        backdrop-filter: blur(18px) saturate(140%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+    }
+    .match-card,
+    .alert-card,
+    .calculator-card {
+        backdrop-filter: blur(16px) saturate(130%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
+    }
+
+    /* ── 8. NAV ITEM – improved active/hover with animated underline ──────── */
+    .nav-item {
+        position: relative;
+        overflow: hidden;
+        transition: background 0.2s ease, color 0.2s ease,
+                    border-color 0.2s ease, transform 0.15s ease !important;
+    }
+    .nav-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0;
+        height: 2px; width: 0;
+        background: linear-gradient(90deg, #00C853, #40C4FF);
+        border-radius: 2px;
+        transition: width 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .nav-item:hover::after { width: 100%; }
+    .nav-item.active::after { width: 100%; }
+    .nav-item:hover {
+        transform: translateX(3px) !important;
+    }
+
+    /* ── 9. BUTTON MICRO-INTERACTIONS – spring lift ──────────────────────── */
+    div.stButton > button {
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.2s ease,
+                    background 0.2s ease !important;
+        will-change: transform;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-3px) !important;
+    }
+    div.stButton > button:active {
+        transform: translateY(1px) scale(0.98) !important;
+        transition-duration: 0.08s !important;
+    }
+
+    /* ── 10. SECTION BANNER – frosted headline gradient ──────────────────── */
+    .section-title {
+        background: linear-gradient(90deg, #E7EEF7 60%, #8FB7FF 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+    .section-kicker {
+        letter-spacing: 0.22em !important;
+    }
+
+    /* ── 11. ODDS VALUE – neon pulse on hover ────────────────────────────── */
+    .match-card .odds-btn {
+        transition: background 0.18s ease !important;
+    }
+    .match-card .odds-btn:hover .odds-value {
+        text-shadow: 0 0 18px rgba(255, 215, 0, 0.7),
+                     0 0 35px rgba(255, 215, 0, 0.35) !important;
+        transition: text-shadow 0.18s ease;
+    }
+
+    /* ── 12. CALCULATOR RESULT VALUE – animated gradient text ────────────── */
+    @media (prefers-reduced-motion: no-preference) {
+        .calculator-card .calc-result-value {
+            background: linear-gradient(90deg,
+                #00C853 0%, #00E676 40%, #40C4FF 55%, #00E676 70%, #00C853 100%
+            ) !important;
+            background-size: 200% auto !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            animation: shimmer-sweep 3s linear infinite !important;
+        }
+    }
+
+    /* ── 13. LIVE DOT – improved glow pulse ─────────────────────────────── */
+    @keyframes pulse-live-enhanced {
+        0%   { box-shadow: 0 0 4px rgba(0,200,83,0.6),  0 0 0   rgba(0,200,83,0);    }
+        50%  { box-shadow: 0 0 12px rgba(0,200,83,0.9), 0 0 22px rgba(0,200,83,0.3); }
+        100% { box-shadow: 0 0 4px rgba(0,200,83,0.6),  0 0 0   rgba(0,200,83,0);    }
+    }
+    .terminal-topbar .live-dot {
+        animation: pulse-live-enhanced 1.8s ease-in-out infinite !important;
+    }
+
+    /* ── 14. FEATURED LIVE CARD – enhanced depth ────────────────────────── */
+    .featured-live {
+        background: linear-gradient(135deg,
+            rgba(0, 60, 30, 0.88) 0%,
+            rgba(0, 30, 60, 0.92) 60%,
+            rgba(5, 8, 74, 0.88) 100%
+        ) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.08),
+            0 20px 60px rgba(0, 0, 0, 0.52) !important;
+    }
+
+    /* ── 15. METRIC CARDS – stat panel glow on hover ────────────────────── */
+    div[data-testid="stMetric"] {
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.2s ease !important;
+    }
+    div[data-testid="stMetric"]:hover {
+        will-change: transform;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 14px 36px rgba(0, 200, 83, 0.14),
+                    0 4px 12px rgba(0, 0, 0, 0.38) !important;
+    }
+
+    /* ── 16. ACCESSIBILITY – respect reduced-motion preference ──────────── */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+
+    /* ── 17. RESPONSIVE POLISH ───────────────────────────────────────────── */
+    @media (max-width: 640px) {
+        .terminal-topbar .brand-text {
+            font-size: 0.95rem !important;
+        }
+        .hero-header .hero-title {
+            font-size: 1.1rem !important;
+        }
+        .smc-value {
+            font-size: 1.4rem !important;
+        }
+        .payout-hero .ph-value {
+            font-size: 1.8rem !important;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -2842,30 +3195,55 @@ if "last_refreshed" not in st.session_state:
 st.sidebar.markdown(
     """
     <div style="
-        background: linear-gradient(135deg, #0D1B2A, #1B2838);
-        border: 1px solid rgba(0,200,83,0.15);
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(20,24,255,0.18) 0%, rgba(0,30,57,0.88) 60%, rgba(0,43,82,0.72) 100%);
+        border: 1px solid rgba(20,24,255,0.28);
         border-radius: 14px;
-        padding: 1.2rem 1rem;
+        padding: 1.3rem 1rem 1.1rem 1rem;
         margin-bottom: 1rem;
         text-align: center;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
     ">
         <div style="
-            width:32px; height:32px;
-            background:#00C853; border-radius:8px;
-            display:flex; align-items:center;
-            justify-content:center; margin:0 auto 0.4rem auto;
-            font-size:1.1rem; color:#FFFFFF; font-weight:900;
-        "><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" fill="white"/><rect x="13" y="1" width="10" height="10" rx="2" fill="white"/><rect x="1" y="13" width="10" height="10" rx="2" fill="white"/><rect x="13" y="13" width="10" height="10" rx="2" fill="white"/></svg></div>
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, #1418FF, #004797, #00C853);
+        "></div>
         <div style="
-            font-size: 0.85rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-            color: #E8EAED;
+            width:38px; height:38px;
+            background: linear-gradient(135deg, #1418FF, #004797);
+            border-radius: 10px;
+            display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 0.55rem auto;
+            box-shadow: 0 4px 16px rgba(20,24,255,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+        "><svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="1" y="1" width="10" height="10" rx="2.5" fill="white"/>
+            <rect x="13" y="1" width="10" height="10" rx="2.5" fill="white" opacity="0.85"/>
+            <rect x="1" y="13" width="10" height="10" rx="2.5" fill="white" opacity="0.85"/>
+            <rect x="13" y="13" width="10" height="10" rx="2.5" fill="white"/>
+        </svg></div>
+        <div style="
+            font-size: 0.9rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            color: #E7EEF7;
             text-transform: uppercase;
-        ">APEX<span style="color:#00C853;">ODDS</span> PRO</div>
-        <div style="font-size:0.68rem; color:#8899AA; margin-top:0.15rem; letter-spacing:0.05em;">
-            VALUE BETS TERMINAL
-        </div>
+        ">APEX<span style="color:#8FB7FF;">ODDS</span></div>
+        <div style="
+            display: inline-block;
+            margin-top: 0.3rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: #00C853;
+            text-transform: uppercase;
+            background: rgba(0,200,83,0.1);
+            border: 1px solid rgba(0,200,83,0.22);
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+        ">PRO TERMINAL</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -2967,7 +3345,10 @@ st.markdown(
     """
     <div class="terminal-topbar">
         <div class="brand">
-            <div class="brand-icon">
+            <div class="brand-icon" style="
+                background: linear-gradient(135deg, #1418FF, #004797);
+                box-shadow: 0 0 16px rgba(20,24,255,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+            ">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <rect x="1" y="1" width="10" height="10" rx="2" fill="white"/>
                     <rect x="13" y="1" width="10" height="10" rx="2" fill="white"/>
@@ -2975,7 +3356,7 @@ st.markdown(
                     <rect x="13" y="13" width="10" height="10" rx="2" fill="white"/>
                 </svg>
             </div>
-            <div class="brand-text">APEX<span class="accent">ODDS</span> PRO</div>
+            <div class="brand-text" style="font-size:1.2rem;">APEX<span class="accent">ODDS</span> <span style="color:#8FA8C8;font-weight:500;font-size:0.85rem;letter-spacing:0.04em;">PRO</span></div>
             <div class="top-nav" style="margin-left: 2rem;">
                 <a href="#">Matches</a>
                 <a class="active" href="#">Value Bets</a>
@@ -2993,11 +3374,14 @@ st.markdown(
                 </svg>
                 <input class="search-input" placeholder="Search markets..." type="text" aria-label="Search markets" />
             </div>
-            <div class="live-feed">
+            <div class="live-feed" style="gap:0.5rem;">
                 <div class="live-dot"></div>
                 <span class="live-text">Live Feed</span>
             </div>
-            <div class="user-avatar">
+            <div class="user-avatar" style="
+                background: linear-gradient(135deg, #00C853, #1418FF);
+                box-shadow: 0 0 12px rgba(0,200,83,0.3);
+            ">
                 <div class="user-avatar-inner">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                          stroke="#E8EAED" stroke-width="2" stroke-linecap="round"
@@ -3016,6 +3400,18 @@ st.markdown(
 st.markdown(
     """
     <div class="hero-header">
+        <div style="
+            position: absolute; top: -30%; right: -8%;
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(20,24,255,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        "></div>
+        <div style="
+            position: absolute; bottom: -20%; left: 30%;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(0,200,83,0.07) 0%, transparent 70%);
+            pointer-events: none;
+        "></div>
         <div class="hero-title">\u26bd ApexOdds <span class="accent">Pro</span></div>
         <div class="hero-sub">
             PREMIUM ANALYTICS
