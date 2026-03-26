@@ -34,11 +34,18 @@ st.set_page_config(
 # Premium Sportsbook UI – DraftKings / Bet365 / FanDuel inspired dark theme
 # ---------------------------------------------------------------------------
 DARK_THEME = {
-    "paper_bgcolor": "#0D1B2A",
-    "plot_bgcolor": "#0D1B2A",
-    "font_color": "#E8EAED",
-    "gridcolor": "rgba(0,200,83,0.08)",
-    "colorway": ["#00C853", "#FFD700", "#00E676", "#40C4FF", "#FF6B35", "#E040FB"],
+    "paper_bgcolor": "#000B14",
+    "plot_bgcolor": "#000B14",
+    "font_color": "#E7EEF7",
+    "gridcolor": "rgba(20, 24, 255, 0.24)",
+    "colorway": [
+        "#1418FF",
+        "#00C853",
+        "#004797",
+        "#00F2FF",
+        "#FF3D00",
+        "#7DD3FC",
+    ],
 }
 
 # Load Google Fonts via <link> tags so they are not blocked by CSP or
@@ -50,6 +57,466 @@ st.markdown(
     '<link href="https://fonts.googleapis.com/css2?family=Material+'
     'Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"'
     ' rel="stylesheet">',
+    unsafe_allow_html=True,
+)
+
+# Final style override pass so page-specific components share one
+# consistent Elite Terminal look (matches, value, calculators, parlay,
+# and bet-slip panes).
+st.markdown(
+    """
+    <style>
+    .terminal-topbar,
+    .hero-header,
+    .nav-panel,
+    .subscription-box,
+    .featured-live,
+    .match-card,
+    .alert-card,
+    .calculator-card,
+    .parlay-summary-v2,
+    .parlay-leg-v2,
+    .slip-card,
+    .payout-hero,
+    .odds-alert-box,
+    .empty-state,
+    .section-banner,
+    .stPlotlyChart {
+        background: rgba(0, 30, 57, 0.54) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+            0 10px 28px rgba(0, 0, 0, 0.34) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+    }
+
+    .hero-header,
+    .section-banner,
+    .terminal-topbar {
+        background:
+            linear-gradient(
+                135deg,
+                rgba(0, 30, 57, 0.76),
+                rgba(0, 43, 82, 0.58)
+            ) !important;
+    }
+
+    .hero-header::before,
+    .section-banner::before,
+    .parlay-summary-v2::before {
+        background: linear-gradient(90deg, #1418FF, #004797, #00C853) !important;
+    }
+
+    .section-kicker,
+    .section-subtitle,
+    .terminal-menu-heading,
+    .subscription-box .sub-label,
+    .subscription-box .sub-days,
+    .empty-state .empty-text,
+    .alert-card .alert-detail,
+    .match-card .kickoff,
+    .match-card .odds-btn .outcome-label,
+    .slip-card .slip-info .slip-match {
+        color: #8EA3BA !important;
+    }
+
+    .section-title,
+    .hero-header .hero-title,
+    .match-card .team-name,
+    .alert-card .alert-teams,
+    .slip-card .slip-info .slip-outcome,
+    .calculator-card .calc-card-title,
+    .parlay-leg-v2 .leg-text .leg-name,
+    .parlay-summary-v2 .ps2-title {
+        color: #E7EEF7 !important;
+    }
+
+    .hero-header .hero-title .accent,
+    .top-nav a.active,
+    .brand-text .accent {
+        color: #8FB7FF !important;
+    }
+
+    .live-feed {
+        border-color: rgba(0, 71, 151, 0.4) !important;
+        background: rgba(0, 43, 82, 0.56) !important;
+    }
+
+    .live-dot,
+    .odds-up {
+        background: #00C853 !important;
+        color: #00C853 !important;
+        box-shadow: 0 0 10px rgba(0, 200, 83, 0.55) !important;
+    }
+    .odds-down {
+        color: #FF3D00 !important;
+    }
+
+    .match-card .league-badge,
+    .count-badge,
+    .alert-card .alert-badge,
+    .subscription-box .sub-tier,
+    .parlay-summary-v2 .ps2-tag {
+        background: rgba(0, 71, 151, 0.24) !important;
+        color: #9CC8FF !important;
+        border: 1px solid rgba(20, 24, 255, 0.38) !important;
+    }
+
+    .match-card .vs-badge,
+    .slip-card .slip-odds,
+    .parlay-leg-v2 .odds-badge {
+        background: linear-gradient(135deg, #FFB800, #FFC940) !important;
+        color: #04101E !important;
+        -webkit-text-fill-color: #04101E !important;
+        text-shadow: none !important;
+        box-shadow: 0 4px 14px rgba(255, 184, 0, 0.26) !important;
+    }
+
+    .match-card .odds-btn:hover,
+    .alert-card:hover,
+    .calculator-card:hover,
+    .parlay-leg-v2:hover,
+    .slip-card:hover {
+        border-color: rgba(0, 200, 83, 0.28) !important;
+        box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+            0 12px 32px rgba(0, 200, 83, 0.16) !important;
+    }
+
+    .match-card .odds-btn .odds-value,
+    .calc-result-value,
+    .payout-hero .ph-value,
+    .parlay-summary-v2 .ps2-stat .ps2-value.green,
+    .parlay-leg-v2 .prob-section .prob-value,
+    .slip-card .slip-odds {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    .parlay-summary-v2 {
+        border-left: 3px solid rgba(255, 184, 0, 0.9) !important;
+        background:
+            linear-gradient(
+                135deg,
+                rgba(0, 20, 40, 0.88),
+                rgba(0, 30, 60, 0.72)
+            ) !important;
+    }
+
+    .parlay-summary-v2 .ps2-stat .ps2-value.gold,
+    .odds-alert-box .oa-text .oa-label {
+        color: #FFB800 !important;
+    }
+
+    .parlay-leg-v2 .leg-num-box,
+    .parlay-leg-v2 .prob-fill,
+    .calculator-card .calc-result-box,
+    .place-parlay-btn {
+        background: linear-gradient(135deg, #00C853, #00E676) !important;
+        color: #04101E !important;
+        -webkit-text-fill-color: #04101E !important;
+    }
+
+    .calculator-card .calc-result-box {
+        border: 1px solid rgba(0, 200, 83, 0.34) !important;
+    }
+
+    .payout-hero {
+        background:
+            linear-gradient(
+                135deg,
+                rgba(0, 20, 40, 0.86),
+                rgba(0, 43, 82, 0.7)
+            ) !important;
+    }
+
+    .payout-hero .ph-value,
+    .calculator-card .calc-result-value {
+        color: #00C853 !important;
+        -webkit-text-fill-color: #00C853 !important;
+        text-shadow: 0 0 16px rgba(0, 200, 83, 0.28) !important;
+    }
+
+    .featured-live {
+        background:
+            linear-gradient(
+                120deg,
+                rgba(0, 30, 57, 0.95),
+                rgba(0, 11, 20, 0.92)
+            ) !important;
+        border-color: rgba(0, 71, 151, 0.34) !important;
+    }
+    .featured-live .fl-badge {
+        background: #FF3D00 !important;
+        color: #FFFFFF !important;
+    }
+
+    .odds-alert-box {
+        border-color: rgba(255, 184, 0, 0.32) !important;
+        background: rgba(255, 184, 0, 0.08) !important;
+    }
+
+    div.stButton > button {
+        border-radius: 8px !important;
+        background: linear-gradient(135deg, #1418FF, #004797) !important;
+        border: 1px solid rgba(143, 183, 255, 0.28) !important;
+        color: #EAF2FF !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        font-weight: 800 !important;
+    }
+    div.stButton > button:hover {
+        background: linear-gradient(135deg, #2227FF, #0054B4) !important;
+    }
+
+    .stTextInput input,
+    .stNumberInput input,
+    .stSelectbox div[data-baseweb="select"] > div,
+    .stMultiSelect div[data-baseweb="select"] > div,
+    div[role="radiogroup"] label {
+        background: rgba(0, 30, 57, 0.62) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #E7EEF7 !important;
+    }
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stSelectbox div[data-baseweb="select"] > div:focus-within,
+    .stMultiSelect div[data-baseweb="select"] > div:focus-within {
+        border-color: rgba(20, 24, 255, 0.6) !important;
+        box-shadow: 0 0 0 1px rgba(20, 24, 255, 0.35) !important;
+    }
+
+    span[data-baseweb="tag"] {
+        background: rgba(0, 71, 151, 0.2) !important;
+        border: 1px solid rgba(20, 24, 255, 0.38) !important;
+        color: #9CC8FF !important;
+    }
+
+    @media (max-width: 900px) {
+        .terminal-topbar {
+            padding: 0.65rem 0.85rem !important;
+        }
+        .hero-header {
+            padding: 1rem 0.95rem !important;
+        }
+        .match-card .teams {
+            gap: 0.35rem !important;
+        }
+        .section-banner {
+            padding: 0.8rem 0.85rem !important;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <style>
+    :root {
+        --obsidian: #000B14;
+        --navy-deep: #001E39;
+        --navy-muted: #002B52;
+        --primary-blue: #1418FF;
+        --electric-blue: #004797;
+        --accent-green: #00C853;
+        --accent-red: #FF3D00;
+        --text-main: #E7EEF7;
+        --text-muted: #8EA3BA;
+        --etched-border: rgba(255, 255, 255, 0.08);
+        --etched-inner: rgba(255, 255, 255, 0.03);
+    }
+
+    .stApp {
+        background:
+            radial-gradient(1200px 600px at 20% 10%, rgba(20, 24, 255, 0.22), transparent 62%),
+            radial-gradient(1000px 500px at 80% 85%, rgba(0, 71, 151, 0.16), transparent 65%),
+            linear-gradient(180deg, #001E39 0%, #000B14 60%, #000B14 100%) !important;
+    }
+    .stApp::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.035;
+        background-image: radial-gradient(rgba(255,255,255,0.9) 0.45px, transparent 0.45px);
+        background-size: 3px 3px;
+    }
+    [data-testid="stMainBlockContainer"] {
+        position: relative;
+        z-index: 2;
+        max-width: 96rem;
+        padding-top: 1.1rem;
+    }
+
+    section[data-testid="stSidebar"] > div {
+        background: rgba(0, 30, 57, 0.78) !important;
+        border-right: 1px solid var(--etched-border) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+    }
+
+    .hero-header {
+        background: rgba(0, 30, 57, 0.56) !important;
+        border: 1px solid var(--etched-border) !important;
+        box-shadow:
+            inset 0 0 0 1px var(--etched-inner),
+            0 20px 42px rgba(0, 0, 0, 0.42) !important;
+    }
+    .hero-header::before {
+        height: 2px !important;
+        background: linear-gradient(90deg, #1418FF, #004797, #00C853) !important;
+    }
+    .hero-header .hero-title .accent {
+        color: var(--accent-green) !important;
+    }
+    .hero-header .hero-sub,
+    .terminal-menu-heading,
+    .subscription-box .sub-days,
+    .subscription-box .sub-label {
+        color: var(--text-muted) !important;
+    }
+
+    .section-banner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1px solid var(--etched-border);
+        box-shadow: inset 0 0 0 1px var(--etched-inner);
+        background: rgba(0, 30, 57, 0.56);
+        padding: 0.95rem 1rem;
+        margin-bottom: 0.8rem;
+    }
+    .section-banner::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #1418FF, #004797, #00C853);
+        opacity: 0.95;
+    }
+    .section-kicker {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.32rem;
+    }
+    .section-title {
+        font-size: 1.08rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.01em;
+        margin: 0;
+    }
+    .section-subtitle {
+        margin-top: 0.24rem;
+        font-size: 0.77rem;
+        color: var(--text-muted);
+    }
+
+    .match-card,
+    .alert-card,
+    .calculator-card,
+    .featured-live,
+    .slip-card,
+    .parlay-summary-v2,
+    .parlay-leg-v2,
+    .payout-hero,
+    .subscription-box,
+    .nav-panel,
+    .stat-panel {
+        border: 1px solid var(--etched-border) !important;
+        box-shadow: inset 0 0 0 1px var(--etched-inner), 0 12px 34px rgba(0, 0, 0, 0.32) !important;
+    }
+
+    .match-card,
+    .alert-card,
+    .calculator-card,
+    .slip-card,
+    .nav-panel,
+    .stat-panel,
+    .subscription-box,
+    .parlay-leg-v2 {
+        background: rgba(0, 30, 57, 0.52) !important;
+    }
+
+    .featured-live,
+    .parlay-summary-v2,
+    .payout-hero {
+        background: linear-gradient(135deg, rgba(0, 30, 57, 0.88), rgba(0, 43, 82, 0.74)) !important;
+    }
+
+    .league-badge,
+    .alert-badge,
+    .count-badge,
+    .sub-tier,
+    .ps2-tag,
+    .odds-badge {
+        background: rgba(0, 71, 151, 0.2) !important;
+        color: #9CC8FF !important;
+        border-color: rgba(20, 24, 255, 0.35) !important;
+    }
+
+    .match-card .odds-btn .odds-value,
+    .ps2-value.green,
+    .calc-result-value,
+    .ph-value,
+    .slip-odds {
+        color: var(--accent-green) !important;
+        background: none !important;
+        -webkit-text-fill-color: var(--accent-green) !important;
+        text-shadow: 0 0 14px rgba(0, 200, 83, 0.25) !important;
+    }
+
+    .brand-text .accent,
+    .top-nav a.active,
+    .live-feed .live-text,
+    .user-avatar,
+    .main .block-container h2 {
+        color: #8FB7FF !important;
+        border-color: #8FB7FF !important;
+    }
+
+    .main .block-container h2 {
+        border-left-width: 3px !important;
+        padding-left: 0.65rem !important;
+    }
+
+    div.stButton > button {
+        background: linear-gradient(135deg, #1418FF, #004797) !important;
+        color: #EAF2FF !important;
+        border: 1px solid rgba(143, 183, 255, 0.32) !important;
+        box-shadow: 0 6px 18px rgba(20, 24, 255, 0.28) !important;
+    }
+    div.stButton > button:hover {
+        background: linear-gradient(135deg, #2025FF, #0054B4) !important;
+        box-shadow: 0 10px 24px rgba(20, 24, 255, 0.4) !important;
+    }
+
+    [data-testid="stMetric"] {
+        background: rgba(9, 27, 50, 0.68) !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: #EAF2FF !important;
+        -webkit-text-fill-color: #EAF2FF !important;
+        background: none !important;
+        text-shadow: none !important;
+    }
+
+    @media (max-width: 1024px) {
+        .section-title {
+            font-size: 0.98rem;
+        }
+    }
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -1277,7 +1744,7 @@ st.markdown(
         justify-content: space-between;
         flex-wrap: nowrap;
         overflow: hidden;
-        background: rgba(13,20,30,0.95);
+        background: rgba(0, 30, 57, 0.7);
         border: 1px solid rgba(255,255,255,0.05);
         border-radius: 16px;
         padding: 0.75rem 1.5rem;
@@ -1297,7 +1764,7 @@ st.markdown(
         width: 32px;
         height: 32px;
         min-width: 32px;
-        background: #00C853;
+        background: #1418FF;
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -1314,7 +1781,7 @@ st.markdown(
         white-space: nowrap;
     }
     .terminal-topbar .brand-text .accent {
-        color: #00C853;
+        color: #8FB7FF;
     }
     .terminal-topbar .top-nav {
         display: none;
@@ -1338,8 +1805,8 @@ st.markdown(
         color: #E8EAED;
     }
     .terminal-topbar .top-nav a.active {
-        color: #00C853;
-        border-bottom: 2px solid #00C853;
+        color: #9CC8FF;
+        border-bottom: 2px solid #1418FF;
         padding-bottom: 2px;
     }
     .terminal-topbar .search-wrapper {
@@ -1372,7 +1839,7 @@ st.markdown(
         color: #556677;
     }
     .terminal-topbar .search-input:focus {
-        box-shadow: 0 0 0 1px rgba(0,200,83,0.5);
+        box-shadow: 0 0 0 1px rgba(20, 24, 255, 0.55);
     }
     .terminal-topbar .top-right {
         display: flex;
@@ -1384,7 +1851,7 @@ st.markdown(
         align-items: center;
         gap: 0.4rem;
         padding: 0.3rem 0.7rem;
-        background: rgba(13,27,42,0.7);
+        background: rgba(0, 43, 82, 0.46);
         border: 1px solid rgba(255,255,255,0.05);
         border-radius: 8px;
     }
@@ -1392,18 +1859,18 @@ st.markdown(
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: #00ff88;
-        box-shadow: 0 0 8px #00ff88;
+        background: #00C853;
+        box-shadow: 0 0 8px #00C853;
         animation: pulse-live 2s ease-in-out infinite;
     }
     @keyframes pulse-live {
-        0%, 100% { box-shadow: 0 0 4px #00ff88; }
-        50% { box-shadow: 0 0 12px #00ff88, 0 0 20px rgba(0,255,136,0.3); }
+        0%, 100% { box-shadow: 0 0 4px #00C853; }
+        50% { box-shadow: 0 0 12px #00C853, 0 0 20px rgba(0,200,83,0.32); }
     }
     .terminal-topbar .live-text {
         font-size: 0.6rem;
         font-family: 'JetBrains Mono', monospace;
-        color: #00ff88;
+        color: #00C853;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.02em;
@@ -1961,6 +2428,30 @@ def render_calculator_card(
     )
 
 
+def render_section_banner(
+    kicker: str,
+    title: str,
+    subtitle: str,
+) -> str:
+    """Return a compact section header banner for each app page.
+
+    Args:
+        kicker: Small uppercase category label.
+        title: Primary section title.
+        subtitle: Supporting description shown under the title.
+
+    Returns:
+        HTML snippet for ``st.markdown(..., unsafe_allow_html=True)``.
+    """
+    return (
+        '<div class="section-banner">'
+        f'<div class="section-kicker">{kicker}</div>'
+        f'<h3 class="section-title">{title}</h3>'
+        f'<div class="section-subtitle">{subtitle}</div>'
+        '</div>'
+    )
+
+
 def _apply_dark_theme(fig):
     """Apply the sportsbook dark theme to a plotly figure."""
     fig.update_layout(
@@ -2435,7 +2926,14 @@ with col_main:
 
     # --- Matches ---
     if active == "matches":
-        st.subheader("Upcoming Matches")
+        st.markdown(
+            render_section_banner(
+                "Live Dashboard",
+                "Upcoming Matches",
+                "Monitor fixtures and compare best available prices in one grid.",
+            ),
+            unsafe_allow_html=True,
+        )
         upcoming_df = upcoming_df_base
 
         # Featured live match card (demo / static showcase)
@@ -2523,7 +3021,14 @@ with col_main:
 
     # --- Value Bets ---
     elif active == "value":
-        st.subheader("Value Bets")
+        st.markdown(
+            render_section_banner(
+                "Edge Scanner",
+                "Value Bets",
+                "Track positive expected value opportunities against sharp lines.",
+            ),
+            unsafe_allow_html=True,
+        )
         if odds_df.empty:
             st.markdown(
                 '<div class="empty-state">'
@@ -2599,7 +3104,14 @@ with col_main:
 
     # --- Arbitrage ---
     elif active == "arb":
-        st.subheader("Arbitrage Opportunities")
+        st.markdown(
+            render_section_banner(
+                "Risk-Free Engine",
+                "Arbitrage Opportunities",
+                "Identify cross-bookmaker pricing gaps with guaranteed upside.",
+            ),
+            unsafe_allow_html=True,
+        )
         if odds_df.empty:
             st.markdown(
                 '<div class="empty-state">'
@@ -2641,7 +3153,14 @@ with col_main:
 
     # --- Movement ---
     elif active == "movement":
-        st.subheader("Odds Movement")
+        st.markdown(
+            render_section_banner(
+                "Market Pulse",
+                "Odds Movement",
+                "Overlay historical price movement by bookmaker and outcome.",
+            ),
+            unsafe_allow_html=True,
+        )
         upcoming_df2 = upcoming_df_base
 
         if upcoming_df2.empty:
@@ -2721,7 +3240,14 @@ with col_main:
 
     # --- Margins ---
     elif active == "margins":
-        st.subheader("Bookmaker Margin Analysis")
+        st.markdown(
+            render_section_banner(
+                "Pricing Quality",
+                "Bookmaker Margin Analysis",
+                "Compare overround efficiency to find sharper books quickly.",
+            ),
+            unsafe_allow_html=True,
+        )
         if odds_df.empty:
             st.markdown(
                 '<div class="empty-state">'
@@ -2800,7 +3326,14 @@ with col_main:
 
     # --- Bet Calculator ---
     elif active == "calc":
-        st.subheader("\U0001f9ee Bet Calculator")
+        st.markdown(
+            render_section_banner(
+                "Quant Tools",
+                "Bet Calculator",
+                "Run payout, Kelly, dutching, and conversion math with pro layouts.",
+            ),
+            unsafe_allow_html=True,
+        )
 
         calc_mode = st.radio(
             "Mode",
@@ -3247,7 +3780,14 @@ with col_main:
 
     # --- Custom Bet & Parlay Calculator ---
     elif active == "parlay":
-        st.subheader("\U0001f3af Custom Parlay Builder")
+        st.markdown(
+            render_section_banner(
+                "Builder",
+                "Custom Parlay Builder",
+                "Assemble multi-leg slips and inspect payout profiles in real time.",
+            ),
+            unsafe_allow_html=True,
+        )
 
         parlay_calc = BetCalculator()
         legs = st.session_state["parlay_legs"]
@@ -3501,7 +4041,14 @@ with col_main:
 
     # --- Feedback ---
     elif active == "feedback":
-        st.subheader("\U0001f4ac User Feedback")
+        st.markdown(
+            render_section_banner(
+                "Operator Feedback",
+                "User Feedback",
+                "Capture platform quality signals, issues, and feature requests.",
+            ),
+            unsafe_allow_html=True,
+        )
         st.markdown(
             '<div class="alert-card">'
             '<div class="alert-header">'
@@ -3606,7 +4153,14 @@ with col_main:
 
     # --- Settings ---
     elif active == "settings":
-        st.subheader("Settings")
+        st.markdown(
+            render_section_banner(
+                "Control Plane",
+                "Settings",
+                "Manage league filters, refresh flow, and API access controls.",
+            ),
+            unsafe_allow_html=True,
+        )
         st.markdown(
             '<div class="alert-card">'
             '<div class="alert-header">'
