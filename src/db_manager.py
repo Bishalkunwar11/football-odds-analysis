@@ -1,15 +1,17 @@
 """Database manager for storing and retrieving football odds (SQLite)."""
 
 import logging
-import os
 import sqlite3
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # Default database path
-DEFAULT_DB_PATH = "data/football_odds.db"
+DEFAULT_DB_PATH = str(
+    Path(__file__).resolve().parent.parent / "data" / "football_odds.db"
+)
 
 
 class DBManager:
@@ -24,7 +26,7 @@ class DBManager:
         """
         self.db_path = db_path
         if db_path != ":memory:":
-            os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.init_db()

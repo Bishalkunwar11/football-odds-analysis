@@ -18,7 +18,7 @@ import streamlit as st
 from src.api_client import OddsAPIClient
 from src.analyzer import OddsAnalyzer
 from src.bet_calculator import BetCalculator
-from src.config import LEAGUES, SHARP_BOOKMAKERS
+from src.config import LEAGUES, ODDS_API_KEY, SHARP_BOOKMAKERS
 from src.db_manager import DBManager
 
 logging.basicConfig(level=logging.INFO)
@@ -2179,7 +2179,17 @@ selected_sport_keys: list[str] = [
     league_options[n] for n in selected_league_names
 ]
 
-if st.sidebar.button("\U0001f504 Refresh Data"):
+# A fetch can use either a configured .env key or a session override.
+_session_api_key = st.session_state.get("api_key_override")
+_has_api_key = bool(_session_api_key or ODDS_API_KEY)
+
+if not _has_api_key:
+    st.sidebar.info(
+        "Live refresh needs an API key. Add ODDS_API_KEY to .env "
+        "or use API Key Override below."
+    )
+
+if st.sidebar.button("\U0001f504 Refresh Data", disabled=not _has_api_key):
     if not selected_sport_keys:
         st.sidebar.warning("Please select at least one league.")
     else:

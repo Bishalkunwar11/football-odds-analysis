@@ -1,9 +1,13 @@
 """Configuration module: loads API keys and defines league/market constants."""
 
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load environment variables from the project root regardless of cwd.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(_PROJECT_ROOT / ".env")
 
 # The-Odds-API key from environment
 ODDS_API_KEY: str = os.getenv("ODDS_API_KEY", "")
