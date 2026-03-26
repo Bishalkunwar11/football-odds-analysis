@@ -134,6 +134,22 @@ class TestGetLatestOdds:
         rows = db.get_latest_odds()
         assert rows == []
 
+    def test_filter_by_multiple_sport_keys(self, db: DBManager) -> None:
+        """sport_keys IN clause should return only the requested leagues."""
+        db.store_odds(SAMPLE_ROWS)
+        rows = db.get_latest_odds(sport_keys=("soccer_epl", "soccer_spain_la_liga"))
+        sport_keys_returned = {r["sport_key"] for r in rows}
+        assert sport_keys_returned == {"soccer_epl", "soccer_spain_la_liga"}
+        # A league not in the filter must not appear
+        assert "soccer_germany_bundesliga" not in sport_keys_returned
+
+    def test_filter_by_sport_keys_single_item(self, db: DBManager) -> None:
+        """A one-element sport_keys tuple should behave like sport_key=..."""
+        db.store_odds(SAMPLE_ROWS)
+        rows = db.get_latest_odds(sport_keys=("soccer_epl",))
+        assert all(r["sport_key"] == "soccer_epl" for r in rows)
+        assert len(rows) == 3  # three EPL outcome rows in SAMPLE_ROWS
+
 
 class TestGetOddsHistory:
     def test_returns_history_for_match(self, db: DBManager) -> None:
@@ -231,3 +247,68 @@ class TestFeedback:
         )
         tables = {row[0] for row in cursor.fetchall()}
         assert "feedback" in tables
+
+
+class TestPruneOldOdds:
+    """Tests for DBManager.prune_old_odds."""
+
+    def _insert_old_odds(self, db: DBManager, old_timestamp: str) -> None:
+        """Directly insert odds rows with a specific timestamp (bypasses store_odds)."""
+        cursor = db.conn.cursor()
+        cursor.execute(
+            """
+            INSERT OR IGNORE INTO matches
+                (match_id, sport_key, league, home_team, away_team,
+                 commence_time, created_at)
+            VALUES ('m_old', 'soccer_epl', 'EPL', 'Team A', 'Team B',
+                    '2024-01-01T15:00:00Z', ?)
+            """,
+            (old_timestamp,),
+        )
+        for i in range(5):
+            cursor.execute(
+                """
+                INSERT INTO odds
+                    (match_id, bookmaker, market, outcome_name,
+                     outcome_price, point, timestamp)
+                VALUES ('m_old', 'Pinnacle', 'h2h', 'Team A', 2.0, NULL, ?)
+                """,
+                (old_timestamp,),
+            )
+        db.conn.commit()
+
+    def test_prune_keeps_latest_n_snapshots(self, db: DBManager) -> None:
+        """Prune should leave at most keep_latest_n rows per outcome partition."""
+        old_ts = "2020-01-01T00:00:00+00:00"
+        self._insert_old_odds(db, old_ts)
+
+        cursor = db.conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM odds")
+        assert cursor.fetchone()[0] == 5
+
+        deleted = db.prune_old_odds(keep_latest_n=2, before_days=1)
+        assert deleted == 3
+
+        cursor.execute("SELECT COUNT(*) FROM odds")
+        assert cursor.fetchone()[0] == 2
+
+    def test_prune_does_not_delete_recent_rows(self, db: DBManager) -> None:
+        """Rows within the retention window must not be deleted."""
+        db.store_odds(SAMPLE_ROWS)  # rows timestamped 'now'
+
+        cursor = db.conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM odds")
+        before = cursor.fetchone()[0]
+
+        deleted = db.prune_old_odds(keep_latest_n=1, before_days=30)
+        assert deleted == 0
+
+        cursor.execute("SELECT COUNT(*) FROM odds")
+        assert cursor.fetchone()[0] == before
+
+    def test_prune_returns_deleted_count(self, db: DBManager) -> None:
+        """Return value must equal the number of rows removed."""
+        old_ts = "2019-06-01T00:00:00+00:00"
+        self._insert_old_odds(db, old_ts)
+        deleted = db.prune_old_odds(keep_latest_n=0, before_days=1)
+        assert deleted == 5

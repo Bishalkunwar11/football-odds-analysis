@@ -3073,18 +3073,18 @@ def get_db() -> DBManager:
 
 
 @st.cache_data(ttl=300)
-def load_latest_odds(sport_key: str | None = None) -> pd.DataFrame:
+def load_latest_odds(sport_keys: tuple[str, ...] | None = None) -> pd.DataFrame:
     """Load the latest odds from the database (cached 5 min)."""
     db = get_db()
-    rows = db.get_latest_odds(sport_key)
+    rows = db.get_latest_odds(sport_keys=sport_keys)
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
 @st.cache_data(ttl=300)
-def load_upcoming_matches(sport_key: str | None = None) -> pd.DataFrame:
+def load_upcoming_matches(sport_keys: tuple[str, ...] | None = None) -> pd.DataFrame:
     """Load upcoming matches from the database (cached 5 min)."""
     db = get_db()
-    rows = db.get_upcoming_matches(sport_key)
+    rows = db.get_upcoming_matches(sport_keys=sport_keys)
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
@@ -3106,16 +3106,11 @@ def compute_summary_stats(
         ``num_arb_opps``.
     """
     db = get_db()
-    # Resolve to a single sport_key string for the DB helper (None = all)
-    sk = sport_keys[0] if sport_keys and len(sport_keys) == 1 else None
-    rows = db.get_latest_odds(sk)
+    rows = db.get_latest_odds(sport_keys=sport_keys)
     if not rows:
         return {"num_matches": 0, "num_value_bets": 0, "num_arb_opps": 0}
 
     df = pd.DataFrame(rows)
-    # Filter when multiple sport keys are specified
-    if sport_keys and len(sport_keys) > 1:
-        df = df[df["sport_key"].isin(sport_keys)]
 
     num_matches = df["match_id"].nunique() if not df.empty else 0
 
@@ -3165,16 +3160,26 @@ def fetch_and_store(selected_leagues: list[str]) -> int:
     client = OddsAPIClient(api_key=session_key) if session_key else OddsAPIClient()
     db = get_db()
     all_rows: list[dict] = []
+    failed_leagues: list[str] = []
     league_map = {v: k for k, v in LEAGUES.items()}
 
     for sport_key in selected_leagues:
         league_name = league_map.get(sport_key, sport_key)
         with st.spinner(f"Fetching {league_name}\u2026"):
             rows = client.fetch_odds(sport_key)
+            if not rows:
+                failed_leagues.append(league_name)
             all_rows.extend(rows)
+
+    if failed_leagues:
+        st.sidebar.warning(
+            f"\u26a0\ufe0f No data for: {', '.join(failed_leagues)}. "
+            "Check your API key or network connection."
+        )
 
     if all_rows:
         db.store_odds(all_rows)
+        db.prune_old_odds()
         # Clear caches so new data is reflected immediately
         load_latest_odds.clear()
         load_upcoming_matches.clear()
@@ -3434,35 +3439,21 @@ st.markdown(
 
 analyzer = OddsAnalyzer()
 
-# Always load all data from DB, then filter by selected leagues in-app.
-odds_df_all = load_latest_odds()
-upcoming_df_all = load_upcoming_matches()
-
-if selected_sport_keys and len(selected_sport_keys) < len(LEAGUES):
-    odds_df = (
-        odds_df_all[odds_df_all["sport_key"].isin(selected_sport_keys)]
-        if not odds_df_all.empty
-        else odds_df_all
-    )
-    upcoming_df_base = (
-        upcoming_df_all[upcoming_df_all["sport_key"].isin(selected_sport_keys)]
-        if not upcoming_df_all.empty
-        else upcoming_df_all
-    )
-else:
-    odds_df = odds_df_all
-    upcoming_df_base = upcoming_df_all
+# Filter at SQL layer — pass the selected-league tuple directly so the DB
+# only returns the rows we need instead of loading the full table in Python.
+_sport_key_tuple = tuple(selected_sport_keys) if selected_sport_keys else None
+odds_df = load_latest_odds(_sport_key_tuple)
+upcoming_df_base = load_upcoming_matches(_sport_key_tuple)
 
 # ---------------------------------------------------------------------------
 # SUMMARY METRICS BAR  (Performance skill – cached computation)
 # Clickable cards jump to the corresponding analysis section.
 # ---------------------------------------------------------------------------
 
-_sport_key_tuple = tuple(selected_sport_keys) if selected_sport_keys else None
 _stats = compute_summary_stats(_sport_key_tuple)
 
 bookmakers_count = (
-    odds_df_all["bookmaker"].nunique() if not odds_df_all.empty else 0
+    odds_df["bookmaker"].nunique() if not odds_df.empty else 0
 )
 
 sm_col1, sm_col2, sm_col3, sm_col4 = st.columns(4)

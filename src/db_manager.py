@@ -171,12 +171,16 @@ class DBManager:
     # ------------------------------------------------------------------
 
     def get_latest_odds(
-        self, sport_key: str | None = None
+        self,
+        sport_key: str | None = None,
+        sport_keys: tuple[str, ...] | None = None,
     ) -> list[dict[str, Any]]:
         """Return the most recent odds for each match/bookmaker/market/outcome.
 
         Args:
-            sport_key: Optional filter by sport key.
+            sport_key: Optional filter by a single sport key.
+            sport_keys: Optional filter by multiple sport keys (takes precedence
+                over ``sport_key`` when provided with 2+ items).
 
         Returns:
             List of row dicts.
@@ -203,7 +207,14 @@ class DBManager:
             WHERE o.rn = 1
         """
         params: tuple = ()
-        if sport_key:
+        if sport_keys and len(sport_keys) > 1:
+            placeholders = ",".join("?" * len(sport_keys))
+            query += f" AND m.sport_key IN ({placeholders})"
+            params = sport_keys
+        elif sport_keys and len(sport_keys) == 1:
+            query += " AND m.sport_key = ?"
+            params = (sport_keys[0],)
+        elif sport_key:
             query += " AND m.sport_key = ?"
             params = (sport_key,)
 
@@ -243,12 +254,16 @@ class DBManager:
         return [dict(r) for r in cursor.fetchall()]
 
     def get_upcoming_matches(
-        self, sport_key: str | None = None
+        self,
+        sport_key: str | None = None,
+        sport_keys: tuple[str, ...] | None = None,
     ) -> list[dict[str, Any]]:
         """Return all upcoming matches (commence_time in the future).
 
         Args:
-            sport_key: Optional filter by sport key.
+            sport_key: Optional filter by a single sport key.
+            sport_keys: Optional filter by multiple sport keys (takes precedence
+                over ``sport_key`` when provided with 2+ items).
 
         Returns:
             List of match row dicts.
@@ -256,14 +271,21 @@ class DBManager:
         now = datetime.now(timezone.utc).isoformat()
         query = "SELECT * FROM matches WHERE commence_time >= ?"
         params: list[Any] = [now]
-        if sport_key:
+        if sport_keys and len(sport_keys) > 1:
+            placeholders = ",".join("?" * len(sport_keys))
+            query += f" AND sport_key IN ({placeholders})"
+            params.extend(sport_keys)
+        elif sport_keys and len(sport_keys) == 1:
+            query += " AND sport_key = ?"
+            params.append(sport_keys[0])
+        elif sport_key:
             query += " AND sport_key = ?"
             params.append(sport_key)
 
         query += " ORDER BY commence_time"
 
         cursor = self.conn.cursor()
-        cursor.execute(query, params)
+        cursor.execute(query, tuple(params))
         return [dict(r) for r in cursor.fetchall()]
 
     # ------------------------------------------------------------------
@@ -326,6 +348,54 @@ class DBManager:
             (limit,),
         )
         return [dict(r) for r in cursor.fetchall()]
+
+    # ------------------------------------------------------------------
+    # Maintenance
+    # ------------------------------------------------------------------
+
+    def prune_old_odds(
+        self, keep_latest_n: int = 3, before_days: int = 30
+    ) -> int:
+        """Delete stale odds rows to keep the database compact.
+
+        Keeps the ``keep_latest_n`` most recent snapshots per
+        ``(match_id, bookmaker, market, outcome_name)`` partition for rows
+        older than ``before_days`` days, and removes everything older than
+        that window entirely.
+
+        Args:
+            keep_latest_n: Number of most-recent snapshots to retain per
+                outcome partition within the retention window.
+            before_days: Age threshold in days.  Rows whose ``timestamp``
+                predates ``now - before_days`` are candidates for deletion.
+
+        Returns:
+            Number of rows deleted.
+        """
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            DELETE FROM odds
+            WHERE id NOT IN (
+                SELECT id FROM (
+                    SELECT id,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY match_id, bookmaker, market, outcome_name
+                               ORDER BY id DESC
+                           ) AS rn
+                    FROM odds
+                ) ranked
+                WHERE rn <= ?
+            )
+            AND timestamp < datetime('now', ? || ' days')
+            """,
+            (keep_latest_n, f"-{before_days}"),
+        )
+        deleted = cursor.rowcount
+        self.conn.commit()
+        logger.info("prune_old_odds: deleted %d rows (keep_n=%d, before_days=%d).",
+                    deleted, keep_latest_n, before_days)
+        return deleted
 
     # ------------------------------------------------------------------
     # Cleanup
