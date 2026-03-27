@@ -1,7 +1,7 @@
 """Analysis engine: implied probability, margin, arbitrage, and value bets."""
 
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 import pandas as pd
 

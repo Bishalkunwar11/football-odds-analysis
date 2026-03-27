@@ -22,9 +22,12 @@ venv/
 .venv/
 env/
 .env
+.streamlit/secrets.toml
 
 # Database files
 data/*.db
+*.db
+*.sqlite
 
 # Testing
 .pytest_cache/

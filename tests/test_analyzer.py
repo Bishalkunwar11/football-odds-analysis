@@ -1,7 +1,7 @@
 """Unit tests for OddsAnalyzer."""
 
-import pytest
 import pandas as pd
+import pytest
 
 from src.analyzer import OddsAnalyzer
 

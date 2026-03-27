@@ -16,10 +16,10 @@ DARK_THEME: dict = {
     "gridcolor": "rgba(20, 24, 255, 0.24)",
     "colorway": [
         "#1418FF",
-        "#00C853",
+        "#00D68F",
         "#004797",
         "#00F2FF",
-        "#FF3D00",
+        "#FF3B5C",
         "#7DD3FC",
     ],
 }
@@ -261,7 +261,7 @@ def render_value_card(
         f'</div>'
         f'<div class="vcard-stat">'
         f'<div class="vcard-stat-label">Edge</div>'
-        f'<div class="vcard-stat-value" style="color:#00C853;">+{edge:.1%}</div>'
+        f'<div class="vcard-stat-value" style="color:var(--accent-green);">+{edge:.1%}</div>'
         f'</div>'
         f'</div>'
         f'<div class="edge-meter-wrap">'

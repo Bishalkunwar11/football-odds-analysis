@@ -4,7 +4,6 @@ import pytest
 
 from src.db_manager import DBManager
 
-
 SAMPLE_ROWS = [
     {
         "match_id": "m001",

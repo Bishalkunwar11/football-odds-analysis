@@ -2,10 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from src.api_client import OddsAPIClient
-
 
 SAMPLE_EVENT = {
     "id": "abc123",
