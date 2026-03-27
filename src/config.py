@@ -33,3 +33,18 @@ REGIONS: str = "us,uk,eu,au"
 
 # Well-known sharp bookmakers used for consensus line calculation
 SHARP_BOOKMAKERS: list[str] = ["pinnacle", "betfair_ex_eu", "betfair_ex_uk"]
+
+# ---------------------------------------------------------------------------
+# UI display constants
+# ---------------------------------------------------------------------------
+
+# Stake quick-add button amounts (£/$ increments shown in the bet slip)
+STAKE_QUICK_ADD: list[int] = [10, 50, 100, 1_000]
+
+# KPI meter upper bounds (used to scale progress bars on the dashboard)
+METER_LIMIT_MATCHES: int = 200
+METER_LIMIT_VALUE_BETS: int = 50
+METER_LIMIT_ARB_OPS: int = 20
+
+# Default minimum edge % shown in the Value Bets section slider
+DEFAULT_EDGE_THRESHOLD: float = 0.05
