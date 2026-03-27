@@ -51,6 +51,2588 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Final style override pass so page-specific components share one
+# consistent Elite Terminal look (matches, value, calculators, parlay,
+# and bet-slip panes).
+st.markdown(
+    """
+    <style>
+    .terminal-topbar,
+    .hero-header,
+    .nav-panel,
+    .subscription-box,
+    .featured-live,
+    .match-card,
+    .alert-card,
+    .calculator-card,
+    .parlay-summary-v2,
+    .parlay-leg-v2,
+    .slip-card,
+    .payout-hero,
+    .odds-alert-box,
+    .empty-state,
+    .section-banner,
+    .stPlotlyChart {
+        background: rgba(0, 30, 57, 0.54) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+            0 10px 28px rgba(0, 0, 0, 0.34) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+    }
+
+    .hero-header,
+    .section-banner,
+    .terminal-topbar {
+        background:
+            linear-gradient(
+                135deg,
+                rgba(0, 30, 57, 0.76),
+                rgba(0, 43, 82, 0.58)
+            ) !important;
+    }
+
+    .hero-header::before,
+    .section-banner::before,
+    .parlay-summary-v2::before {
+        background: linear-gradient(90deg, #1418FF, #004797, #00C853) !important;
+    }
+
+    .section-kicker,
+    .section-subtitle,
+    .terminal-menu-heading,
+    .subscription-box .sub-label,
+    .subscription-box .sub-days,
+    .empty-state .empty-text,
+    .alert-card .alert-detail,
+    .match-card .kickoff,
+    .match-card .odds-btn .outcome-label,
+    .slip-card .slip-info .slip-match {
+        color: #8EA3BA !important;
+    }
+
+    .section-title,
+    .hero-header .hero-title,
+    .match-card .team-name,
+    .alert-card .alert-teams,
+    .slip-card .slip-info .slip-outcome,
+    .calculator-card .calc-card-title,
+    .parlay-leg-v2 .leg-text .leg-name,
+    .parlay-summary-v2 .ps2-title {
+        color: #E7EEF7 !important;
+    }
+
+    .hero-header .hero-title .accent,
+    .top-nav a.active,
+    .brand-text .accent {
+        color: #8FB7FF !important;
+    }
+
+    .live-feed {
+        border-color: rgba(0, 71, 151, 0.4) !important;
+        background: rgba(0, 43, 82, 0.56) !important;
+    }
+
+    .live-dot,
+    .odds-up {
+        background: #00C853 !important;
+        color: #00C853 !important;
+        box-shadow: 0 0 10px rgba(0, 200, 83, 0.55) !important;
+    }
+    .odds-down {
+        color: #FF3D00 !important;
+    }
+
+    .match-card .league-badge,
+    .count-badge,
+    .alert-card .alert-badge,
+    .subscription-box .sub-tier,
+    .parlay-summary-v2 .ps2-tag {
+        background: rgba(0, 71, 151, 0.24) !important;
+        color: #9CC8FF !important;
+        border: 1px solid rgba(20, 24, 255, 0.38) !important;
+    }
+
+    .match-card .vs-badge,
+    .slip-card .slip-odds,
+    .parlay-leg-v2 .odds-badge {
+        background: linear-gradient(135deg, #FFB800, #FFC940) !important;
+        color: #04101E !important;
+        -webkit-text-fill-color: #04101E !important;
+        text-shadow: none !important;
+        box-shadow: 0 4px 14px rgba(255, 184, 0, 0.26) !important;
+    }
+
+    .match-card .odds-btn:hover,
+    .alert-card:hover,
+    .calculator-card:hover,
+    .parlay-leg-v2:hover,
+    .slip-card:hover {
+        border-color: rgba(0, 200, 83, 0.28) !important;
+        box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+            0 12px 32px rgba(0, 200, 83, 0.16) !important;
+    }
+
+    .match-card .odds-btn .odds-value,
+    .calc-result-value,
+    .payout-hero .ph-value,
+    .parlay-summary-v2 .ps2-stat .ps2-value.green,
+    .parlay-leg-v2 .prob-section .prob-value,
+    .slip-card .slip-odds {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    .parlay-summary-v2 {
+        border-left: 3px solid rgba(255, 184, 0, 0.9) !important;
+        background:
+            linear-gradient(
+                135deg,
+                rgba(0, 20, 40, 0.88),
+                rgba(0, 30, 60, 0.72)
+            ) !important;
+    }
+
+    .parlay-summary-v2 .ps2-stat .ps2-value.gold,
+    .odds-alert-box .oa-text .oa-label {
+        color: #FFB800 !important;
+    }
+
+    .parlay-leg-v2 .leg-num-box,
+    .parlay-leg-v2 .prob-fill,
+    .calculator-card .calc-result-box,
+    .place-parlay-btn {
+        background: linear-gradient(135deg, #00C853, #00E676) !important;
+        color: #04101E !important;
+        -webkit-text-fill-color: #04101E !important;
+    }
+
+    .calculator-card .calc-result-box {
+        border: 1px solid rgba(0, 200, 83, 0.34) !important;
+    }
+
+    .payout-hero {
+        background:
+            linear-gradient(
+                135deg,
+                rgba(0, 20, 40, 0.86),
+                rgba(0, 43, 82, 0.7)
+            ) !important;
+    }
+
+    .payout-hero .ph-value,
+    .calculator-card .calc-result-value {
+        color: #00C853 !important;
+        -webkit-text-fill-color: #00C853 !important;
+        text-shadow: 0 0 16px rgba(0, 200, 83, 0.28) !important;
+    }
+
+    .featured-live {
+        background:
+            linear-gradient(
+                120deg,
+                rgba(0, 30, 57, 0.95),
+                rgba(0, 11, 20, 0.92)
+            ) !important;
+        border-color: rgba(0, 71, 151, 0.34) !important;
+    }
+    .featured-live .fl-badge {
+        background: #FF3D00 !important;
+        color: #FFFFFF !important;
+    }
+
+    .odds-alert-box {
+        border-color: rgba(255, 184, 0, 0.32) !important;
+        background: rgba(255, 184, 0, 0.08) !important;
+    }
+
+    div.stButton > button {
+        border-radius: 8px !important;
+        background: linear-gradient(135deg, #1418FF, #004797) !important;
+        border: 1px solid rgba(143, 183, 255, 0.28) !important;
+        color: #EAF2FF !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        font-weight: 800 !important;
+    }
+    div.stButton > button:hover {
+        background: linear-gradient(135deg, #2227FF, #0054B4) !important;
+    }
+
+    .stTextInput input,
+    .stNumberInput input,
+    .stSelectbox div[data-baseweb="select"] > div,
+    .stMultiSelect div[data-baseweb="select"] > div,
+    div[role="radiogroup"] label {
+        background: rgba(0, 30, 57, 0.62) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #E7EEF7 !important;
+    }
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stSelectbox div[data-baseweb="select"] > div:focus-within,
+    .stMultiSelect div[data-baseweb="select"] > div:focus-within {
+        border-color: rgba(20, 24, 255, 0.6) !important;
+        box-shadow: 0 0 0 1px rgba(20, 24, 255, 0.35) !important;
+    }
+
+    span[data-baseweb="tag"] {
+        background: rgba(0, 71, 151, 0.2) !important;
+        border: 1px solid rgba(20, 24, 255, 0.38) !important;
+        color: #9CC8FF !important;
+    }
+
+    @media (max-width: 900px) {
+        .terminal-topbar {
+            padding: 0.65rem 0.85rem !important;
+        }
+        .hero-header {
+            padding: 1rem 0.95rem !important;
+        }
+        .match-card .teams {
+            gap: 0.35rem !important;
+        }
+        .section-banner {
+            padding: 0.8rem 0.85rem !important;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <style>
+    :root {
+        --obsidian: #000B14;
+        --navy-deep: #001E39;
+        --navy-muted: #002B52;
+        --primary-blue: #1418FF;
+        --electric-blue: #004797;
+        --accent-green: #00C853;
+        --accent-red: #FF3D00;
+        --text-main: #E7EEF7;
+        --text-muted: #8EA3BA;
+        --etched-border: rgba(255, 255, 255, 0.08);
+        --etched-inner: rgba(255, 255, 255, 0.03);
+    }
+
+    .stApp {
+        background:
+            radial-gradient(1200px 600px at 20% 10%, rgba(20, 24, 255, 0.22), transparent 62%),
+            radial-gradient(1000px 500px at 80% 85%, rgba(0, 71, 151, 0.16), transparent 65%),
+            linear-gradient(180deg, #001E39 0%, #000B14 60%, #000B14 100%) !important;
+    }
+    .stApp::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.035;
+        background-image: radial-gradient(rgba(255,255,255,0.9) 0.45px, transparent 0.45px);
+        background-size: 3px 3px;
+    }
+    [data-testid="stMainBlockContainer"] {
+        position: relative;
+        z-index: 2;
+        max-width: 96rem;
+        padding-top: 1.1rem;
+    }
+
+    section[data-testid="stSidebar"] > div {
+        background: rgba(0, 30, 57, 0.78) !important;
+        border-right: 1px solid var(--etched-border) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+    }
+
+    .hero-header {
+        background: rgba(0, 30, 57, 0.56) !important;
+        border: 1px solid var(--etched-border) !important;
+        box-shadow:
+            inset 0 0 0 1px var(--etched-inner),
+            0 20px 42px rgba(0, 0, 0, 0.42) !important;
+    }
+    .hero-header::before {
+        height: 2px !important;
+        background: linear-gradient(90deg, #1418FF, #004797, #00C853) !important;
+    }
+    .hero-header .hero-title .accent {
+        color: var(--accent-green) !important;
+    }
+    .hero-header .hero-sub,
+    .terminal-menu-heading,
+    .subscription-box .sub-days,
+    .subscription-box .sub-label {
+        color: var(--text-muted) !important;
+    }
+
+    .section-banner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1px solid var(--etched-border);
+        box-shadow: inset 0 0 0 1px var(--etched-inner);
+        background: rgba(0, 30, 57, 0.56);
+        padding: 0.95rem 1rem;
+        margin-bottom: 0.8rem;
+    }
+    .section-banner::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #1418FF, #004797, #00C853);
+        opacity: 0.95;
+    }
+    .section-kicker {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.32rem;
+    }
+    .section-title {
+        font-size: 1.08rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.01em;
+        margin: 0;
+    }
+    .section-subtitle {
+        margin-top: 0.24rem;
+        font-size: 0.77rem;
+        color: var(--text-muted);
+    }
+
+    .match-card,
+    .alert-card,
+    .calculator-card,
+    .featured-live,
+    .slip-card,
+    .parlay-summary-v2,
+    .parlay-leg-v2,
+    .payout-hero,
+    .subscription-box,
+    .nav-panel,
+    .stat-panel {
+        border: 1px solid var(--etched-border) !important;
+        box-shadow: inset 0 0 0 1px var(--etched-inner), 0 12px 34px rgba(0, 0, 0, 0.32) !important;
+    }
+
+    .match-card,
+    .alert-card,
+    .calculator-card,
+    .slip-card,
+    .nav-panel,
+    .stat-panel,
+    .subscription-box,
+    .parlay-leg-v2 {
+        background: rgba(0, 30, 57, 0.52) !important;
+    }
+
+    .featured-live,
+    .parlay-summary-v2,
+    .payout-hero {
+        background: linear-gradient(135deg, rgba(0, 30, 57, 0.88), rgba(0, 43, 82, 0.74)) !important;
+    }
+
+    .league-badge,
+    .alert-badge,
+    .count-badge,
+    .sub-tier,
+    .ps2-tag,
+    .odds-badge {
+        background: rgba(0, 71, 151, 0.2) !important;
+        color: #9CC8FF !important;
+        border-color: rgba(20, 24, 255, 0.35) !important;
+    }
+
+    .match-card .odds-btn .odds-value,
+    .ps2-value.green,
+    .calc-result-value,
+    .ph-value,
+    .slip-odds {
+        color: var(--accent-green) !important;
+        background: none !important;
+        -webkit-text-fill-color: var(--accent-green) !important;
+        text-shadow: 0 0 14px rgba(0, 200, 83, 0.25) !important;
+    }
+
+    .brand-text .accent,
+    .top-nav a.active,
+    .live-feed .live-text,
+    .user-avatar,
+    .main .block-container h2 {
+        color: #8FB7FF !important;
+        border-color: #8FB7FF !important;
+    }
+
+    .main .block-container h2 {
+        border-left-width: 3px !important;
+        padding-left: 0.65rem !important;
+    }
+
+    div.stButton > button {
+        background: linear-gradient(135deg, #1418FF, #004797) !important;
+        color: #EAF2FF !important;
+        border: 1px solid rgba(143, 183, 255, 0.32) !important;
+        box-shadow: 0 6px 18px rgba(20, 24, 255, 0.28) !important;
+    }
+    div.stButton > button:hover {
+        background: linear-gradient(135deg, #2025FF, #0054B4) !important;
+        box-shadow: 0 10px 24px rgba(20, 24, 255, 0.4) !important;
+    }
+
+    [data-testid="stMetric"] {
+        background: rgba(9, 27, 50, 0.68) !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: #EAF2FF !important;
+        -webkit-text-fill-color: #EAF2FF !important;
+        background: none !important;
+        text-shadow: none !important;
+    }
+
+    @media (max-width: 1024px) {
+        .section-title {
+            font-size: 0.98rem;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <style>
+    /* ── Global reset ── */
+    html, body, [class*="css"] {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ── Material Symbols ── */
+    .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'liga';
+    }
+
+    /* ── Full-screen background image ── */
+    .stApp {
+        background-color: #0D1B2A;
+        background-image: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+    }
+    .stApp::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(5,10,20,0.88);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .main, [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    [data-testid="stMain"],
+    [data-testid="stMainBlockContainer"] {
+        background: transparent !important;
+    }
+    header[data-testid="stHeader"] {
+        background: rgba(5,10,20,0.7) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+    }
+    .main .block-container {
+        padding-top: 1rem;
+    }
+
+    /* ── Custom scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(13,27,42,0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(26,35,50,0.8); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00C853; }
+
+    /* ── Navigation panel ── */
+    .nav-panel {
+        background: rgba(20, 23, 32, 0.85);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 0.8rem;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .nav-item {
+        display: block;
+        width: 100%;
+        padding: 0.7rem 1rem;
+        margin-bottom: 0.3rem;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(13,27,42,0.4);
+        color: #8899AA;
+        font-weight: 600;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+    }
+    .nav-item:hover {
+        background: rgba(0,200,83,0.1);
+        color: #E8EAED;
+        border-color: rgba(0,200,83,0.15);
+    }
+    .nav-item.active {
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%);
+        color: #0D1B2A;
+        font-weight: 700;
+        border-color: transparent;
+        box-shadow: 0 0 20px rgba(0,200,83,0.4);
+    }
+
+    /* ── Native metric cards – glassmorphism ── */
+    div[data-testid="stMetric"] {
+        background: rgba(13,27,42,0.55) !important;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    div[data-testid="stMetric"] label {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: #8899AA !important;
+    }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+        font-size: 1.5rem !important;
+        font-weight: 800 !important;
+        background: linear-gradient(90deg, #00C853, #00E676, #40C4FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    div[data-testid="stMetric"] [data-testid="stMetricDelta"] {
+        color: #00E676 !important;
+    }
+
+    /* ── Buttons – green gradient with glow ── */
+    div.stButton > button {
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
+        color: #0D1B2A !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 0.82rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        padding: 0.55rem 1.5rem !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 2px 12px rgba(0,200,83,0.3) !important;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 24px rgba(0,200,83,0.5) !important;
+        background: linear-gradient(135deg, #00E676 0%, #69F0AE 100%) !important;
+    }
+    div.stButton > button:active {
+        transform: translateY(0px) !important;
+    }
+
+    /* ── Sidebar – glassmorphism branded panel ── */
+    section[data-testid="stSidebar"] {
+        border-right: 1px solid rgba(0,200,83,0.15) !important;
+    }
+    section[data-testid="stSidebar"] > div {
+        background: rgba(20, 23, 32, 0.9) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+    }
+    section[data-testid="stSidebar"] .stSelectbox,
+    section[data-testid="stSidebar"] .stMultiSelect {
+        border-radius: 10px;
+    }
+
+    /* ── Expanders – glass effect ── */
+    details[data-testid="stExpander"] {
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 12px !important;
+        margin-bottom: 0.5rem !important;
+        background: rgba(13,27,42,0.5) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+    }
+    details[data-testid="stExpander"] summary {
+        font-weight: 600 !important;
+    }
+
+    /* ── Subheader accents ── */
+    .main .block-container h2 {
+        border-left: 4px solid #00C853;
+        padding-left: 0.75rem;
+        letter-spacing: 0.02em;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    hr {
+        border-color: rgba(0,200,83,0.12) !important;
+    }
+
+    /* ── Inputs / sliders – green accent ── */
+    .stSlider [data-testid="stThumbValue"] {
+        color: #00C853 !important;
+    }
+
+    /* ── Hero header – glassmorphism ── */
+    .hero-header {
+        background: rgba(13,27,42,0.55);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        padding: 1.8rem 2rem 1.4rem 2rem;
+        margin-bottom: 1.2rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        box-shadow:
+            0 8px 32px rgba(0,0,0,0.4),
+            inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .hero-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #00C853, #FFD700, #00E676);
+    }
+    .hero-header::after {
+        content: '';
+        position: absolute;
+        top: -50%; right: -20%;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(0,200,83,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .hero-header .hero-title {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #E8EAED;
+        margin: 0;
+        letter-spacing: -0.01em;
+        text-shadow: 0 0 20px rgba(0,200,83,0.3), 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .hero-header .hero-title .accent {
+        color: #00C853;
+        text-shadow: 0 0 30px rgba(0,200,83,0.5), 0 0 60px rgba(0,200,83,0.2);
+    }
+    .hero-header .hero-sub {
+        font-size: 0.82rem;
+        color: rgba(136,153,170,0.9);
+        margin-top: 0.3rem;
+        font-weight: 500;
+        letter-spacing: 0.03em;
+    }
+    .hero-header .hero-sub .dot {
+        display: inline-block;
+        width: 5px; height: 5px;
+        background: #00C853;
+        border-radius: 50%;
+        margin: 0 0.5rem;
+        vertical-align: middle;
+        box-shadow: 0 0 6px rgba(0,200,83,0.5);
+    }
+
+    /* ── Match cards – glassmorphism sportsbook style ── */
+    .match-card {
+        background: rgba(20, 23, 32, 0.85);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 0.85rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .match-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0,200,83,0.15);
+        border-color: rgba(0,200,83,0.2);
+    }
+    .match-card .card-top {
+        padding: 0.9rem 1.2rem 0.6rem 1.2rem;
+    }
+    .match-card .league-badge {
+        display: inline-block;
+        background: rgba(0,200,83,0.1);
+        color: #00C853;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.22rem 0.6rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,200,83,0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    .match-card .teams {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+    }
+    .match-card .team-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #E8EAED;
+        flex: 1;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .match-card .team-name.away { text-align: right; }
+    .match-card .vs-badge {
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: #0D1B2A;
+        background: linear-gradient(135deg, #00C853, #00E676);
+        padding: 0.25rem 0.55rem;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,200,83,0.3);
+    }
+    .match-card .kickoff {
+        font-size: 0.7rem;
+        color: #8899AA;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .match-card .odds-row {
+        display: flex;
+        gap: 0;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        background: rgba(0,0,0,0.15);
+    }
+    .match-card .odds-btn {
+        flex: 1;
+        text-align: center;
+        padding: 0.55rem 0.3rem;
+        transition: background 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+        border-right: 1px solid rgba(255,255,255,0.04);
+    }
+    .match-card .odds-btn:last-child { border-right: none; }
+    .match-card .odds-btn:hover {
+        background: rgba(0,200,83,0.18);
+        box-shadow: 0 0 15px rgba(0,200,83,0.3), inset 0 0 15px rgba(0,200,83,0.1);
+    }
+    .match-card .odds-btn .outcome-label {
+        font-size: 0.6rem;
+        color: #8899AA;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+    .match-card .odds-btn .odds-value {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #FFD700;
+        margin-top: 0.1rem;
+    }
+
+    /* ── Odds movement indicators ── */
+    .odds-up { color: #00E676; font-size: 0.7rem; }
+    .odds-down { color: #FF6B6B; font-size: 0.7rem; }
+
+    /* ── Stat panels – glassmorphism ── */
+    .stat-panel {
+        background: rgba(13,27,42,0.5);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+        text-align: center;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+    .stat-panel .stat-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #8899AA;
+        margin-bottom: 0.25rem;
+    }
+    .stat-panel .stat-value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #00C853, #00E676, #40C4FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Bet slip cards – glassmorphism ── */
+    .slip-card {
+        background: rgba(13,27,42,0.5);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-left: 4px solid #00C853;
+        border-radius: 12px;
+        padding: 0.85rem 1.1rem;
+        margin-bottom: 0.55rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        transition: transform 0.15s ease;
+    }
+    .slip-card:hover {
+        transform: translateX(3px);
+        border-color: rgba(0,200,83,0.15);
+    }
+    .slip-card .slip-info { flex: 1; }
+    .slip-card .slip-info .slip-match {
+        font-size: 0.72rem;
+        color: #8899AA;
+        font-weight: 500;
+    }
+    .slip-card .slip-info .slip-outcome {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #E8EAED;
+        margin-top: 0.1rem;
+    }
+    .slip-card .slip-odds {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0D1B2A;
+        background: linear-gradient(135deg, #FFD700, #FFC107);
+        padding: 0.3rem 0.7rem;
+        border-radius: 8px;
+        margin-left: 0.75rem;
+        box-shadow: 0 2px 8px rgba(255,215,0,0.3);
+    }
+
+    /* ── Value bet / Arbitrage alert cards – glassmorphism ── */
+    .alert-card {
+        background: rgba(13,27,42,0.5);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 1.05rem 1.3rem;
+        margin-bottom: 0.7rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: transform 0.15s ease;
+    }
+    .alert-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0,200,83,0.15);
+    }
+    .alert-card .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .alert-card .alert-teams {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #E8EAED;
+    }
+    .alert-card .alert-badge {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 0.25rem 0.65rem;
+        border-radius: 20px;
+        letter-spacing: 0.04em;
+    }
+    .badge-value {
+        background: rgba(0,200,83,0.12);
+        color: #00E676;
+        border: 1px solid rgba(0,200,83,0.3);
+        animation: pulse-green 2s ease-in-out infinite;
+    }
+    @keyframes pulse-green {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,83,0.3); }
+        50% { box-shadow: 0 0 12px 2px rgba(0,200,83,0.25); }
+    }
+    .badge-arb {
+        background: rgba(255,215,0,0.12);
+        color: #FFD700;
+        border: 1px solid rgba(255,215,0,0.3);
+        animation: pulse-gold 2s ease-in-out infinite;
+    }
+    @keyframes pulse-gold {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.3); }
+        50% { box-shadow: 0 0 12px 2px rgba(255,215,0,0.25); }
+    }
+    .alert-card .alert-detail {
+        font-size: 0.78rem;
+        color: #8899AA;
+        line-height: 1.6;
+    }
+    .alert-card .alert-detail strong {
+        color: #E8EAED;
+    }
+
+    /* ── Counter badge ── */
+    .count-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #00C853, #00E676);
+        color: #0D1B2A;
+        font-size: 0.8rem;
+        font-weight: 800;
+        padding: 0.35rem 0.95rem;
+        border-radius: 20px;
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.03em;
+        box-shadow: 0 2px 10px rgba(0,200,83,0.3);
+    }
+
+    /* ── Empty state styling ── */
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: #8899AA;
+    }
+    .empty-state .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.6rem;
+        opacity: 0.6;
+    }
+    .empty-state .empty-text {
+        font-size: 0.88rem;
+        font-weight: 500;
+        max-width: 400px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    /* ── Footer – glassmorphism ── */
+    .app-footer {
+        text-align: center;
+        padding: 1.5rem 0 1rem 0;
+        color: #556677;
+        font-size: 0.72rem;
+        border-top: 1px solid rgba(0,200,83,0.08);
+        margin-top: 2rem;
+        letter-spacing: 0.03em;
+        background: rgba(13,27,42,0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 12px 12px 0 0;
+    }
+    .app-footer .footer-accent { color: #00C853; }
+
+    /* ── Multiselect tags ── premium dark pills ── */
+    span[data-baseweb="tag"] {
+        background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,200,83,0.08)) !important;
+        border: 1px solid rgba(0,200,83,0.3) !important;
+        border-radius: 20px !important;
+        color: #00E676 !important;
+        font-weight: 600 !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.02em !important;
+    }
+    span[data-baseweb="tag"] span {
+        color: #00E676 !important;
+    }
+    span[data-baseweb="tag"] [data-testid="stMarkdownContainer"],
+    span[data-baseweb="tag"] span[aria-label] {
+        color: #00E676 !important;
+    }
+    /* Tag close/remove button */
+    span[data-baseweb="tag"] span[role="presentation"] {
+        color: rgba(0,200,83,0.6) !important;
+    }
+    span[data-baseweb="tag"] span[role="presentation"]:hover {
+        color: #FF6B6B !important;
+    }
+
+    /* ── Form inputs – glassmorphism fields ── */
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div,
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input {
+        background-color: rgba(13,27,42,0.6) !important;
+        color: #E8EAED !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 10px !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+    }
+    .stSelectbox > div > div:focus-within,
+    .stMultiSelect > div > div:focus-within,
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus {
+        border-color: #00C853 !important;
+        box-shadow: 0 0 12px rgba(0,200,83,0.25) !important;
+    }
+    /* Dropdown menus */
+    [data-baseweb="popover"] > div,
+    [data-baseweb="menu"],
+    ul[role="listbox"] {
+        background-color: rgba(13,27,42,0.9) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 10px !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+    }
+    [data-baseweb="menu"] li,
+    ul[role="listbox"] li {
+        color: #E8EAED !important;
+    }
+    [data-baseweb="menu"] li:hover,
+    ul[role="listbox"] li:hover {
+        background-color: rgba(0,200,83,0.12) !important;
+    }
+
+    /* ── Radio buttons ── styled chips ── */
+    div[role="radiogroup"] label {
+        background: rgba(13,27,42,0.5) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 20px !important;
+        padding: 0.4rem 1rem !important;
+        color: #8899AA !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        transition: all 0.2s ease !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+    }
+    div[role="radiogroup"] label:hover {
+        border-color: rgba(0,200,83,0.2) !important;
+        color: #E8EAED !important;
+    }
+    div[role="radiogroup"] label[data-checked="true"],
+    div[role="radiogroup"] label:has(input:checked) {
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
+        color: #0D1B2A !important;
+        font-weight: 700 !important;
+        border-color: transparent !important;
+        box-shadow: 0 0 16px rgba(0,200,83,0.35) !important;
+    }
+
+    /* ── Slider track ── green accent ── */
+    .stSlider > div > div > div > div {
+        background: linear-gradient(90deg, #00C853, #00E676) !important;
+    }
+
+    /* ── Responsive improvement ── */
+    @media (max-width: 768px) {
+        .match-card .teams {
+            flex-direction: column !important;
+            text-align: center !important;
+        }
+        .match-card .team-name.away {
+            text-align: center !important;
+        }
+        .hero-header {
+            padding: 1.2rem 1rem 1rem 1rem !important;
+        }
+        .hero-header .hero-title {
+            font-size: 1.2rem !important;
+        }
+    }
+
+    /* ── Streamlit toast/alert – glass style ── */
+    .stAlert {
+        background-color: rgba(13,27,42,0.7) !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+    }
+
+    /* ── Text elements ── ensure readable on glass bg ── */
+    .stMarkdown, .stText, p, span, label, .stCaption {
+        color: #E8EAED;
+    }
+
+    /* ── Number input spinner buttons ── */
+    .stNumberInput button {
+        background-color: rgba(13,27,42,0.6) !important;
+        color: #00C853 !important;
+        border-color: rgba(255,255,255,0.08) !important;
+    }
+    .stNumberInput button:hover {
+        background-color: rgba(0,200,83,0.12) !important;
+    }
+
+    /* ── Plotly chart containers – glass wrapper ── */
+    .stPlotlyChart {
+        background: rgba(13,27,42,0.4) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 14px !important;
+        padding: 0.5rem !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+    }
+
+    /* ── Parlay Builder – DraftKings / FanDuel inspired ── */
+    .parlay-summary {
+        background: linear-gradient(135deg, rgba(20,23,32,0.9), rgba(26,29,38,0.95));
+        border: 1px solid rgba(255,215,0,0.2);
+        border-radius: 16px;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .parlay-summary::before {
+        content: '';
+        display: block;
+        height: 3px;
+        background: linear-gradient(90deg, #FFD700, #FFC107, #FF9800);
+        border-radius: 2px;
+        margin-bottom: 0.9rem;
+    }
+    .parlay-summary .parlay-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #A0AEC0;
+        margin-bottom: 0.6rem;
+    }
+    .parlay-summary .parlay-stats {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .parlay-summary .parlay-stat {
+        flex: 1;
+        min-width: 80px;
+    }
+    .parlay-summary .parlay-stat .ps-label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #8899AA;
+    }
+    .parlay-summary .parlay-stat .ps-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #FFD700;
+        margin-top: 0.1rem;
+    }
+    .parlay-summary .parlay-stat .ps-value.green {
+        color: #00E676;
+    }
+
+    .parlay-leg-card {
+        background: rgba(20, 23, 32, 0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-left: 3px solid #FFD700;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.15s ease;
+    }
+    .parlay-leg-card:hover {
+        border-color: rgba(255,215,0,0.25);
+        background: rgba(26, 29, 38, 0.9);
+    }
+    .parlay-leg-card .leg-info {
+        flex: 1;
+    }
+    .parlay-leg-card .leg-label {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #E8EAED;
+    }
+    .parlay-leg-card .leg-detail {
+        font-size: 0.7rem;
+        color: #8899AA;
+        margin-top: 0.15rem;
+    }
+    .parlay-leg-card .leg-odds {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #0D1B2A;
+        background: linear-gradient(135deg, #FFD700, #FFC107);
+        padding: 0.25rem 0.65rem;
+        border-radius: 8px;
+        margin-left: 0.75rem;
+        box-shadow: 0 2px 6px rgba(255,215,0,0.25);
+    }
+    .parlay-leg-card .leg-prob {
+        font-size: 0.68rem;
+        color: #A0AEC0;
+        margin-left: 0.5rem;
+        font-weight: 500;
+    }
+
+    .parlay-payout-box {
+        background: linear-gradient(135deg, rgba(0,200,83,0.08), rgba(0,200,83,0.03));
+        border: 1px solid rgba(0,200,83,0.2);
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        margin-top: 0.8rem;
+        text-align: center;
+    }
+    .parlay-payout-box .payout-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #8899AA;
+    }
+    .parlay-payout-box .payout-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #00E676;
+        margin-top: 0.2rem;
+        text-shadow: 0 0 20px rgba(0,200,83,0.3);
+    }
+
+    /* ── Leg number badge ── */
+    .leg-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background: rgba(255,215,0,0.15);
+        color: #FFD700;
+        font-size: 0.7rem;
+        font-weight: 800;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    /* ── Enhanced Parlay Summary v2 ── gold accent bar ── */
+    .parlay-summary-v2 {
+        position: relative;
+        overflow: hidden;
+        background: rgba(20,23,32,0.9);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 1.3rem 1.5rem 1.3rem 1.8rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .parlay-summary-v2::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #FFD700, #FFC107);
+        box-shadow: 0 0 15px rgba(251,191,36,0.3);
+    }
+    .parlay-summary-v2 .ps2-tag {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #FFD700;
+        margin-bottom: 0.3rem;
+    }
+    .parlay-summary-v2 .ps2-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #E8EAED;
+        margin-bottom: 0.9rem;
+    }
+    .parlay-summary-v2 .ps2-title .star {
+        color: #FFD700;
+    }
+    .parlay-summary-v2 .ps2-stats {
+        display: flex;
+        gap: 2.5rem;
+        flex-wrap: wrap;
+    }
+    .parlay-summary-v2 .ps2-stat {
+        text-align: center;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #8899AA;
+        margin-bottom: 0.2rem;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-value {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #E8EAED;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-value.gold {
+        color: #FFD700;
+    }
+    .parlay-summary-v2 .ps2-stat .ps2-value.green {
+        color: #00E676;
+        text-shadow: 0 0 10px rgba(19,241,149,0.2);
+    }
+
+    /* ── Enhanced Parlay Leg Card v2 ── with prob bar ── */
+    .parlay-leg-v2 {
+        background: rgba(20,23,32,0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.15s ease, background 0.15s ease;
+    }
+    .parlay-leg-v2:hover {
+        border-color: rgba(0,200,83,0.2);
+        background: rgba(26,29,38,0.9);
+    }
+    .parlay-leg-v2 .leg-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .parlay-leg-v2 .leg-num-box {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: rgba(0,200,83,0.1);
+        border: 1px solid rgba(0,200,83,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #00C853;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+    .parlay-leg-v2 .leg-text .leg-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #E8EAED;
+    }
+    .parlay-leg-v2 .leg-text .leg-meta {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #8899AA;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-top: 0.1rem;
+    }
+    .parlay-leg-v2 .leg-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .parlay-leg-v2 .prob-section {
+        text-align: right;
+    }
+    .parlay-leg-v2 .prob-section .prob-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #8899AA;
+        text-transform: uppercase;
+        margin-bottom: 0.3rem;
+    }
+    .parlay-leg-v2 .prob-section .prob-value {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #E8EAED;
+        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 0.25rem;
+    }
+    .parlay-leg-v2 .prob-bar {
+        width: 60px;
+        height: 4px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-left: auto;
+    }
+    .parlay-leg-v2 .prob-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00C853, #00E676);
+        border-radius: 2px;
+    }
+    .parlay-leg-v2 .odds-badge {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #00E676;
+        font-family: 'JetBrains Mono', monospace;
+        min-width: 50px;
+        text-align: right;
+    }
+
+    /* ── Extend Parlay dashed section ── */
+    .extend-parlay {
+        background: rgba(13,27,42,0.4);
+        border: 2px dashed rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 1.5rem 1.5rem;
+        text-align: center;
+        transition: border-color 0.3s ease;
+    }
+    .extend-parlay:hover {
+        border-color: rgba(0,200,83,0.4);
+    }
+    .extend-parlay .ep-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #E8EAED;
+        margin-bottom: 0.2rem;
+    }
+    .extend-parlay .ep-sub {
+        font-size: 0.8rem;
+        color: #8899AA;
+    }
+
+    /* ── Payout Hero display ── */
+    .payout-hero {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: rgba(20,23,32,0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: inset 0 0 20px rgba(0,200,83,0.05);
+    }
+    .payout-hero .ph-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #8899AA;
+        margin-bottom: 0.4rem;
+    }
+    .payout-hero .ph-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #00E676;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: -0.02em;
+        text-shadow: 0 0 30px rgba(0,200,83,0.15);
+    }
+    .payout-hero .ph-note {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #8899AA;
+        margin-top: 0.4rem;
+    }
+
+    /* ── Quick stake buttons ── */
+    .stake-btns {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+    }
+    .stake-btns .qbtn {
+        flex: 1;
+        text-align: center;
+        padding: 0.45rem 0;
+        background: rgba(30,35,50,0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 8px;
+        color: #E8EAED;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .stake-btns .qbtn:hover {
+        background: rgba(0,200,83,0.12);
+        border-color: rgba(0,200,83,0.3);
+    }
+
+    /* ── Odds Alert banner ── */
+    .odds-alert-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        padding: 0.75rem;
+        background: rgba(255,215,0,0.05);
+        border: 1px solid rgba(255,215,0,0.2);
+        border-radius: 10px;
+        margin-bottom: 0.6rem;
+    }
+    .odds-alert-box .oa-icon {
+        color: #FFD700;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .odds-alert-box .oa-text {
+        font-size: 0.7rem;
+        color: #8899AA;
+        line-height: 1.5;
+    }
+    .odds-alert-box .oa-text .oa-label {
+        color: #FFD700;
+        font-weight: 700;
+    }
+
+    /* ── Place Parlay button ── */
+    .place-parlay-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #00C853 0%, #00E676 100%);
+        color: #0D1B2A;
+        font-weight: 900;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 12px 40px -10px rgba(0,200,83,0.4);
+        transition: all 0.2s ease;
+    }
+    .place-parlay-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 48px -10px rgba(0,200,83,0.5);
+    }
+    .save-fav-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.7rem;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        color: #8899AA;
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .save-fav-btn:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.15);
+    }
+
+    /* ── Featured Live Match Card ── */
+    .featured-live {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #00C853 0%, #05084a 100%);
+        padding: 1.4rem 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(0,200,83,0.2);
+    }
+    .featured-live .fl-badge {
+        display: inline-block;
+        background: #FF3D3D;
+        color: #0D1B2A;
+        font-size: 0.6rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        margin-right: 0.5rem;
+    }
+    .featured-live .fl-time {
+        color: rgba(255,255,255,0.7);
+        font-size: 0.72rem;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .featured-live .fl-teams {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 450px;
+        margin: 1rem 0;
+    }
+    .featured-live .fl-team {
+        text-align: center;
+    }
+    .featured-live .fl-team-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.4rem auto;
+        font-size: 1.5rem;
+    }
+    .featured-live .fl-team-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #FFFFFF;
+    }
+    .featured-live .fl-score {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #FFFFFF;
+        font-family: 'JetBrains Mono', monospace;
+        font-style: italic;
+        letter-spacing: -0.02em;
+    }
+    .featured-live .fl-score-label {
+        font-size: 0.6rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-top: 0.2rem;
+    }
+
+    /* ── Terminal Top Bar ── */
+    .terminal-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        background: rgba(0, 30, 57, 0.7);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 16px;
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    .terminal-topbar .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    .terminal-topbar .brand-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        background: #1418FF;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        font-size: 1.1rem;
+        font-weight: 900;
+    }
+    .terminal-topbar .brand-text {
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #E8EAED;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+    }
+    .terminal-topbar .brand-text .accent {
+        color: #8FB7FF;
+    }
+    .terminal-topbar .top-nav {
+        display: none;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    @media (min-width: 1024px) {
+        .terminal-topbar .top-nav { display: flex; }
+    }
+    .terminal-topbar .top-nav a {
+        color: #8899AA;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        text-decoration: none;
+        transition: color 0.2s ease;
+        cursor: pointer;
+    }
+    .terminal-topbar .top-nav a:hover {
+        color: #E8EAED;
+    }
+    .terminal-topbar .top-nav a.active {
+        color: #9CC8FF;
+        border-bottom: 2px solid #1418FF;
+        padding-bottom: 2px;
+    }
+    .terminal-topbar .search-wrapper {
+        position: relative;
+        display: none;
+    }
+    @media (min-width: 640px) {
+        .terminal-topbar .search-wrapper { display: block; }
+    }
+    .terminal-topbar .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .terminal-topbar .search-input {
+        background: rgba(20,25,38,0.8);
+        border: none;
+        border-radius: 8px;
+        padding: 0.45rem 1rem 0.45rem 2.2rem;
+        font-size: 0.8rem;
+        color: #E8EAED;
+        width: 16rem;
+        max-width: 16rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: box-shadow 0.2s ease;
+    }
+    .terminal-topbar .search-input::placeholder {
+        color: #556677;
+    }
+    .terminal-topbar .search-input:focus {
+        box-shadow: 0 0 0 1px rgba(20, 24, 255, 0.55);
+    }
+    .terminal-topbar .top-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .terminal-topbar .live-feed {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.7rem;
+        background: rgba(0, 43, 82, 0.46);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 8px;
+    }
+    .terminal-topbar .live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #00C853;
+        box-shadow: 0 0 8px #00C853;
+        animation: pulse-live 2s ease-in-out infinite;
+    }
+    @keyframes pulse-live {
+        0%, 100% { box-shadow: 0 0 4px #00C853; }
+        50% { box-shadow: 0 0 12px #00C853, 0 0 20px rgba(0,200,83,0.32); }
+    }
+    .terminal-topbar .live-text {
+        font-size: 0.6rem;
+        font-family: 'JetBrains Mono', monospace;
+        color: #00C853;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .terminal-topbar .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00C853, #40C4FF);
+        padding: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .terminal-topbar .user-avatar-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #0D1420;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #E8EAED;
+        font-size: 1rem;
+    }
+
+    /* ── Terminal Menu heading ── */
+    .terminal-menu-heading {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #556677;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        margin-bottom: 0.75rem;
+        padding-left: 0.2rem;
+    }
+
+    /* ── Subscription Box ── */
+    .subscription-box {
+        background: rgba(20,23,32,0.85);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        margin-top: 1rem;
+    }
+    .subscription-box .sub-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .subscription-box .sub-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #556677;
+        text-transform: uppercase;
+    }
+    .subscription-box .sub-tier {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #00ff88;
+        background: rgba(0,255,136,0.1);
+        border: 1px solid rgba(0,255,136,0.2);
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+    }
+    .subscription-box .sub-bar {
+        height: 6px;
+        width: 100%;
+        background: rgba(13,27,42,0.8);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 0.4rem;
+    }
+    .subscription-box .sub-bar-fill {
+        height: 100%;
+        background: #00ff88;
+        width: 75%;
+        border-radius: 3px;
+    }
+    .subscription-box .sub-days {
+        font-size: 0.68rem;
+        color: #8899AA;
+        font-weight: 500;
+    }
+
+    /* ── Calculator Cards – glassmorphism ── */
+    .calculator-card {
+        background: rgba(20, 23, 32, 0.85);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 1.3rem 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.25s ease;
+    }
+    .calculator-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0,200,83,0.15);
+        border-color: rgba(0,200,83,0.2);
+    }
+    .calculator-card .calc-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .calculator-card .calc-card-icon {
+        font-size: 1.5rem;
+        filter: drop-shadow(0 0 8px rgba(0,200,83,0.3));
+    }
+    .calculator-card .calc-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #E8EAED;
+        letter-spacing: 0.01em;
+    }
+    .calculator-card .calc-card-subtitle {
+        font-size: 0.72rem;
+        color: #8899AA;
+        margin-top: 0.2rem;
+    }
+    .calculator-card .calc-result-box {
+        background: rgba(0,200,83,0.08);
+        border: 1px solid rgba(0,200,83,0.2);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        margin-top: 1rem;
+    }
+    .calculator-card .calc-result-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #8899AA;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.3rem;
+    }
+    .calculator-card .calc-result-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #00C853, #00E676);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0,200,83,0.3);
+    }
+    .calc-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
+    .calc-grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
+
+    /* ── Summary metric cards – custom KPI grid ── */
+    .summary-metric-card {
+        background: rgba(20, 23, 32, 0.78);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 1.1rem 1.2rem 0.9rem 1.2rem;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), 0 8px 24px rgba(0,0,0,0.32);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    .summary-metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+    }
+    .summary-metric-card.smc-green::before { background: linear-gradient(90deg, #00C853, #00E676); }
+    .summary-metric-card.smc-red::before   { background: linear-gradient(90deg, #FF3D00, #FF6B35); }
+    .summary-metric-card.smc-gold::before  { background: linear-gradient(90deg, #FFB800, #FFD700); }
+    .summary-metric-card.smc-blue::before  { background: linear-gradient(90deg, #1418FF, #00F2FF); }
+    .smc-label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #8899AA;
+        margin-bottom: 0.45rem;
+    }
+    .smc-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #E7EEF7;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+    }
+    .smc-badge {
+        display: inline-block;
+        margin-top: 0.55rem;
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.15rem 0.5rem;
+        border-radius: 20px;
+    }
+    .smc-badge.smc-green { background: rgba(0,200,83,0.12); color: #00C853; border: 1px solid rgba(0,200,83,0.25); }
+    .smc-badge.smc-red   { background: rgba(255,61,0,0.1);  color: #FF6B35; border: 1px solid rgba(255,61,0,0.22); }
+    .smc-badge.smc-gold  { background: rgba(255,184,0,0.1); color: #FFB800; border: 1px solid rgba(255,184,0,0.22); }
+    .smc-badge.smc-blue  { background: rgba(20,24,255,0.1); color: #9CC8FF; border: 1px solid rgba(20,24,255,0.25); }
+    .smc-meter {
+        margin-top: 0.75rem;
+        height: 3px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .smc-meter-fill { height: 100%; border-radius: 10px; }
+    .smc-meter-fill.smc-green { background: #00C853; }
+    .smc-meter-fill.smc-red   { background: #FF3D00; }
+    .smc-meter-fill.smc-gold  { background: #FFB800; }
+    .smc-meter-fill.smc-blue  { background: #1418FF; }
+
+    /* ── Value bet card – stats grid ── */
+    .vcard-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+        margin: 0.75rem 0 0.55rem 0;
+    }
+    .vcard-stat {
+        background: rgba(0,0,0,0.22);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 8px;
+        padding: 0.5rem 0.65rem;
+    }
+    .vcard-stat-label {
+        font-size: 0.58rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #8899AA;
+        margin-bottom: 0.2rem;
+    }
+    .vcard-stat-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #E7EEF7;
+        font-variant-numeric: tabular-nums;
+    }
+    .vcard-stat-value.vcard-accent   { color: #00F2FF; }
+    .vcard-stat-value.vcard-positive { color: #00C853; }
+
+    /* ── Value bet card – edge meter ── */
+    .edge-meter-wrap {
+        margin-top: 0.7rem;
+        padding-top: 0.7rem;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .edge-meter-label-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.58rem;
+        color: #8899AA;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 0.38rem;
+    }
+    .edge-meter-track {
+        height: 5px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .edge-meter-fill {
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #1418FF, #00F2FF, #00C853);
+        box-shadow: 0 0 8px rgba(0,200,83,0.4);
+    }
+
+    /* ── Parlay leg probability fill – glow ── */
+    .prob-fill {
+        box-shadow: 0 0 8px rgba(0,200,83,0.4) !important;
+    }
+
+    /* ── PRO EDGE badge on match cards ── */
+    .pro-edge-badge {
+        display: inline-block;
+        font-size: 0.58rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        padding: 0.18rem 0.55rem;
+        border-radius: 20px;
+        background: rgba(20,24,255,0.18);
+        color: #9CC8FF;
+        border: 1px solid rgba(20,24,255,0.35);
+        margin-left: 0.5rem;
+        vertical-align: middle;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+
+# ---------------------------------------------------------------------------
+# HTML rendering helpers
+# ---------------------------------------------------------------------------
+
+
+def render_match_card(
+    home: str,
+    away: str,
+    league: str,
+    kickoff: str,
+    odds: dict[str, float] | None = None,
+    edge_pct: float | None = None,
+) -> str:
+    """Return HTML for a single sportsbook-style match card.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        league: League / competition label shown in the badge.
+        kickoff: ISO kick-off time string displayed on the card.
+        odds: Optional mapping of outcome label → best decimal price.
+            When provided, an odds-button row is appended below the
+            match header. A triangular up/down indicator is shown when
+            the price is unusually high or low.
+        edge_pct: Optional best edge percentage for this match (0–1 scale).
+            When positive, a PRO EDGE badge is shown in the card header.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    odds_html = ""
+    if odds:
+        btns = []
+        for label, price in odds.items():
+            # Odds movement indicator
+            movement = ""
+            if price > 2.0:
+                movement = ' <span class="odds-up">\u25b2</span>'
+            elif price < 1.8:
+                movement = ' <span class="odds-down">\u25bc</span>'
+            btns.append(
+                f'<div class="odds-btn">'
+                f'<div class="outcome-label">{label}</div>'
+                f'<div class="odds-value">{price:.2f}{movement}</div>'
+                f'</div>'
+            )
+        odds_html = f'<div class="odds-row">{"".join(btns)}</div>'
+    edge_badge_html = ""
+    if edge_pct is not None and edge_pct > 0:
+        edge_badge_html = (
+            f'<span class="pro-edge-badge">PRO EDGE +{edge_pct:.1%}</span>'
+        )
+    return (
+        f'<div class="match-card">'
+        f'<div class="card-top">'
+        f'<span class="league-badge">\u26bd {league}</span>'
+        f'{edge_badge_html}'
+        f'<div class="teams">'
+        f'<span class="team-name">{home}</span>'
+        f'<span class="vs-badge">VS</span>'
+        f'<span class="team-name away">{away}</span>'
+        f'</div>'
+        f'<div class="kickoff">\U0001f550 {kickoff}</div>'
+        f'</div>'
+        f'{odds_html}'
+        f'</div>'
+    )
+
+
+def render_stat_panel(label: str, value: str) -> str:
+    """Return HTML for a small glassmorphism stat panel.
+
+    Args:
+        label: Short uppercase label displayed above the value.
+        value: Formatted value string (e.g. ``"42"`` or ``"5.3%"``).
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    return (
+        f'<div class="stat-panel">'
+        f'<div class="stat-label">{label}</div>'
+        f'<div class="stat-value">{value}</div>'
+        f'</div>'
+    )
+
+
+def render_summary_metric_card(
+    label: str,
+    value: str | int,
+    badge_text: str,
+    color: str,
+    meter_pct: float,
+) -> str:
+    """Return HTML for a styled KPI summary card.
+
+    Args:
+        label: Short uppercase label displayed above the value.
+        value: Primary metric value (e.g. ``42`` or ``"5.3%"``).
+        badge_text: Small text shown in a pill badge below the value.
+        color: Accent color key — one of ``"green"``, ``"red"``,
+            ``"gold"``, or ``"blue"``.
+        meter_pct: Progress meter fill 0–100.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    meter_pct = max(0.0, min(100.0, meter_pct))
+    return (
+        f'<div class="summary-metric-card smc-{color}">'
+        f'<div class="smc-label">{label}</div>'
+        f'<div class="smc-value">{value}</div>'
+        f'<span class="smc-badge smc-{color}">{badge_text}</span>'
+        f'<div class="smc-meter">'
+        f'<div class="smc-meter-fill smc-{color}" style="width:{meter_pct:.1f}%"></div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_slip_card(match: str, outcome: str, odds: float) -> str:
+    """Return HTML for a single bet-slip selection card.
+
+    Args:
+        match: Match label shown in small muted text above the outcome.
+        outcome: Outcome string displayed prominently (e.g. ``"Arsenal"``,
+            ``"Over 2.5"``).
+        odds: Decimal odds shown in the gold badge on the right.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    return (
+        f'<div class="slip-card">'
+        f'<div class="slip-info">'
+        f'<div class="slip-match">{match}</div>'
+        f'<div class="slip-outcome">{outcome}</div>'
+        f'</div>'
+        f'<div class="slip-odds">{odds:.2f}</div>'
+        f'</div>'
+    )
+
+
+def render_value_card(
+    home: str,
+    away: str,
+    outcome: str,
+    bookmaker: str,
+    price: float,
+    edge: float,
+    american_odds: str | None = None,
+) -> str:
+    """Return HTML for a value-bet alert card.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        outcome: Outcome being bet (e.g. ``"Home"``, ``"Over 2.5"``).
+        bookmaker: Name of the bookmaker offering the value price.
+        price: Decimal odds offered by the bookmaker.
+        edge: Calculated edge over the consensus probability (0–1 scale).
+        american_odds: Optional pre-formatted American odds string
+            (e.g. ``"+150"`` or ``"-200"``). When provided, it is shown
+            in blue beside the decimal price.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    american_html = (
+        f' <span style="font-size:0.7rem;color:#40C4FF;">'
+        f"({american_odds})</span>"
+        if american_odds
+        else ""
+    )
+    implied_prob = OddsAnalyzer.implied_probability(price) if price > 0 else 0.0
+    edge_meter_pct = min(edge / _MAX_EDGE_DISPLAY, 1.0) * 100
+    return (
+        f'<div class="alert-card">'
+        f'<div class="alert-header">'
+        f'<span class="alert-teams">\u26bd {home} vs {away}</span>'
+        f'<span class="alert-badge badge-value">+{edge:.1%} EDGE</span>'
+        f'</div>'
+        f'<div class="alert-detail">'
+        f'<strong>{outcome}</strong> @ <strong>{price:.2f}</strong>'
+        f'{american_html} '
+        f'via {bookmaker}'
+        f'</div>'
+        f'<div class="vcard-stats">'
+        f'<div class="vcard-stat">'
+        f'<div class="vcard-stat-label">Bookie Odds</div>'
+        f'<div class="vcard-stat-value">{price:.2f}</div>'
+        f'</div>'
+        f'<div class="vcard-stat">'
+        f'<div class="vcard-stat-label">Implied Prob.</div>'
+        f'<div class="vcard-stat-value vcard-accent">{implied_prob:.1%}</div>'
+        f'</div>'
+        f'<div class="vcard-stat">'
+        f'<div class="vcard-stat-label">Edge</div>'
+        f'<div class="vcard-stat-value vcard-positive">+{edge:.1%}</div>'
+        f'</div>'
+        f'</div>'
+        f'<div class="edge-meter-wrap">'
+        f'<div class="edge-meter-label-row">'
+        f'<span>Edge Meter</span>'
+        f'<span>{edge:.1%} / 15.0%</span>'
+        f'</div>'
+        f'<div class="edge-meter-track">'
+        f'<div class="edge-meter-fill" style="width:{edge_meter_pct:.1f}%"></div>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_arb_card(
+    home: str,
+    away: str,
+    market: str,
+    arb_pct: float,
+    best_odds: dict,
+) -> str:
+    """Return HTML for an arbitrage alert card.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        market: Market key (e.g. ``"h2h"``, ``"totals"``).
+        arb_pct: Guaranteed profit percentage (e.g. ``1.23`` for 1.23%).
+        best_odds: Mapping of outcome label → best available decimal price.
+
+    Returns:
+        An HTML string ready for ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    odds_parts = " \u00b7 ".join(f"{k}: <strong>{v:.2f}</strong>" for k, v in best_odds.items())
+    return (
+        f'<div class="alert-card">'
+        f'<div class="alert-header">'
+        f'<span class="alert-teams">\U0001f504 {home} vs {away}</span>'
+        f'<span class="alert-badge badge-arb">\U0001f4b0 {arb_pct:.3f}% PROFIT</span>'
+        f'</div>'
+        f'<div class="alert-detail">'
+        f'Market: <strong>{market}</strong><br>'
+        f'{odds_parts}'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_featured_live_card(
+    home: str,
+    away: str,
+    home_score: int,
+    away_score: int,
+    minute: str,
+    league: str,
+) -> str:
+    """Return HTML for a featured live match card.
+
+    Renders a gradient-styled card highlighting a live match with
+    the current score and minute indicator.
+
+    Args:
+        home: Home team name.
+        away: Away team name.
+        home_score: Current score for the home team.
+        away_score: Current score for the away team.
+        minute: Match minute string (e.g. ``"74'"``).
+        league: League / competition label.
+
+    Returns:
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    return (
+        f'<div class="featured-live">'
+        f'<span class="fl-badge">Live Now</span>'
+        f'<span class="fl-time">{minute} - {league}</span>'
+        f'<div class="fl-teams">'
+        f'<div class="fl-team">'
+        f'<div class="fl-team-icon">\U0001f6e1\ufe0f</div>'
+        f'<div class="fl-team-name">{home}</div>'
+        f'</div>'
+        f'<div style="text-align:center;">'
+        f'<div class="fl-score">'
+        f'{home_score} - {away_score}</div>'
+        f'<div class="fl-score-label">Score</div>'
+        f'</div>'
+        f'<div class="fl-team">'
+        f'<div class="fl-team-icon">\U0001f6e1\ufe0f</div>'
+        f'<div class="fl-team-name">{away}</div>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_payout_hero(
+    payout: float,
+    stake: float,
+) -> str:
+    """Return HTML for a large payout display widget.
+
+    Shows the potential payout prominently with a note that
+    the displayed amount includes the original stake.
+
+    Args:
+        payout: Total potential payout in dollars.
+        stake: Original stake amount included in the payout.
+
+    Returns:
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    return (
+        f'<div class="payout-hero">'
+        f'<div class="ph-label">Potential Payout</div>'
+        f'<div class="ph-value">${payout:,.2f}</div>'
+        f'<div class="ph-note">'
+        f'\u2139\ufe0f Includes your ${stake:,.2f} stake'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_parlay_leg(
+    index: int,
+    label: str,
+    odds: float,
+    implied_prob: float,
+    meta: str = "",
+) -> str:
+    """Return HTML for an enhanced parlay leg card with probability bar.
+
+    Args:
+        index: 1-based leg number shown in the numbered badge.
+        label: Human-readable selection label (e.g. ``"Arsenal ML"``).
+        odds: Decimal odds for this leg.
+        implied_prob: Implied win probability (0–1 scale).
+        meta: Optional metadata string shown below the label
+            (e.g. ``"Premier League • Today 20:00"``).
+
+    Returns:
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    pct = max(0, min(100, round(implied_prob * 100)))
+    meta_html = (
+        f'<div class="leg-meta">{meta}</div>'
+        if meta
+        else ""
+    )
+    return (
+        f'<div class="parlay-leg-v2">'
+        f'<div class="leg-left">'
+        f'<div class="leg-num-box">#{index}</div>'
+        f'<div class="leg-text">'
+        f'<div class="leg-name">{label}</div>'
+        f'{meta_html}'
+        f'</div>'
+        f'</div>'
+        f'<div class="leg-right">'
+        f'<div class="prob-section">'
+        f'<div class="prob-label">Implied Prob.</div>'
+        f'<div class="prob-value">{implied_prob:.1%}</div>'
+        f'<div class="prob-bar">'
+        f'<div class="prob-fill" style="width:{pct}%"></div>'
+        f'</div>'
+        f'</div>'
+        f'<div class="odds-badge">{odds:.2f}</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_parlay_summary(
+    num_legs: int,
+    combined_odds: float,
+    stake: float,
+) -> str:
+    """Return HTML for a running parlay summary banner.
+
+    Displays a live summary with a gold accent bar, showing
+    the number of legs, combined odds, potential payout,
+    and net profit at a glance.
+
+    Args:
+        num_legs: Total number of legs currently in the parlay.
+        combined_odds: Product of all leg odds (already computed
+            upstream).
+        stake: Stake amount in dollars used to estimate payout
+            and profit.
+
+    Returns:
+        An HTML string ready for
+        ``st.markdown(…, unsafe_allow_html=True)``.
+    """
+    payout = stake * combined_odds if combined_odds > 0 else 0
+    profit = payout - stake
+    return (
+        f'<div class="parlay-summary-v2">'
+        f'<div class="ps2-tag">Live Summary</div>'
+        f'<div class="ps2-title">'
+        f'<span class="star">\u2b50</span> Pro Parlay Builder'
+        f'</div>'
+        f'<div class="ps2-stats">'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Legs</div>'
+        f'<div class="ps2-value">{num_legs}</div>'
+        f'</div>'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Combined Odds</div>'
+        f'<div class="ps2-value gold">'
+        f'{combined_odds:.2f}x</div>'
+        f'</div>'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Total Payout</div>'
+        f'<div class="ps2-value green">'
+        f'${payout:,.2f}</div>'
+        f'</div>'
+        f'<div class="ps2-stat">'
+        f'<div class="ps2-label">Net Profit</div>'
+        f'<div class="ps2-value">'
+        f'${profit:,.2f}</div>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def render_calculator_card(
+    icon: str,
+    title: str,
+    subtitle: str,
+) -> str:
+    """Return HTML for a calculator card header.
+
+    Args:
+        icon: Emoji icon for the calculator (e.g. "💰").
+        title: Calculator title (e.g. "Single Bet Calculator").
+        subtitle: Brief description of the calculator's purpose.
+
+    Returns:
+        Opening HTML for a calculator card, to be closed with </div>.
+    """
+    return (
+        f'<div class="calculator-card">'
+        f'<div class="calc-card-header">'
+        f'<div class="calc-card-icon">{icon}</div>'
+        f'<div>'
+        f'<div class="calc-card-title">{title}</div>'
+        f'<div class="calc-card-subtitle">{subtitle}</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+
 # ---------------------------------------------------------------------------
 # CSS loader – reads src/assets/styles.css once at startup
 # ---------------------------------------------------------------------------
@@ -124,6 +2706,24 @@ def load_upcoming_matches(sport_keys: tuple[str, ...] | None = None) -> pd.DataF
     db = get_db()
     rows = db.get_upcoming_matches(sport_keys=sport_keys)
     return pd.DataFrame(rows) if rows else pd.DataFrame()
+
+
+@st.cache_data(ttl=300)
+def compute_best_edge_map(odds_df: pd.DataFrame) -> dict[str, float]:
+    """Return a mapping of match_id → max edge for PRO EDGE badges (cached 5 min)."""
+    edge_map: dict[str, float] = {}
+    if odds_df.empty:
+        return edge_map
+    try:
+        vb = OddsAnalyzer().find_value_bets(
+            odds_df, sharp_bookmakers=SHARP_BOOKMAKERS, threshold=0.03
+        )
+        if not vb.empty and "match_id" in vb.columns:
+            for mid, grp in vb.groupby("match_id"):
+                edge_map[str(mid)] = float(grp["edge"].max())
+    except Exception:
+        logger.debug("Could not build PRO EDGE map.", exc_info=True)
+    return edge_map
 
 
 @st.cache_data(ttl=300)
@@ -502,6 +3102,7 @@ with sm_col1:
             value=_stats["num_matches"],
             badge_text="Fixtures Loaded",
             color="green",
+            meter_pct=_stats["num_matches"] / _METER_SCALE_MATCHES * 100,
             meter_pct=min(_stats["num_matches"] / METER_LIMIT_MATCHES * 100, 100),
         ),
         unsafe_allow_html=True,
@@ -516,6 +3117,7 @@ with sm_col2:
             value=_stats["num_value_bets"],
             badge_text="≥5% Edge",
             color="red",
+            meter_pct=_stats["num_value_bets"] / _METER_SCALE_VALUE_BETS * 100,
             meter_pct=min(_stats["num_value_bets"] / METER_LIMIT_VALUE_BETS * 100, 100),
         ),
         unsafe_allow_html=True,
@@ -530,6 +3132,7 @@ with sm_col3:
             value=_stats["num_arb_opps"],
             badge_text="Risk-Free",
             color="gold",
+            meter_pct=_stats["num_arb_opps"] / _METER_SCALE_ARB_OPPS * 100,
             meter_pct=min(_stats["num_arb_opps"] / METER_LIMIT_ARB_OPS * 100, 100),
         ),
         unsafe_allow_html=True,
@@ -544,6 +3147,7 @@ with sm_col4:
             value=bookmakers_count,
             badge_text="Data Sources",
             color="blue",
+            meter_pct=bookmakers_count / _METER_SCALE_BOOKMAKERS * 100,
             meter_pct=min(bookmakers_count / METER_LIMIT_VALUE_BETS * 100, 100),
         ),
         unsafe_allow_html=True,
@@ -699,6 +3303,39 @@ def _render_matches(
 
 # --- Value Bets ---
 
+                # Build best-odds lookup per match
+                best_odds_map: dict[str, dict[str, float]] = {}
+                if not odds_df.empty:
+                    h2h = odds_df[odds_df["market"] == "h2h"]
+                    if not h2h.empty:
+                        best = (
+                            h2h.groupby(["match_id", "outcome_name"])["outcome_price"]
+                            .max()
+                            .unstack("outcome_name")
+                        )
+                        for mid in best.index:
+                            row_dict = best.loc[mid].dropna().to_dict()
+                            if row_dict:
+                                best_odds_map[mid] = row_dict
+
+                # Build best edge per match for PRO EDGE badges (cached)
+                best_edge_map = compute_best_edge_map(odds_df)
+
+                # Render cards in a two-column grid
+                cols = st.columns(2)
+                for idx, (_, row) in enumerate(upcoming_df.iterrows()):
+                    m_id = row.get("match_id", "")
+                    odds_for_match = best_odds_map.get(m_id)
+                    card_html = render_match_card(
+                        home=row["home_team"],
+                        away=row["away_team"],
+                        league=row.get("league", ""),
+                        kickoff=str(row["commence_time"]),
+                        odds=odds_for_match,
+                        edge_pct=best_edge_map.get(m_id),
+                    )
+                    with cols[idx % 2]:
+                        st.markdown(card_html, unsafe_allow_html=True)
 
 def _render_value_bets(
     odds_df: "pd.DataFrame",
@@ -763,6 +3400,23 @@ def _render_value_bets(
                 labels={"edge": "Edge (probability units)"},
                 color_discrete_sequence=["#00C853"],
             )
+            threshold = st.slider(
+                "Minimum edge threshold", 0.01, 0.20, 0.05, 0.01,
+                key="value_threshold",
+            )
+            value_df = analyzer.find_value_bets(
+                odds_df, sharp_bookmakers=SHARP_BOOKMAKERS, threshold=threshold
+            )
+            # Apply filter
+            if not value_df.empty:
+                if vb_filter == "High Edge (>10%)":
+                    value_df = value_df[value_df["edge"] > 0.10]
+                elif vb_filter == "New":
+                    value_df = value_df.sort_values("edge", ascending=False).head(5)
+            if value_df.empty:
+                st.success(
+                    "No value bets found at the current threshold. "
+                    "Try lowering the threshold or changing the filter."
             fig_edge.update_layout(bargap=0.08, showlegend=False)
             _apply_dark_theme(fig_edge)
             st.plotly_chart(fig_edge, use_container_width=True)
