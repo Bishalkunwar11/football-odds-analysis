@@ -33,6 +33,15 @@ st.set_page_config(
 # ---------------------------------------------------------------------------
 # Premium Sportsbook UI – DraftKings / Bet365 / FanDuel inspired dark theme
 # ---------------------------------------------------------------------------
+# Max edge used as the 100% ceiling on the edge meter bar in value bet cards.
+_MAX_EDGE_DISPLAY = 0.15
+
+# Denominator scales used to convert raw KPI counts to 0-100 meter fill %.
+_METER_SCALE_MATCHES = 200
+_METER_SCALE_VALUE_BETS = 50
+_METER_SCALE_ARB_OPPS = 20
+_METER_SCALE_BOOKMAKERS = 50
+
 DARK_THEME = {
     "paper_bgcolor": "#000B14",
     "plot_bgcolor": "#000B14",
@@ -2127,7 +2136,8 @@ st.markdown(
         color: #E7EEF7;
         font-variant-numeric: tabular-nums;
     }
-    .vcard-stat-value.vcard-accent { color: #00F2FF; }
+    .vcard-stat-value.vcard-accent   { color: #00F2FF; }
+    .vcard-stat-value.vcard-positive { color: #00C853; }
 
     /* ── Value bet card – edge meter ── */
     .edge-meter-wrap {
@@ -2359,8 +2369,8 @@ def render_value_card(
         if american_odds
         else ""
     )
-    implied_prob = 1.0 / price if price > 0 else 0.0
-    edge_meter_pct = min(edge / 0.15, 1.0) * 100
+    implied_prob = OddsAnalyzer.implied_probability(price) if price > 0 else 0.0
+    edge_meter_pct = min(edge / _MAX_EDGE_DISPLAY, 1.0) * 100
     return (
         f'<div class="alert-card">'
         f'<div class="alert-header">'
@@ -2383,7 +2393,7 @@ def render_value_card(
         f'</div>'
         f'<div class="vcard-stat">'
         f'<div class="vcard-stat-label">Edge</div>'
-        f'<div class="vcard-stat-value" style="color:#00C853;">+{edge:.1%}</div>'
+        f'<div class="vcard-stat-value vcard-positive">+{edge:.1%}</div>'
         f'</div>'
         f'</div>'
         f'<div class="edge-meter-wrap">'
@@ -2736,6 +2746,24 @@ def load_upcoming_matches(sport_key: str | None = None) -> pd.DataFrame:
 
 
 @st.cache_data(ttl=300)
+def compute_best_edge_map(odds_df: pd.DataFrame) -> dict[str, float]:
+    """Return a mapping of match_id → max edge for PRO EDGE badges (cached 5 min)."""
+    edge_map: dict[str, float] = {}
+    if odds_df.empty:
+        return edge_map
+    try:
+        vb = OddsAnalyzer().find_value_bets(
+            odds_df, sharp_bookmakers=SHARP_BOOKMAKERS, threshold=0.03
+        )
+        if not vb.empty and "match_id" in vb.columns:
+            for mid, grp in vb.groupby("match_id"):
+                edge_map[str(mid)] = float(grp["edge"].max())
+    except Exception:
+        logger.debug("Could not build PRO EDGE map.", exc_info=True)
+    return edge_map
+
+
+@st.cache_data(ttl=300)
 def compute_summary_stats(
     sport_keys: tuple[str, ...] | None = None,
 ) -> dict:
@@ -3070,7 +3098,7 @@ with sm_col1:
             value=_stats["num_matches"],
             badge_text="Fixtures Loaded",
             color="green",
-            meter_pct=min(_stats["num_matches"] / 200.0 * 100, 100),
+            meter_pct=_stats["num_matches"] / _METER_SCALE_MATCHES * 100,
         ),
         unsafe_allow_html=True,
     )
@@ -3084,7 +3112,7 @@ with sm_col2:
             value=_stats["num_value_bets"],
             badge_text="≥5% Edge",
             color="red",
-            meter_pct=min(_stats["num_value_bets"] / 50.0 * 100, 100),
+            meter_pct=_stats["num_value_bets"] / _METER_SCALE_VALUE_BETS * 100,
         ),
         unsafe_allow_html=True,
     )
@@ -3098,7 +3126,7 @@ with sm_col3:
             value=_stats["num_arb_opps"],
             badge_text="Risk-Free",
             color="gold",
-            meter_pct=min(_stats["num_arb_opps"] / 20.0 * 100, 100),
+            meter_pct=_stats["num_arb_opps"] / _METER_SCALE_ARB_OPPS * 100,
         ),
         unsafe_allow_html=True,
     )
@@ -3112,7 +3140,7 @@ with sm_col4:
             value=bookmakers_count,
             badge_text="Data Sources",
             color="blue",
-            meter_pct=min(bookmakers_count / 50.0 * 100, 100),
+            meter_pct=bookmakers_count / _METER_SCALE_BOOKMAKERS * 100,
         ),
         unsafe_allow_html=True,
     )
@@ -3238,18 +3266,8 @@ with col_main:
                             if row_dict:
                                 best_odds_map[mid] = row_dict
 
-                # Build best edge per match for PRO EDGE badges
-                best_edge_map: dict[str, float] = {}
-                if not odds_df.empty:
-                    try:
-                        _vb_for_map = analyzer.find_value_bets(
-                            odds_df, sharp_bookmakers=SHARP_BOOKMAKERS, threshold=0.03
-                        )
-                        if not _vb_for_map.empty and "match_id" in _vb_for_map.columns:
-                            for _mid, _grp in _vb_for_map.groupby("match_id"):
-                                best_edge_map[str(_mid)] = float(_grp["edge"].max())
-                    except Exception:
-                        pass
+                # Build best edge per match for PRO EDGE badges (cached)
+                best_edge_map = compute_best_edge_map(odds_df)
 
                 # Render cards in a two-column grid
                 cols = st.columns(2)
@@ -3305,7 +3323,7 @@ with col_main:
                 if vb_filter == "High Edge (>10%)":
                     value_df = value_df[value_df["edge"] > 0.10]
                 elif vb_filter == "New":
-                    value_df = value_df.head(5)
+                    value_df = value_df.sort_values("edge", ascending=False).head(5)
             if value_df.empty:
                 st.success(
                     "No value bets found at the current threshold. "
