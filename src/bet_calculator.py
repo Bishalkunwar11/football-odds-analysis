@@ -2,8 +2,8 @@
 
 import logging
 import math
+from collections.abc import Sequence
 from itertools import combinations
-from typing import Sequence
 
 logger = logging.getLogger(__name__)
 

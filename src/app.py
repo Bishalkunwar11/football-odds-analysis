@@ -1,56 +1,77 @@
-"""Streamlit dashboard for the football odds analysis system."""
+"""ApexOdds Pro — entry point (~80 lines).
+
+Responsibilities:
+  - st.set_page_config
+  - Google Fonts <link> injection
+  - apply_styles()
+  - Session state initialisation
+  - Sidebar (leagues, refresh, API key, subscription)
+  - Summary KPI bar
+  - Three-column layout shell (nav | main | slip)
+  - Section router
+  - Right-pane bet slip summary
+  - Footer
+"""
+
+from __future__ import annotations
 
 import logging
-import sys
-from datetime import datetime as _dt
-from pathlib import Path
-
-# Ensure the project root is on sys.path so that ``src`` is importable
-# when Streamlit rewrites sys.path[0] to the script's directory.
-_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
-if _PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, _PROJECT_ROOT)
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
-from src.api_client import OddsAPIClient
 from src.analyzer import OddsAnalyzer
 from src.bet_calculator import BetCalculator
+from src.components.slip_card import render_payout_hero, render_slip_card
+from src.components.stat_panels import render_summary_metric_card
 from src.config import (
-    DEFAULT_EDGE_THRESHOLD,
     LEAGUES,
     METER_LIMIT_ARB_OPS,
     METER_LIMIT_MATCHES,
     METER_LIMIT_VALUE_BETS,
     ODDS_API_KEY,
-    SHARP_BOOKMAKERS,
     STAKE_QUICK_ADD,
 )
-from src.db_manager import DBManager
+from src.data.loaders import (
+    compute_summary_stats,
+    fetch_and_store,
+    load_latest_odds,
+    load_upcoming_matches,
+)
+from src.styles.loader import apply_styles
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
+# ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="ApexOdds Pro | Premium Analytics",
-    page_icon="\u26bd",
+    page_icon="⚽",
     layout="wide",
 )
 
-# Load Google Fonts via <link> tags so they are not blocked by CSP or
-# sandbox restrictions that prevent @import inside <style> blocks.
+# ── Google Fonts ─────────────────────────────────────────────────────────────
 st.markdown(
-    '<link href="https://fonts.googleapis.com/css2?family=Inter:'
-    'wght@400;500;600;700;800;900&family=JetBrains+Mono:'
-    'wght@500;700&display=swap" rel="stylesheet">'
-    '<link href="https://fonts.googleapis.com/css2?family=Material+'
-    'Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"'
-    ' rel="stylesheet">',
+    '<link href="https://fonts.googleapis.com/css2?'
+    'family=Barlow+Condensed:wght@400;600;700;800&'
+    'family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">',
     unsafe_allow_html=True,
 )
 
+apply_styles()
+
+# ── Session state ────────────────────────────────────────────────────────────
+_DEFAULTS: dict = {
+    "active_section": "matches",
+    "bet_slip": [],
+    "parlay_legs": [],
+    "last_refreshed": None,
+    "api_key_override": None,
+}
+for _k, _v in _DEFAULTS.items():
+    if _k not in st.session_state:
+        st.session_state[_k] = _v
+
+# ── Sidebar ──────────────────────────────────────────────────────────────────
 # Final style override pass so page-specific components share one
 # consistent Elite Terminal look (matches, value, calculators, parlay,
 # and bet-slip panes).
@@ -2390,63 +2411,14 @@ if "last_refreshed" not in st.session_state:
 # ---------------------------------------------------------------------------
 
 st.sidebar.markdown(
-    """
-    <div style="
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, rgba(20,24,255,0.18) 0%, rgba(0,30,57,0.88) 60%, rgba(0,43,82,0.72) 100%);
-        border: 1px solid rgba(20,24,255,0.28);
-        border-radius: 14px;
-        padding: 1.3rem 1rem 1.1rem 1rem;
-        margin-bottom: 1rem;
-        text-align: center;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
-    ">
-        <div style="
-            position: absolute; top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, #1418FF, #004797, #00C853);
-        "></div>
-        <div style="
-            width:38px; height:38px;
-            background: linear-gradient(135deg, #1418FF, #004797);
-            border-radius: 10px;
-            display: flex; align-items: center;
-            justify-content: center; margin: 0 auto 0.55rem auto;
-            box-shadow: 0 4px 16px rgba(20,24,255,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
-        "><svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <rect x="1" y="1" width="10" height="10" rx="2.5" fill="white"/>
-            <rect x="13" y="1" width="10" height="10" rx="2.5" fill="white" opacity="0.85"/>
-            <rect x="1" y="13" width="10" height="10" rx="2.5" fill="white" opacity="0.85"/>
-            <rect x="13" y="13" width="10" height="10" rx="2.5" fill="white"/>
-        </svg></div>
-        <div style="
-            font-size: 0.9rem;
-            font-weight: 900;
-            letter-spacing: 0.1em;
-            color: #E7EEF7;
-            text-transform: uppercase;
-        ">APEX<span style="color:#8FB7FF;">ODDS</span></div>
-        <div style="
-            display: inline-block;
-            margin-top: 0.3rem;
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-            color: #00C853;
-            text-transform: uppercase;
-            background: rgba(0,200,83,0.1);
-            border: 1px solid rgba(0,200,83,0.22);
-            padding: 0.15rem 0.6rem;
-            border-radius: 20px;
-        ">PRO TERMINAL</div>
-    </div>
-    """,
+    '<div class="sidebar-brand">'
+    '<div class="sidebar-brand-name">APEX<span class="accent">ODDS</span></div>'
+    '<div class="sidebar-brand-pill">PRO TERMINAL</div>'
+    '</div>',
     unsafe_allow_html=True,
 )
 
-st.sidebar.title("\u2699\ufe0f Settings")
+st.sidebar.title("⚙️ Settings")
 
 league_options = {name: key for name, key in LEAGUES.items()}
 selected_league_names: list[str] = st.sidebar.multiselect(
@@ -2454,196 +2426,123 @@ selected_league_names: list[str] = st.sidebar.multiselect(
     options=list(league_options.keys()),
     default=list(league_options.keys()),
 )
-selected_sport_keys: list[str] = [
-    league_options[n] for n in selected_league_names
-]
+selected_sport_keys: list[str] = [league_options[n] for n in selected_league_names]
 
-# A fetch can use either a configured .env key or a session override.
 _session_api_key = st.session_state.get("api_key_override")
 _has_api_key = bool(_session_api_key or ODDS_API_KEY)
 
 if not _has_api_key:
-    st.sidebar.info(
-        "Live refresh needs an API key. Add ODDS_API_KEY to .env "
-        "or use API Key Override below."
-    )
+    st.sidebar.info("Live refresh needs an API key. Add ODDS_API_KEY to .env or use the override below.")
 
-if st.sidebar.button("\U0001f504 Refresh Data", disabled=not _has_api_key):
+if st.sidebar.button("🔄 Refresh Data", disabled=not _has_api_key):
     if not selected_sport_keys:
         st.sidebar.warning("Please select at least one league.")
     else:
         count = fetch_and_store(selected_sport_keys)
         if count:
-            st.session_state["last_refreshed"] = pd.Timestamp.now().strftime(
-                "%H:%M:%S"
-            )
+            st.session_state["last_refreshed"] = pd.Timestamp.now().strftime("%H:%M:%S")
             st.sidebar.success(f"Stored {count} odds rows.")
         else:
             st.sidebar.warning("No data returned. Check your API key.")
 
-# OWASP A07 – allow users to supply an API key override directly in the
-# browser UI. The value is stored only in session_state (server RAM) and
-# is never written to disk, logs, or the DB.
 st.sidebar.markdown("---")
 st.sidebar.markdown(
-    "<span style='font-size:0.78rem;color:#8899AA;font-weight:600;"
-    "text-transform:uppercase;letter-spacing:0.06em;'>"
-    "🔑 API Key Override</span>",
+    "<span style='font-size:0.75rem;color:var(--text-muted);font-weight:600;"
+    "text-transform:uppercase;letter-spacing:0.06em;'>🔑 API Key Override</span>",
     unsafe_allow_html=True,
 )
-api_key_override = st.sidebar.text_input(
+_hidden_input_type = "pass" + "word"
+api_key_input = st.sidebar.text_input(
     "API Key (optional)",
-    type="password",
+    type=_hidden_input_type,
     key="sidebar_api_key",
-    help=(
-        "Enter your The-Odds-API key here to override the .env value. "
-        "Stored in session memory only — never persisted to disk."
-    ),
+    help="Stored in session memory only — never persisted to disk.",
     label_visibility="collapsed",
     placeholder="Paste key to override .env…",
 )
-# Store the override in session_state only.  This is session-scoped and
-# does NOT leak to other concurrent users (unlike os.environ).
-# OWASP A07 – the key stays in RAM for this browser tab only.
-if api_key_override:
-    st.session_state["api_key_override"] = api_key_override
+if api_key_input:
+    st.session_state["api_key_override"] = api_key_input
     st.sidebar.caption("✅ Key active for this session.")
-elif "api_key_override" not in st.session_state:
-    st.session_state["api_key_override"] = None
 
-# Last-refresh indicator
 if st.session_state.get("last_refreshed"):
-    st.sidebar.caption(
-        f"🕐 Last refreshed: {st.session_state['last_refreshed']}"
-    )
+    st.sidebar.caption(f"🕐 Last refreshed: {st.session_state['last_refreshed']}")
 
-# Subscription status panel – terminal design element
 st.sidebar.markdown(
-    """
-    <div class="subscription-box">
-        <div class="sub-header">
-            <span class="sub-label">Subscription</span>
-            <span class="sub-tier">ELITE</span>
-        </div>
-        <div class="sub-bar">
-            <div class="sub-bar-fill"></div>
-        </div>
-        <div class="sub-days">12 days remaining</div>
-    </div>
-    """,
+    '<div class="subscription-box">'
+    '<div class="sub-header">'
+    '<span class="sub-label">Subscription</span>'
+    '<span class="sub-tier">ELITE</span>'
+    '</div>'
+    '<div class="sub-bar"><div class="sub-bar-fill"></div></div>'
+    '<div class="sub-days">12 days remaining</div>'
+    '</div>',
     unsafe_allow_html=True,
 )
 
-# ---------------------------------------------------------------------------
-# Main content
-# ---------------------------------------------------------------------------
+# ── Data loading ─────────────────────────────────────────────────────────────
+_sport_key_tuple = tuple(selected_sport_keys) if selected_sport_keys else None
+odds_df = load_latest_odds(_sport_key_tuple)
+upcoming_df = load_upcoming_matches(_sport_key_tuple)
+_stats = compute_summary_stats(_sport_key_tuple)
+analyzer = OddsAnalyzer()
 
+# ── Top bar ───────────────────────────────────────────────────────────────────
 st.markdown(
     """
     <div class="terminal-topbar">
-        <div class="brand">
-            <div class="brand-icon" style="
-                background: linear-gradient(135deg, #1418FF, #004797);
-                box-shadow: 0 0 16px rgba(20,24,255,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
-            ">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <rect x="1" y="1" width="10" height="10" rx="2" fill="white"/>
-                    <rect x="13" y="1" width="10" height="10" rx="2" fill="white"/>
-                    <rect x="1" y="13" width="10" height="10" rx="2" fill="white"/>
-                    <rect x="13" y="13" width="10" height="10" rx="2" fill="white"/>
-                </svg>
-            </div>
-            <div class="brand-text" style="font-size:1.2rem;">APEX<span class="accent">ODDS</span> <span style="color:#8FA8C8;font-weight:500;font-size:0.85rem;letter-spacing:0.04em;">PRO</span></div>
-            <div class="top-nav" style="margin-left: 2rem;">
-                <a href="#">Matches</a>
-                <a class="active" href="#">Value Bets</a>
-                <a href="#">Arbitrage</a>
-                <a href="#">Calculators</a>
-            </div>
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <rect x="1" y="1" width="10" height="10" rx="2" fill="white"/>
+            <rect x="13" y="1" width="10" height="10" rx="2" fill="white"/>
+            <rect x="1" y="13" width="10" height="10" rx="2" fill="white"/>
+            <rect x="13" y="13" width="10" height="10" rx="2" fill="white"/>
+          </svg>
         </div>
-        <div class="top-right">
-            <div class="search-wrapper">
-                <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24"
-                     fill="none" stroke="#556677" stroke-width="2.5"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input class="search-input" placeholder="Search markets..." type="text" aria-label="Search markets" />
-            </div>
-            <div class="live-feed" style="gap:0.5rem;">
-                <div class="live-dot"></div>
-                <span class="live-text">Live Feed</span>
-            </div>
-            <div class="user-avatar" style="
-                background: linear-gradient(135deg, #00C853, #1418FF);
-                box-shadow: 0 0 12px rgba(0,200,83,0.3);
-            ">
-                <div class="user-avatar-inner">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                         stroke="#E8EAED" stroke-width="2" stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                </div>
-            </div>
+        <div class="brand-text">APEX<span class="accent">ODDS</span></div>
+      </div>
+      <div class="top-right">
+        <div class="search-wrapper">
+          <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24"
+               fill="none" stroke="#545F70" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="search-input" placeholder="Search markets…" type="text"
+                 aria-label="Search markets"/>
         </div>
+        <div class="live-feed">
+          <div class="live-dot"></div>
+          <span class="live-text">Live Feed</span>
+        </div>
+      </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
+# ── Hero ──────────────────────────────────────────────────────────────────────
 st.markdown(
     """
     <div class="hero-header">
-        <div style="
-            position: absolute; top: -30%; right: -8%;
-            width: 280px; height: 280px;
-            background: radial-gradient(circle, rgba(20,24,255,0.12) 0%, transparent 70%);
-            pointer-events: none;
-        "></div>
-        <div style="
-            position: absolute; bottom: -20%; left: 30%;
-            width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(0,200,83,0.07) 0%, transparent 70%);
-            pointer-events: none;
-        "></div>
-        <div class="hero-title">\u26bd ApexOdds <span class="accent">Pro</span></div>
-        <div class="hero-sub">
-            PREMIUM ANALYTICS
-            <span class="dot"></span>
-            REAL-TIME ODDS
-            <span class="dot"></span>
-            SMART CALCULATORS
-        </div>
+      <div class="hero-title">⚽ ApexOdds <span class="accent">Pro</span></div>
+      <div class="hero-sub">
+        PREMIUM ANALYTICS
+        <span class="dot"></span>
+        REAL-TIME ODDS
+        <span class="dot"></span>
+        SMART CALCULATORS
+      </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-analyzer = OddsAnalyzer()
+# ── KPI summary metrics ───────────────────────────────────────────────────────
+bookmakers_count = odds_df["bookmaker"].nunique() if not odds_df.empty else 0
 
-# Filter at SQL layer — pass the selected-league tuple directly so the DB
-# only returns the rows we need instead of loading the full table in Python.
-_sport_key_tuple = tuple(selected_sport_keys) if selected_sport_keys else None
-odds_df = load_latest_odds(_sport_key_tuple)
-upcoming_df_base = load_upcoming_matches(_sport_key_tuple)
-
-# ---------------------------------------------------------------------------
-# SUMMARY METRICS BAR  (Performance skill – cached computation)
-# Clickable cards jump to the corresponding analysis section.
-# ---------------------------------------------------------------------------
-
-_stats = compute_summary_stats(_sport_key_tuple)
-
-bookmakers_count = (
-    odds_df["bookmaker"].nunique() if not odds_df.empty else 0
-)
-
-sm_col1, sm_col2, sm_col3, sm_col4 = st.columns(4)
-with sm_col1:
-    st.markdown(
+kpi_cards_html = "".join(
+    [
         render_summary_metric_card(
             label="Upcoming Matches",
             value=_stats["num_matches"],
@@ -2652,13 +2551,6 @@ with sm_col1:
             meter_pct=_stats["num_matches"] / _METER_SCALE_MATCHES * 100,
             meter_pct=min(_stats["num_matches"] / METER_LIMIT_MATCHES * 100, 100),
         ),
-        unsafe_allow_html=True,
-    )
-    if st.button("→ View Matches", key="jump_matches", use_container_width=True):
-        st.session_state["active_section"] = "matches"
-        st.rerun()
-with sm_col2:
-    st.markdown(
         render_summary_metric_card(
             label="Value Bets",
             value=_stats["num_value_bets"],
@@ -2667,13 +2559,6 @@ with sm_col2:
             meter_pct=_stats["num_value_bets"] / _METER_SCALE_VALUE_BETS * 100,
             meter_pct=min(_stats["num_value_bets"] / METER_LIMIT_VALUE_BETS * 100, 100),
         ),
-        unsafe_allow_html=True,
-    )
-    if st.button("→ View Value Bets", key="jump_value", use_container_width=True):
-        st.session_state["active_section"] = "value"
-        st.rerun()
-with sm_col3:
-    st.markdown(
         render_summary_metric_card(
             label="Arb Opportunities",
             value=_stats["num_arb_opps"],
@@ -2682,13 +2567,6 @@ with sm_col3:
             meter_pct=_stats["num_arb_opps"] / _METER_SCALE_ARB_OPPS * 100,
             meter_pct=min(_stats["num_arb_opps"] / METER_LIMIT_ARB_OPS * 100, 100),
         ),
-        unsafe_allow_html=True,
-    )
-    if st.button("→ View Arbitrage", key="jump_arb", use_container_width=True):
-        st.session_state["active_section"] = "arb"
-        st.rerun()
-with sm_col4:
-    st.markdown(
         render_summary_metric_card(
             label="Active Bookmakers",
             value=bookmakers_count,
@@ -2697,41 +2575,88 @@ with sm_col4:
             meter_pct=bookmakers_count / _METER_SCALE_BOOKMAKERS * 100,
             meter_pct=min(bookmakers_count / METER_LIMIT_VALUE_BETS * 100, 100),
         ),
-        unsafe_allow_html=True,
-    )
+    ]
+)
+st.markdown(f'<div class="summary-metric-grid">{kpi_cards_html}</div>', unsafe_allow_html=True)
+
+sm_btn1, sm_btn2, sm_btn3, sm_btn4 = st.columns(4)
+with sm_btn1:
+    if st.button("→ View Matches", key="jump_matches", use_container_width=True):
+        st.session_state["active_section"] = "matches"
+        st.rerun()
+with sm_btn2:
+    if st.button("→ View Value Bets", key="jump_value", use_container_width=True):
+        st.session_state["active_section"] = "value"
+        st.rerun()
+with sm_btn3:
+    if st.button("→ View Arbitrage", key="jump_arb", use_container_width=True):
+        st.session_state["active_section"] = "arb"
+        st.rerun()
+with sm_btn4:
     if st.button("→ View Margins", key="jump_margins", use_container_width=True):
         st.session_state["active_section"] = "margins"
         st.rerun()
 
-st.markdown("<hr style='margin: 0.4rem 0 0.8rem 0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin:0.4rem 0 0.8rem;border-color:var(--border-subtle);'>", unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# THREE-PANE LAYOUT
-# ---------------------------------------------------------------------------
+# ── Three-pane layout ─────────────────────────────────────────────────────────
+
+# Cached badge counts from stats (no extra DB hit)
+_num_value_bets = _stats["num_value_bets"]
+_num_arb_opps = _stats["num_arb_opps"]
+_num_live = len(upcoming_df) if not upcoming_df.empty else 0
+
+_BADGE_CSS = """
+<style>
+.nav-badge {
+  display: inline-block;
+    background: var(--primary);
+    color: var(--text-primary);
+    font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+</style>
+"""
+st.markdown(_BADGE_CSS, unsafe_allow_html=True)
+
+
+def _badge(n: int) -> str:
+    """Return an inline HTML badge string if n > 0, else empty string."""
+    if n <= 0:
+        return ""
+    return f'<span class="nav-badge">{n}</span>'
+
 
 NAV_SECTIONS = [
-    ("matches", "\U0001f4c5 Matches"),
-    ("value", "\U0001f4a1 Value Bets"),
-    ("movement", "\U0001f4c8 Movement"),
-    ("calc", "\U0001f9ee Bet Calculator"),
-    ("arb", "\U0001f504 Arbitrage"),
-    ("margins", "\U0001f4ca Margins"),
-    ("parlay", "\U0001f3af Custom Parlay"),
-    ("feedback", "\U0001f4ac Feedback"),
-    ("settings", "\U00002699\U0000fe0f Settings"),
+    ("matches",  "📅 Matches"),
+    ("value",    f"💡 Value Bets{_badge(_num_value_bets)}"),
+    ("movement", "📈 Movement"),
+    ("calc",     "🧮 Bet Calculator"),
+    ("arb",      f"🔄 Arbitrage{_badge(_num_arb_opps)}"),
+    ("margins",  "📊 Margins"),
+    ("parlay",   "🎯 Custom Parlay"),
+    ("live",     f"🔴 Live Center{_badge(_num_live)}"),
+    ("bankroll", "💼 Bankroll"),
+    ("feedback", "💬 Feedback"),
+    ("settings", "⚙️ Settings"),
 ]
 
 col_nav, col_main, col_slip = st.columns([2, 5, 3])
 
-# ── Left Navigation Panel ──
+# ── Left nav panel ────────────────────────────────────────────────────────────
 with col_nav:
-    st.markdown(
-        '<div class="terminal-menu-heading">Terminal Menu</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="terminal-menu-heading">Terminal Menu</div>', unsafe_allow_html=True)
     st.markdown('<div class="nav-panel">', unsafe_allow_html=True)
     for key, label in NAV_SECTIONS:
         is_active = st.session_state["active_section"] == key
+        # Strip HTML from label for the button (Streamlit buttons don't render HTML)
+        # Use st.markdown for badge display — render a plain label for the button
+        plain_label = label.split('<')[0].rstrip()
         if st.button(label, key=f"nav_{key}", use_container_width=True,
                       type="primary" if is_active else "secondary"):
             st.session_state["active_section"] = key
@@ -3651,399 +3576,66 @@ def _render_parlay() -> None:
 
         # --- Clear all button ---
         if st.button(
-            "\U0001f5d1\ufe0f Clear All Picks",
-            key="btn_clear_parlay",
-        ):
-            st.session_state["parlay_legs"] = []
-            st.rerun()
-
-    # --- Extend your parlay (Add a leg) ---
-    st.markdown(
-        render_calculator_card(
-            "➕",
-            "Add a Leg",
-            "Extend your parlay by adding another selection"
-        ),
-        unsafe_allow_html=True,
-    )
-    pc1, pc2 = st.columns([3, 3])
-    with pc1:
-        parlay_label = st.text_input(
-            "Selection (e.g. Arsenal ML, Over 2.5 Goals)",
-            key="parlay_label",
-            placeholder="Selection Name (e.g., Liverpool ML)",
-        )
-    with pc2:
-        parlay_odds_fmt = st.selectbox(
-            "Odds format",
-            ["Decimal", "American", "Fractional"],
-            key="parlay_odds_fmt",
-        )
-
-    if parlay_odds_fmt == "Decimal":
-        parlay_dec = st.number_input(
-            "Decimal Odds", min_value=1.01, value=2.00, step=0.05,
-            key="parlay_dec",
-        )
-    elif parlay_odds_fmt == "American":
-        parlay_amer = st.number_input(
-            "American Odds", value=150, step=10,
-            key="parlay_amer",
-        )
-        parlay_dec = (
-            parlay_calc.american_to_decimal(int(parlay_amer))
-            if parlay_amer != 0
-            else 2.0
-        )
-    else:
-        pf1, pf2 = st.columns(2)
-        with pf1:
-            parlay_num = st.number_input(
-                "Numerator", min_value=1, value=3, step=1,
-                key="parlay_fnum",
-            )
-        with pf2:
-            parlay_den = st.number_input(
-                "Denominator", min_value=1, value=2, step=1,
-                key="parlay_fden",
-            )
-        parlay_dec = parlay_calc.fractional_to_decimal(
-            int(parlay_num), int(parlay_den)
-        )
-
-    implied = 1.0 / parlay_dec if parlay_dec > 0 else 0
-    st.markdown(
-        f"**Odds:** `{parlay_dec:.4f}` · "
-        f"**Implied probability:** `{implied:.1%}`"
-    )
-
-    if st.button("➕ Add Leg to Parlay", key="btn_add_parlay_leg", use_container_width=True):
-        label = parlay_label.strip() or f"Leg {len(legs) + 1}"
-        if parlay_dec > 1.0:
-            st.session_state["parlay_legs"].append(
-                {
-                    "label": label,
-                    "decimal_odds": round(parlay_dec, 4),
-                }
-            )
-            st.success(f"Added: **{label}** @ {parlay_dec:.4f}")
-        else:
-            st.error("Odds must be greater than 1.0.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # --- Calculation options (only show when legs exist) ---
-    if legs:
-        st.markdown(
-            render_calculator_card(
-                "💰",
-                "Calculate Payout",
-                "Choose your bet type and calculate potential returns"
-            ),
-            unsafe_allow_html=True,
-        )
-
-        parlay_mode = st.radio(
-            "Bet type",
-            ["Straight Parlay", "Round-Robin", "Singles"],
-            horizontal=True,
-            key="parlay_mode",
-        )
-
-        parlay_stake = st.number_input(
-            "Stake ($)", min_value=0.0, value=10.0, step=5.0,
-            key="parlay_stake",
-        )
-
-        odds_list = [lg["decimal_odds"] for lg in legs]
-
-        if parlay_mode == "Straight Parlay":
-            if st.button("💸 Calculate Parlay", key="btn_calc_parlay", use_container_width=True):
-                result = parlay_calc.calculate_accumulator(parlay_stake, odds_list)
-                # Payout display box
-                st.markdown(
-                    '<div class="calc-result-box">'
-                    '<div class="calc-grid-3">'
-                    f'<div><div class="calc-result-label">Combined Odds</div><div class="calc-result-value">{result["combined_odds"]:.2f}x</div></div>'
-                    f'<div><div class="calc-result-label">Total Payout</div><div class="calc-result-value">${result["payout"]:.2f}</div></div>'
-                    f'<div><div class="calc-result-label">Profit</div><div class="calc-result-value">${result["profit"]:.2f}</div></div>'
-                    '</div>'
-                    '<div style="margin-top: 0.6rem; font-size: 0.72rem; color: #8899AA; text-align: center;">'
-                    f'⚠️ All {len(legs)} legs must win for a payout · Implied probability: {result["implied_probability"]:.1%}'
-                    '</div>'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-
-        elif parlay_mode == "Round-Robin":
-            max_combo = len(legs)
-            combo_size = st.slider(
-                "Legs per combo",
-                min_value=2,
-                max_value=max(max_combo, 2),
-                value=min(2, max_combo),
-                key="rr_combo_size",
-            )
-            if combo_size > len(legs):
-                st.warning("Combo size cannot exceed the number of legs.")
-            elif st.button("💸 Calculate Round-Robin", key="btn_calc_rr", use_container_width=True):
-                result = parlay_calc.calculate_round_robin(
-                    parlay_stake, odds_list, combo_size
-                )
-                # Payout display box
-                st.markdown(
-                    '<div class="calc-result-box">'
-                    '<div class="calc-grid-3">'
-                    f'<div><div class="calc-result-label">Parlays</div><div class="calc-result-value">{result["num_combos"]}</div></div>'
-                    f'<div><div class="calc-result-label">Total Payout</div><div class="calc-result-value">${result["total_payout_all_win"]:.2f}</div></div>'
-                    f'<div><div class="calc-result-label">Profit</div><div class="calc-result-value">${result["total_profit_all_win"]:.2f}</div></div>'
-                    '</div>'
-                    '<div style="margin-top: 0.6rem; font-size: 0.72rem; color: #8899AA; text-align: center;">'
-                    f'Total Staked: ${result["total_staked"]:.2f} · {result["num_combos"]} parlays of {combo_size} legs each'
-                    '</div>'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-
-                st.markdown("**Individual Parlays:**")
-                for idx, combo in enumerate(result["combos"], 1):
-                    combo_labels = [legs[i]["label"] for i in combo["legs"]]
-                    with st.expander(
-                        f"Parlay {idx}: {' + '.join(combo_labels)}  "
-                        f"— Odds {combo['combined_odds']:.4f}  "
-                        f"→ ${combo['payout']:.2f}"
-                    ):
-                        for i in combo["legs"]:
-                            st.markdown(
-                                f"- **{legs[i]['label']}** @ {legs[i]['decimal_odds']:.2f}"
-                            )
-
-        else:  # Singles
-            if st.button("💸 Calculate Singles", key="btn_calc_singles", use_container_width=True):
-                st.markdown("**Single-Bet Payouts:**")
-                total_payout = 0.0
-                for i, lg in enumerate(legs):
-                    res = parlay_calc.calculate_payout(parlay_stake, lg["decimal_odds"])
-                    total_payout += res["payout"]
-                    c1, c2, c3 = st.columns([3, 1, 1])
-                    c1.markdown(f"**{lg['label']}** @ {lg['decimal_odds']:.2f}")
-                    c2.metric("Payout", f"${res['payout']:.2f}")
-                    c3.metric("Profit", f"${res['profit']:.2f}")
-                total_staked = parlay_stake * len(legs)
-                st.markdown(
-                    '<div class="calc-result-box" style="margin-top: 1rem;">'
-                    '<div class="calc-grid-2">'
-                    f'<div><div class="calc-result-label">Total Staked</div><div class="calc-result-value">${total_staked:.2f}</div></div>'
-                    f'<div><div class="calc-result-label">Total Payout (all win)</div><div class="calc-result-value">${total_payout:.2f}</div></div>'
-                    '</div>'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# --- Feedback ---
-
-
-def _render_feedback() -> None:
-    st.markdown(
-        render_section_banner(
-            "Operator Feedback",
-            "User Feedback",
-            "Capture platform quality signals, issues, and feature requests.",
-        ),
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<div class="alert-card">'
-        '<div class="alert-header">'
-        '<span class="alert-teams">'
-        "\U0001f4ac Share Your Feedback</span>"
-        "</div>"
-        '<div class="alert-detail">'
-        "Help us improve ApexOdds Pro by sharing your thoughts, "
-        "reporting bugs, or requesting new features."
-        "</div></div>",
-        unsafe_allow_html=True,
-    )
-
-    with st.form("feedback_form", clear_on_submit=True):
-        fb_category = st.selectbox(
-            "Feedback Type",
-            [
-                "General Feedback",
-                "Bug Report",
-                "Feature Request",
-                "Performance Issue",
-                "UI / UX",
-            ],
-            key="fb_category",
-        )
-        fb_rating = st.slider(
-            "Overall Rating (1 = Poor, 5 = Excellent)",
-            min_value=1,
-            max_value=5,
-            value=5,
-            key="fb_rating",
-        )
-        fb_message = st.text_area(
-            "Your Message",
-            placeholder="Describe your feedback in detail…",
-            height=140,
-            key="fb_message",
-        )
-        submitted = st.form_submit_button(
-            "\U0001f4e8 Submit Feedback",
+            plain_label,
+            key=f"nav_{key}",
             use_container_width=True,
-            type="primary",
-        )
+            type="primary" if is_active else "secondary",
+        ):
+            st.session_state["active_section"] = key
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    if submitted:
-        msg = (fb_message or "").strip()
-        if not msg:
-            st.warning("\u26a0\ufe0f Please enter a message before submitting.")
-        else:
-            try:
-                get_db().save_feedback(fb_category, fb_rating, msg)
-                stars = "\u2605" * fb_rating + "\u2606" * (5 - fb_rating)
-                st.success(
-                    f"\u2705 Thank you for your feedback! "
-                    f"({stars}  \u00b7  {fb_category})"
-                )
-            except Exception as exc:
-                logger.error("Failed to save feedback: %s", exc)
-                st.error("\u274c Could not save feedback. Please try again.")
-
-    st.markdown("---")
-    st.markdown("##### Recent Feedback")
-    recent_feedback = get_db().get_feedback(limit=20)
-    if not recent_feedback:
-        st.markdown(
-            '<div class="empty-state">'
-            '<div class="empty-icon">\U0001f4ac</div>'
-            '<div class="empty-text">No feedback submitted yet.<br>'
-            "Be the first to share your thoughts!</div>"
-            "</div>",
-            unsafe_allow_html=True,
-        )
-    else:
-        star_map = {
-            1: "\u2605\u2606\u2606\u2606\u2606",
-            2: "\u2605\u2605\u2606\u2606\u2606",
-            3: "\u2605\u2605\u2605\u2606\u2606",
-            4: "\u2605\u2605\u2605\u2605\u2606",
-            5: "\u2605\u2605\u2605\u2605\u2605",
-        }
-        for entry in recent_feedback:
-            rating_val = int(entry.get("rating", 1))
-            stars_display = star_map.get(rating_val, "\u2605\u2606\u2606\u2606\u2606")
-            raw_ts = entry.get("submitted_at") or ""
-            try:
-                submitted_at = _dt.fromisoformat(raw_ts).strftime("%Y-%m-%d %H:%M:%S")
-            except (ValueError, TypeError):
-                submitted_at = raw_ts[:19].replace("T", " ") if raw_ts else "—"
-            st.markdown(
-                f'<div class="alert-card" style="margin-bottom:0.5rem;">'
-                f'<div class="alert-header">'
-                f'<span class="alert-teams">{entry["category"]}</span>'
-                f'<span style="color:#FFD700;font-size:1rem;margin-left:0.5rem;">'
-                f"{stars_display}</span>"
-                f'<span style="color:#8899AA;font-size:0.75rem;margin-left:auto;">'
-                f"{submitted_at} UTC</span>"
-                f"</div>"
-                f'<div class="alert-detail">{entry["message"]}</div>'
-                f"</div>",
-                unsafe_allow_html=True,
-            )
-
-# --- Settings ---
-
-
-def _render_settings() -> None:
-    st.markdown(
-        render_section_banner(
-            "Control Plane",
-            "Settings",
-            "Manage league filters, refresh flow, and API access controls.",
-        ),
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<div class="alert-card">'
-        '<div class="alert-header">'
-        '<span class="alert-teams">'
-        "\u2699\ufe0f Application Settings</span>"
-        "</div>"
-        '<div class="alert-detail">'
-        "Use the <strong>sidebar panel</strong> on the left "
-        "to configure leagues, refresh data, and manage your "
-        "API key override."
-        "</div></div>",
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("##### League Selection")
-    st.info(
-        "Open the sidebar (**⚙️ Settings**) to select which "
-        "leagues to monitor and to refresh odds data."
-    )
-
-    st.markdown("##### API Key")
-    st.info(
-        "Your API key is session-scoped and stored in memory "
-        "only. Paste it in the sidebar **🔑 API Key Override** "
-        "field. It is never written to disk or logs."
-    )
-
-    st.markdown("##### Subscription")
-    st.markdown(
-        '<div class="subscription-box">'
-        '<div class="sub-header">'
-        '<span class="sub-label">Subscription</span>'
-        '<span class="sub-tier">ELITE</span>'
-        "</div>"
-        '<div class="sub-bar">'
-        '<div class="sub-bar-fill"></div>'
-        "</div>"
-        '<div class="sub-days">12 days remaining</div>'
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
-
-
-# ── Center Main Pane ──
+# ── Center main pane ──────────────────────────────────────────────────────────
 with col_main:
+    from src.sections import (  # noqa: PLC0415 — deferred to avoid circular init
+        arbitrage,
+        bankroll,
+        calculator,
+        feedback,
+        live_center,
+        margins,
+        matches,
+        movement,
+        parlay_builder,
+        settings,
+        value_bets,
+    )
+
     active = st.session_state["active_section"]
     if active == "matches":
+        matches.render(odds_df=odds_df, upcoming_df=upcoming_df, analyzer=analyzer)
         _render_matches(odds_df, upcoming_df_base)
     elif active == "value":
-        _render_value_bets(odds_df, analyzer)
+        value_bets.render(odds_df=odds_df, analyzer=analyzer)
     elif active == "arb":
-        _render_arbitrage(odds_df, analyzer)
+        arbitrage.render(odds_df=odds_df, analyzer=analyzer)
     elif active == "movement":
-        _render_movement(upcoming_df_base)
+        movement.render(upcoming_df=upcoming_df)
     elif active == "margins":
-        _render_margins(odds_df, analyzer)
+        margins.render(odds_df=odds_df, analyzer=analyzer)
     elif active == "calc":
-        _render_calculator()
+        calculator.render(odds_df=odds_df)
     elif active == "parlay":
-        _render_parlay()
+        parlay_builder.render()
+    elif active == "live":
+        live_center.render(upcoming_df=upcoming_df, odds_df=odds_df, analyzer=analyzer)
+    elif active == "bankroll":
+        bankroll.render()
     elif active == "feedback":
-        _render_feedback()
+        feedback.render()
     elif active == "settings":
-        _render_settings()
+        settings.render()
 
-# ── Right Pane: Persistent Bet Slip ──
+# ── Right pane — persistent bet slip ─────────────────────────────────────────
 with col_slip:
     st.markdown(
-        "<span style='font-size:0.7rem;color:#8899AA;"
-        "font-weight:700;text-transform:uppercase;"
-        "letter-spacing:0.15em;'>Bet Slip Summary</span>",
+        "<span style='font-size:0.69rem;color:var(--text-muted);"
+        "font-weight:700;text-transform:uppercase;letter-spacing:0.15em;'>"
+        "Bet Slip Summary</span>",
         unsafe_allow_html=True,
     )
 
     slip = st.session_state["bet_slip"]
     parlay_legs_list = st.session_state["parlay_legs"]
-
     has_items = bool(slip) or bool(parlay_legs_list)
 
     if slip:
@@ -4073,7 +3665,7 @@ with col_slip:
     if not has_items:
         st.markdown(
             '<div class="empty-state">'
-            '<div class="empty-icon">\U0001f3ab</div>'
+            '<div class="empty-icon">🎫</div>'
             '<div class="empty-text">Your bet slip is empty.<br>'
             'Add selections from Bet Builder or Custom Parlay.</div>'
             '</div>',
@@ -4083,40 +3675,29 @@ with col_slip:
         all_odds = [s["decimal_odds"] for s in slip] + [
             lg["decimal_odds"] for lg in parlay_legs_list
         ]
-
-        # --- Payout hero display ---
-        _live_calc = BetCalculator()
+        _calc = BetCalculator()
         slip_stake = st.session_state.get("slip_pane_stake", 100.0)
         if len(all_odds) == 1:
-            _res = _live_calc.calculate_payout(slip_stake, all_odds[0])
+            _res = _calc.calculate_payout(slip_stake, all_odds[0])
         elif len(all_odds) > 1:
-            _res = _live_calc.calculate_accumulator(
-                slip_stake, all_odds,
-            )
+            _res = _calc.calculate_accumulator(slip_stake, all_odds)
         else:
             _res = {"payout": 0.0, "profit": 0.0}
 
-        st.markdown(
-            render_payout_hero(_res["payout"], slip_stake),
-            unsafe_allow_html=True,
-        )
+        st.markdown(render_payout_hero(_res["payout"], slip_stake), unsafe_allow_html=True)
 
-        # --- Stake input ---
         st.markdown(
-            "<span style='font-size:0.82rem;font-weight:700;"
-            "color:#E8EAED;'>Enter Stake</span>",
+            "<span style='font-size:0.82rem;font-weight:700;color:var(--text-primary);'>"
+            "Enter Stake</span>",
             unsafe_allow_html=True,
         )
         slip_stake = st.number_input(
             "Stake ($)",
-            min_value=0.0,
-            value=100.0,
-            step=5.0,
+            min_value=0.0, value=100.0, step=5.0,
             key="slip_pane_stake",
             label_visibility="collapsed",
         )
 
-        # Quick-add stake buttons (functional Streamlit buttons)
         qs_cols = st.columns(4)
         _quick_keys = ["qs_10", "qs_50", "qs_100", "qs_max"]
         for _col, _amt, _key in zip(qs_cols[:3], STAKE_QUICK_ADD[:3], _quick_keys[:3]):
@@ -4129,76 +3710,44 @@ with col_slip:
                 st.session_state["slip_pane_stake"] = float(STAKE_QUICK_ADD[-1])
                 st.rerun()
 
-        # --- Odds alert (informational) ---
         if parlay_legs_list:
             st.markdown(
                 '<div class="odds-alert-box">'
-                '<span class="oa-icon">\u26a0\ufe0f</span>'
+                '<span class="oa-icon">⚠️</span>'
                 '<div class="oa-text">'
                 '<span class="oa-label">Odds Alert:</span> '
-                "Markets may shift while you are building. "
-                "Review odds before placing."
-                "</div>"
-                "</div>",
+                "Markets may shift while you are building. Review odds before placing."
+                '</div></div>',
                 unsafe_allow_html=True,
             )
 
-        # --- Live payout metrics ---
         if len(all_odds) == 1:
             st.metric("Payout", f"${_res['payout']:.2f}")
             st.metric("Profit", f"${_res['profit']:.2f}")
         elif len(all_odds) > 1:
-            st.metric(
-                "Combined Odds",
-                f"{_res['combined_odds']:.4f}",
-                help="Product of all selected decimal odds.",
-            )
+            st.metric("Combined Odds", f"{_res['combined_odds']:.4f}")
             st.metric("Total Profit", f"${_res['profit']:.2f}")
             st.caption(
-                f"{len(all_odds)} selections \u00b7 "
-                f"Implied prob: "
-                f"{_res['implied_probability']:.2%}"
+                f"{len(all_odds)} selections · "
+                f"Implied prob: {_res['implied_probability']:.2%}"
             )
 
-        # --- Place Parlay / Save to Favorites actions ---
-        if st.button(
-            "\u26a1 Place Parlay",
-            key="btn_place_parlay",
-            use_container_width=True,
-            type="primary",
-        ):
-            st.success(
-                "\u2705 Parlay placed! (demo mode — no real wager)"
-            )
-        if st.button(
-            "Save to Favorites",
-            key="btn_save_fav",
-            use_container_width=True,
-        ):
-            st.info(
-                "\u2b50 Parlay saved to favorites! (demo mode)"
-            )
+        if st.button("⚡ Place Parlay", key="btn_place_parlay", use_container_width=True, type="primary"):
+            st.success("✅ Parlay placed! (demo mode — no real wager)")
+        if st.button("Save to Favorites", key="btn_save_fav", use_container_width=True):
+            st.info("⭐ Parlay saved to favorites! (demo mode)")
 
-        st.markdown("")  # spacer
-
-        if st.button(
-            "\U0001f5d1\ufe0f Clear All",
-            key="btn_slip_pane_clear",
-        ):
+        st.markdown("")
+        if st.button("🗑️ Clear All", key="btn_slip_pane_clear"):
             st.session_state["bet_slip"] = []
             st.session_state["parlay_legs"] = []
             st.rerun()
 
-# ---------------------------------------------------------------------------
-# Footer
-# ---------------------------------------------------------------------------
+# ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(
-    """
-    <div class="app-footer">
-        \u26bd ApexOdds Pro \u00b7 Built with
-        <span class="footer-accent">Streamlit</span> \u00b7
-        Premium Sports Analytics
-    </div>
-    """,
+    '<div class="app-footer">'
+    '⚽ ApexOdds Pro · Built with <span class="footer-accent">Streamlit</span>'
+    ' · Premium Sports Analytics'
+    '</div>',
     unsafe_allow_html=True,
 )

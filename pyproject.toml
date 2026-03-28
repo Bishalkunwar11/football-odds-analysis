@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--tb=short"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/seed_demo_data.py"]
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"

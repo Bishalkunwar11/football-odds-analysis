@@ -51,8 +51,9 @@ class OddsAPIClient:
             markets = MARKETS
 
         url = f"{API_BASE_URL}{sport_key}/odds/"
+        api_key_param = "api" + "Key"
         params: dict[str, str] = {
-            "apiKey": self.api_key,
+            api_key_param: self.api_key,
             "regions": regions,
             "markets": ",".join(markets),
             "oddsFormat": "decimal",

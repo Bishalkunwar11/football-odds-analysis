@@ -4,8 +4,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 # Streamlit must be mocked *before* importing app.py.  The mock
 # must be thorough enough to survive module-level execution of
 # st.columns, st.session_state, st.number_input, etc.
@@ -51,7 +49,6 @@ from src.app import (  # noqa: E402
     render_parlay_summary,
     render_payout_hero,
 )
-
 
 # -------------------------------------------------------------------
 # render_parlay_summary
