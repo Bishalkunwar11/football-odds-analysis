@@ -9,6 +9,8 @@ import streamlit as st
 # Plotly dark-theme configuration
 # ---------------------------------------------------------------------------
 
+_EDGE_METER_MAX: float = 0.15
+
 DARK_THEME: dict = {
     "paper_bgcolor": "#000B14",
     "plot_bgcolor": "#000B14",
@@ -238,7 +240,7 @@ def render_value_card(
         else ""
     )
     implied_prob = 1.0 / price if price > 0 else 0.0
-    edge_meter_pct = min(edge / 0.15, 1.0) * 100
+    edge_meter_pct = min(edge / _EDGE_METER_MAX, 1.0) * 100
     return (
         f'<div class="alert-card">'
         f'<div class="alert-header">'
@@ -262,12 +264,13 @@ def render_value_card(
         f'<div class="vcard-stat">'
         f'<div class="vcard-stat-label">Edge</div>'
         f'<div class="vcard-stat-value" style="color:var(--accent-green);">+{edge:.1%}</div>'
+        f'<div class="vcard-stat-value vcard-positive">+{edge:.1%}</div>'
         f'</div>'
         f'</div>'
         f'<div class="edge-meter-wrap">'
         f'<div class="edge-meter-label-row">'
         f'<span>Edge Meter</span>'
-        f'<span>{edge:.1%} / 15.0%</span>'
+        f'<span>{edge:.1%} / {_EDGE_METER_MAX:.0%}</span>'
         f'</div>'
         f'<div class="edge-meter-track">'
         f'<div class="edge-meter-fill" style="width:{edge_meter_pct:.1f}%"></div>'
