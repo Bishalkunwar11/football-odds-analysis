@@ -30,7 +30,7 @@ def render(
     st.markdown(
         render_section_banner(
             "Live Dashboard",
-            "Upcoming Matches",
+            "Upcoming Fixtures",
             "Monitor fixtures and compare best available prices in one grid.",
         ),
         unsafe_allow_html=True,
