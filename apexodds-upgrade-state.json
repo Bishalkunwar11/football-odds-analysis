@@ -1,0 +1,33 @@
+{
+  "project": "ApexOdds Pro Upgrade",
+  "version": "1.0",
+  "last_updated": "2026-03-29",
+  "current_phase": 1,
+  "current_step": 1,
+  "status": "NOT_STARTED",
+  "steps": [
+    { "id": 1,  "phase": 1, "status": "pending", "model": "sonnet", "task": "Audit imports — find all ui_components.py references", "files_touched": [], "notes": "" },
+    { "id": 2,  "phase": 1, "status": "pending", "model": "opus",   "task": "Delete ui_components.py and fix all imports", "files_touched": [], "notes": "" },
+    { "id": 3,  "phase": 2, "status": "pending", "model": "sonnet", "task": "Plan CSS rewrite — extract actual tokens/classes in use", "files_touched": [], "notes": "" },
+    { "id": 4,  "phase": 2, "status": "pending", "model": "opus",   "task": "Rewrite styles.css from scratch — single design system", "files_touched": [], "notes": "" },
+    { "id": 5,  "phase": 1, "status": "pending", "model": "sonnet", "task": "Plan DB schema — map old to new tables, write migration plan", "files_touched": [], "notes": "" },
+    { "id": 6,  "phase": 1, "status": "pending", "model": "opus",   "task": "Upgrade DB schema in db_manager.py with migration support", "files_touched": [], "notes": "" },
+    { "id": 7,  "phase": 1, "status": "pending", "model": "opus",   "task": "Add price direction tracking to store_odds()", "files_touched": [], "notes": "" },
+    { "id": 8,  "phase": 2, "status": "pending", "model": "sonnet", "task": "Plan layout rewrite — map current app.py structure", "files_touched": [], "notes": "" },
+    { "id": 9,  "phase": 2, "status": "pending", "model": "opus",   "task": "Rewrite app.py layout — new shell with collapsible bet slip", "files_touched": [], "notes": "" },
+    { "id": 10, "phase": 2, "status": "pending", "model": "opus",   "task": "Redesign match cards with real data and implied probabilities", "files_touched": [], "notes": "" },
+    { "id": 11, "phase": 2, "status": "pending", "model": "opus",   "task": "Upgrade bet slip with per-selection stakes and tab modes", "files_touched": [], "notes": "" },
+    { "id": 12, "phase": 1, "status": "pending", "model": "opus",   "task": "Add alerts engine and Alerts Center section", "files_touched": [], "notes": "" },
+    { "id": 13, "phase": 2, "status": "pending", "model": "opus",   "task": "Add dashboard home as new default view", "files_touched": [], "notes": "" },
+    { "id": 14, "phase": 2, "status": "pending", "model": "opus",   "task": "Upgrade navigation with grouped items and icons", "files_touched": [], "notes": "" },
+    { "id": 15, "phase": 2, "status": "pending", "model": "opus",   "task": "Upgrade value bets with table view and inline actions", "files_touched": [], "notes": "" },
+    { "id": 16, "phase": 2, "status": "pending", "model": "opus",   "task": "Upgrade live center simulation", "files_touched": [], "notes": "" },
+    { "id": 17, "phase": 1, "status": "pending", "model": "opus",   "task": "Move bankroll to DB persistence", "files_touched": [], "notes": "" },
+    { "id": 18, "phase": 3, "status": "pending", "model": "sonnet", "task": "Verify everything works — run app, check each section", "files_touched": [], "notes": "" },
+    { "id": 19, "phase": 3, "status": "pending", "model": "opus",   "task": "Write test suite — pytest for all backend modules", "files_touched": [], "notes": "" },
+    { "id": 20, "phase": 3, "status": "pending", "model": "sonnet", "task": "Run tests + mypy — fix failures", "files_touched": [], "notes": "" },
+    { "id": 21, "phase": 3, "status": "pending", "model": "opus",   "task": "Final cleanup — type hints, error handling, config", "files_touched": [], "notes": "" }
+  ],
+  "blocked_issues": [],
+  "completed_at": null
+}
