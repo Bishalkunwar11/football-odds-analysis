@@ -23,5 +23,5 @@ def test_single_bet_calculation(page: Page) -> None:
 
     page.get_by_role("button", name=re.compile("Calculate Payout", re.IGNORECASE)).first.click(force=True)
 
-    expect(page.get_by_text("Payout")).to_be_visible(timeout=20000)
-    expect(page.get_by_text("Profit")).to_be_visible(timeout=20000)
+    expect(page.get_by_text("Payout", exact=True)).to_be_visible(timeout=20000)
+    expect(page.get_by_text("Profit", exact=True)).to_be_visible(timeout=20000)
