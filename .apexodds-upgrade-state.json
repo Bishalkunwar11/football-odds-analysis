@@ -1,5 +1,5 @@
 {
-  "current_step": 10,
+  "current_step": 11,
   "last_updated": "2026-03-29",
   "steps": {
     "1": {
@@ -58,9 +58,9 @@
     },
     "10": {
       "name": "Redesign match cards",
-      "status": "pending",
-      "files_touched": [],
-      "notes": ""
+      "status": "done",
+      "files_touched": ["src/components/match_card.py", "src/sections/matches.py", "src/assets/styles.css"],
+      "notes": "Split match_card into render_match_card_header() (HTML) + render_odds_button_label() for st.button(). Odds buttons now use st.button(on_click=_add_to_slip) — clickable, add to bet slip, open slip drawer. Implied probability shown as st.caption() below each button. Real price_direction (up/down/stable) from DB odds data — ▲/▼ in button label. PRO EDGE badge only when edge_pct > 0 from analyzer. Team initial circles added (CSS: .team-init-circle / .away-circle). Added .implied-prob CSS. Updated .odds-row to auto-fit grid. Added .team-col layout wrapper."
     },
     "11": {
       "name": "Upgrade bet slip",

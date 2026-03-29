@@ -530,6 +530,40 @@ header[data-testid="stHeader"] {
   margin: 0.5rem 0;
 }
 
+/* Team column wraps the circle + name */
+.team-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  gap: 0.25rem;
+}
+.team-col-away {
+  align-items: flex-end;
+}
+
+/* Team initial circles */
+.team-init-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-dim, rgba(0,200,83,0.15));
+  border: 1px solid var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+}
+.team-init-circle.away-circle {
+  background: rgba(59,130,246,0.12);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
 .team-name {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1rem;
@@ -537,7 +571,6 @@ header[data-testid="stHeader"] {
   text-transform: uppercase;
   color: var(--text-primary);
   letter-spacing: 0.04em;
-  flex: 1;
 }
 
 .team-name.away { text-align: right; }
@@ -555,7 +588,7 @@ header[data-testid="stHeader"] {
 
 .odds-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 0.4rem;
   margin-top: 0.5rem;
 }
@@ -594,6 +627,13 @@ header[data-testid="stHeader"] {
 
 .odds-up   { color: var(--primary); font-size: 0.7em; }
 .odds-down { color: var(--accent-red); font-size: 0.7em; }
+
+.implied-prob {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+  font-family: 'DM Sans', sans-serif;
+}
 
 /* ── Featured live card ─────────────────────────────────────── */
 .featured-live {
