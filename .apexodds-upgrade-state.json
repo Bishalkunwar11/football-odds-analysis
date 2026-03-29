@@ -1,0 +1,132 @@
+{
+  "current_step": 8,
+  "last_updated": "2026-03-28",
+  "steps": {
+    "1": {
+      "name": "Audit ui_components imports",
+      "status": "done",
+      "files_touched": [],
+      "notes": "No files import from ui_components.py — already fully migrated to src/components/. All 15 functions in ui_components.py have exact equivalents in src/components/."
+    },
+    "2": {
+      "name": "Delete ui_components.py + fix imports",
+      "status": "done",
+      "files_touched": ["src/ui_components.py"],
+      "notes": "Deleted src/ui_components.py. All imports verified OK — no import errors."
+    },
+    "3": {
+      "name": "Plan CSS rewrite",
+      "status": "done",
+      "files_touched": [],
+      "notes": "Audited styles.css: 1358 lines, 48 !important overrides, 3 competing design systems. Used classes mapped: ~90 unique classes. Missing from CSS: ticker-item/track/league/score/min/sep (live ticker). Orphaned in CSS: top-nav, user-avatar, active (unused). Target: Obsidian Terminal design system per CLAUDE.md tokens."
+    },
+    "4": {
+      "name": "Rewrite styles.css from scratch",
+      "status": "done",
+      "files_touched": ["src/assets/styles.css"],
+      "notes": "Complete rewrite: 1239 lines, 0 !important, single coherent Obsidian Terminal system. Tokens: --bg-base #0A0F1A, --primary #00C853, --accent-gold #FFD700, --accent-red #FF3D3D. Glassmorphism on all cards. Added missing ticker CSS classes. Removed scanline overlay, Unsplash URL, and all competing override layers."
+    },
+    "5": {
+      "name": "Plan DB schema upgrade",
+      "status": "done",
+      "files_touched": [],
+      "notes": "Planned: add schema_version table, v2 migration for previous_price + price_direction on odds table, alerts table, user_bets table."
+    },
+    "6": {
+      "name": "Upgrade DB schema",
+      "status": "done",
+      "files_touched": ["src/db_manager.py"],
+      "notes": "Added SCHEMA_VERSION=2, schema_version table, migrate()/_migrate_v2(). v2 adds previous_price REAL and price_direction TEXT CHECK(...) to odds table. Added alerts table (id, alert_type, match_id, title, detail, value, is_read, created_at). Added user_bets table (id, match_label, outcome, bookmaker, decimal_odds, stake, result, pnl, settled_at, placed_at, notes). Added PRAGMA journal_mode=WAL and foreign_keys=ON."
+    },
+    "7": {
+      "name": "Price direction tracking",
+      "status": "done",
+      "files_touched": ["src/db_manager.py"],
+      "notes": "store_odds() now looks up previous price, computes direction (up/down/stable), writes both previous_price and price_direction. get_latest_odds() returns price_direction and previous_price columns. Added get_price_movements(), save_alert(), get_alerts(), get_unread_alert_count(), mark_alert_read(), mark_all_alerts_read(), add_bet(), settle_bet(), get_bets(), get_bankroll_stats(), get_pnl_timeseries()."
+    },
+    "8": {
+      "name": "Plan layout rewrite",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "9": {
+      "name": "Rewrite app.py layout",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "10": {
+      "name": "Redesign match cards",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "11": {
+      "name": "Upgrade bet slip",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "12": {
+      "name": "Alert engine",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "13": {
+      "name": "Dashboard home",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "14": {
+      "name": "Navigation upgrade",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "15": {
+      "name": "Value bets upgrade",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "16": {
+      "name": "Live center upgrade",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "17": {
+      "name": "Bankroll to DB",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "18": {
+      "name": "Verify everything",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "19": {
+      "name": "Write test suite",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "20": {
+      "name": "Run tests + mypy",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    },
+    "21": {
+      "name": "Final cleanup",
+      "status": "pending",
+      "files_touched": [],
+      "notes": ""
+    }
+  }
+}
