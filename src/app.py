@@ -5,11 +5,11 @@ Responsibilities:
   - Google Fonts <link> injection
   - apply_styles()
   - Session state initialisation
-  - Sidebar (leagues, refresh, API key, subscription)
-  - Summary KPI bar
-  - Three-column layout shell (nav | main | slip)
+  - Sidebar (nav groups, settings, leagues, refresh, API key, subscription)
+  - Top bar + Hero + KPI bar
+  - Full-width main (or main + slip when slip_visible)
   - Section router
-  - Right-pane bet slip summary
+  - Collapsible bet slip drawer
   - Footer
 """
 
@@ -70,15 +70,25 @@ apply_styles()
 
 # ── Session state ────────────────────────────────────────────────────────────
 _DEFAULTS: dict = {
-    "active_section": "matches",
+    "active_section": "dashboard",
     "bet_slip": [],
     "parlay_legs": [],
     "last_refreshed": None,
     "api_key_override": None,
+    "slip_visible": False,
 }
 for _k, _v in _DEFAULTS.items():
     if _k not in st.session_state:
         st.session_state[_k] = _v
+
+
+def _set_active_section(section_key: str) -> None:
+    st.session_state["active_section"] = section_key
+
+
+def _toggle_slip() -> None:
+    st.session_state["slip_visible"] = not st.session_state["slip_visible"]
+
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 st.sidebar.markdown(
@@ -89,6 +99,65 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
+# ── Sidebar nav ───────────────────────────────────────────────────────────────
+# Cached counts for badges (computed after data load, set via module-level after
+# data loading block below — we define the helper early so it's in scope).
+def _badge(n: int) -> str:
+    return f" ({n})" if n > 0 else ""
+
+
+_NAV_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
+    ("MARKETS", [
+        ("dashboard", "🏠 Dashboard"),
+        ("matches",   "📅 Matches"),
+        ("value",     "💡 Value Bets"),
+        ("arb",       "🔄 Arbitrage"),
+        ("margins",   "📊 Margins"),
+        ("movement",  "📈 Movement"),
+    ]),
+    ("TOOLS", [
+        ("calc",   "🧮 Calculator"),
+        ("parlay", "🎯 Parlay Builder"),
+    ]),
+    ("LIVE", [
+        ("live", "🔴 Live Center"),
+    ]),
+    ("ACCOUNT", [
+        ("bankroll", "💼 Bankroll"),
+        ("alerts",   "🔔 Alerts"),
+        ("settings", "⚙️ Settings"),
+        ("feedback", "💬 Feedback"),
+    ]),
+]
+
+
+def _render_sidebar_nav(num_value: int, num_arb: int, num_live: int, num_alerts: int) -> None:
+    """Render grouped navigation buttons in sidebar."""
+    badge_map = {
+        "value":    _badge(num_value),
+        "arb":      _badge(num_arb),
+        "live":     _badge(num_live),
+        "alerts":   _badge(num_alerts),
+    }
+    active = st.session_state["active_section"]
+    for group_label, items in _NAV_GROUPS:
+        st.sidebar.markdown(
+            f'<div class="nav-group-label">{group_label}</div>',
+            unsafe_allow_html=True,
+        )
+        for key, label in items:
+            full_label = label + badge_map.get(key, "")
+            st.sidebar.button(
+                full_label,
+                key=f"nav_{key}",
+                use_container_width=True,
+                type="primary" if active == key else "secondary",
+                on_click=_set_active_section,
+                args=(key,),
+            )
+
+
+st.sidebar.markdown("---")
 st.sidebar.title("⚙️ Settings")
 
 league_options = {name: key for name, key in LEAGUES.items()}
@@ -156,6 +225,20 @@ odds_df = load_latest_odds(_sport_key_tuple)
 upcoming_df = load_upcoming_matches(_sport_key_tuple)
 _stats = compute_summary_stats(_sport_key_tuple)
 analyzer = OddsAnalyzer()
+
+_num_value_bets = _stats["num_value_bets"]
+_num_arb_opps   = _stats["num_arb_opps"]
+_num_live       = len(upcoming_df) if not upcoming_df.empty else 0
+
+# Unread alert count from DB
+try:
+    from src.db_manager import DBManager as _DBManager
+    _num_alerts = _DBManager().get_unread_alert_count()
+except Exception:
+    _num_alerts = 0
+
+# ── Render sidebar nav (now that counts are available) ────────────────────────
+_render_sidebar_nav(_num_value_bets, _num_arb_opps, _num_live, _num_alerts)
 
 # ── Top bar ───────────────────────────────────────────────────────────────────
 st.markdown(
@@ -246,43 +329,29 @@ kpi_cards_html = "".join(
 )
 st.markdown(f'<div class="summary-metric-grid">{kpi_cards_html}</div>', unsafe_allow_html=True)
 
-sm_btn1, sm_btn2, sm_btn3, sm_btn4 = st.columns(4)
-with sm_btn1:
-    if st.button("→ View Matches", key="jump_matches", use_container_width=True):
-        st.session_state["active_section"] = "matches"
-        st.rerun()
-with sm_btn2:
-    if st.button("→ View Value Bets", key="jump_value", use_container_width=True):
-        st.session_state["active_section"] = "value"
-        st.rerun()
-with sm_btn3:
-    if st.button("→ View Arbitrage", key="jump_arb", use_container_width=True):
-        st.session_state["active_section"] = "arb"
-        st.rerun()
-with sm_btn4:
-    if st.button("→ View Margins", key="jump_margins", use_container_width=True):
-        st.session_state["active_section"] = "margins"
-        st.rerun()
-
 st.markdown("<hr style='margin:0.4rem 0 0.8rem;border-color:var(--border-subtle);'>", unsafe_allow_html=True)
 
-# ── Three-pane layout ─────────────────────────────────────────────────────────
+# ── Bet slip toggle button ────────────────────────────────────────────────────
+_slip_count = len(st.session_state["bet_slip"]) + len(st.session_state["parlay_legs"])
+_slip_label = f"🎫 Bet Slip ({_slip_count})" if _slip_count else "🎫 Bet Slip"
+_slip_open  = st.session_state["slip_visible"]
 
-# Cached badge counts from stats (no extra DB hit)
-_num_value_bets = _stats["num_value_bets"]
-_num_arb_opps = _stats["num_arb_opps"]
-_num_live = len(upcoming_df) if not upcoming_df.empty else 0
+_btn_col, _ = st.columns([2, 8])
+with _btn_col:
+    st.button(
+        f"{'✕ Close' if _slip_open else _slip_label}",
+        key="btn_toggle_slip",
+        use_container_width=True,
+        type="primary" if _slip_open else "secondary",
+        on_click=_toggle_slip,
+    )
 
-
-
-def _badge(n: int) -> str:
-    """Return a plain-text count suffix for nav button labels."""
-    return f" ({n})" if n > 0 else ""
-
-
-def _set_active_section(section_key: str) -> None:
-    """Set the active center-pane section in session state."""
-    st.session_state["active_section"] = section_key
+# ── Main layout — full-width or split with slip drawer ────────────────────────
+if _slip_open:
+    col_main, col_slip = st.columns([7, 3])
+else:
+    col_main = st.container()
+    col_slip = None
 
 
 def _render_e2e_compat_surface() -> None:
@@ -332,38 +401,6 @@ def _render_e2e_compat_surface() -> None:
     st.markdown("Total Payout")
 
 
-NAV_SECTIONS = [
-    ("matches",  "📅 Matches"),
-    ("value",    f"💡 Value Bets{_badge(_num_value_bets)}"),
-    ("movement", "📈 Movement"),
-    ("calc",     "🧮 Bet Calculator"),
-    ("arb",      f"🔄 Arbitrage{_badge(_num_arb_opps)}"),
-    ("margins",  "📊 Margins"),
-    ("parlay",   "🎯 Custom Parlay"),
-    ("live",     f"🔴 Live Center{_badge(_num_live)}"),
-    ("bankroll", "💼 Bankroll"),
-    ("feedback", "💬 Feedback"),
-    ("settings", "⚙️ Settings"),
-]
-
-col_nav, col_main, col_slip = st.columns([2, 5, 3])
-
-# ── Left nav panel ────────────────────────────────────────────────────────────
-with col_nav:
-    st.markdown('<div class="terminal-menu-heading">Terminal Menu</div>', unsafe_allow_html=True)
-    st.markdown('<div class="nav-panel">', unsafe_allow_html=True)
-    for key, label in NAV_SECTIONS:
-        is_active = st.session_state["active_section"] == key
-        st.button(
-            label,
-            key=f"nav_{key}",
-            use_container_width=True,
-            type="primary" if is_active else "secondary",
-            on_click=_set_active_section,
-            args=(key,),
-        )
-    st.markdown('</div>', unsafe_allow_html=True)
-
 # ── Center main pane ──────────────────────────────────────────────────────────
 with col_main:
     _render_e2e_compat_surface()
@@ -383,7 +420,18 @@ with col_main:
     )
 
     active = st.session_state["active_section"]
-    if active == "matches":
+    if active == "dashboard":
+        try:
+            from src.sections import dashboard
+            dashboard.render(
+                odds_df=odds_df,
+                upcoming_df=upcoming_df,
+                analyzer=analyzer,
+                stats=_stats,
+            )
+        except ImportError:
+            st.info("Dashboard section coming soon.")
+    elif active == "matches":
         matches.render(odds_df=odds_df, upcoming_df=upcoming_df, analyzer=analyzer)
     elif active == "value":
         value_bets.render(odds_df=odds_df, analyzer=analyzer)
@@ -401,128 +449,135 @@ with col_main:
         live_center.render(upcoming_df=upcoming_df, odds_df=odds_df, analyzer=analyzer)
     elif active == "bankroll":
         bankroll.render()
+    elif active == "alerts":
+        try:
+            from src.sections import alerts
+            alerts.render()
+        except ImportError:
+            st.info("Alerts section coming soon.")
     elif active == "feedback":
         feedback.render()
     elif active == "settings":
         settings.render()
 
-# ── Right pane — persistent bet slip ─────────────────────────────────────────
-with col_slip:
-    st.markdown(
-        "<span style='font-size:0.69rem;color:var(--text-muted);"
-        "font-weight:700;text-transform:uppercase;letter-spacing:0.15em;'>"
-        "Bet Slip Summary</span>",
-        unsafe_allow_html=True,
-    )
-
-    slip = st.session_state["bet_slip"]
-    parlay_legs_list = st.session_state["parlay_legs"]
-    has_items = bool(slip) or bool(parlay_legs_list)
-
-    if slip:
-        st.markdown("**Bet Builder Selections**")
-        for sel in slip:
-            st.markdown(
-                render_slip_card(
-                    match=sel.get("match", ""),
-                    outcome=sel.get("outcome", ""),
-                    odds=sel["decimal_odds"],
-                ),
-                unsafe_allow_html=True,
-            )
-
-    if parlay_legs_list:
-        st.markdown("**Custom Parlay Legs**")
-        for lg in parlay_legs_list:
-            st.markdown(
-                render_slip_card(
-                    match="Custom Selection",
-                    outcome=lg["label"],
-                    odds=lg["decimal_odds"],
-                ),
-                unsafe_allow_html=True,
-            )
-
-    if not has_items:
+# ── Right pane — collapsible bet slip drawer ──────────────────────────────────
+if col_slip is not None:
+    with col_slip:
         st.markdown(
-            '<div class="empty-state">'
-            '<div class="empty-icon">🎫</div>'
-            '<div class="empty-text">Your bet slip is empty.<br>'
-            'Add selections from Bet Builder or Custom Parlay.</div>'
-            '</div>',
+            "<span style='font-size:0.69rem;color:var(--text-muted);"
+            "font-weight:700;text-transform:uppercase;letter-spacing:0.15em;'>"
+            "Bet Slip</span>",
             unsafe_allow_html=True,
         )
-    else:
-        all_odds = [s["decimal_odds"] for s in slip] + [
-            lg["decimal_odds"] for lg in parlay_legs_list
-        ]
-        _calc = BetCalculator()
-        slip_stake = st.session_state.get("slip_pane_stake", 100.0)
-        if len(all_odds) == 1:
-            _res = _calc.calculate_payout(slip_stake, all_odds[0])
-        elif len(all_odds) > 1:
-            _res = _calc.calculate_accumulator(slip_stake, all_odds)
-        else:
-            _res = {"payout": 0.0, "profit": 0.0}
 
-        st.markdown(render_payout_hero(_res["payout"], slip_stake), unsafe_allow_html=True)
+        slip = st.session_state["bet_slip"]
+        parlay_legs_list = st.session_state["parlay_legs"]
+        has_items = bool(slip) or bool(parlay_legs_list)
 
-        st.markdown(
-            "<span style='font-size:0.82rem;font-weight:700;color:var(--text-primary);'>"
-            "Enter Stake</span>",
-            unsafe_allow_html=True,
-        )
-        slip_stake = st.number_input(
-            "Stake ($)",
-            min_value=0.0, value=100.0, step=5.0,
-            key="slip_pane_stake",
-            label_visibility="collapsed",
-        )
-
-        qs_cols = st.columns(4)
-        _quick_keys = ["qs_10", "qs_50", "qs_100", "qs_max"]
-        for _col, _amt, _key in zip(qs_cols[:3], STAKE_QUICK_ADD[:3], _quick_keys[:3]):
-            with _col:
-                if st.button(f"+{_amt}", key=_key, use_container_width=True):
-                    st.session_state["slip_pane_stake"] = slip_stake + _amt
-                    st.rerun()
-        with qs_cols[3]:
-            if st.button("MAX", key="qs_max", use_container_width=True):
-                st.session_state["slip_pane_stake"] = float(STAKE_QUICK_ADD[-1])
-                st.rerun()
+        if slip:
+            st.markdown("**Selections**")
+            for sel in slip:
+                st.markdown(
+                    render_slip_card(
+                        match=sel.get("match", ""),
+                        outcome=sel.get("outcome", ""),
+                        odds=sel["decimal_odds"],
+                    ),
+                    unsafe_allow_html=True,
+                )
 
         if parlay_legs_list:
+            st.markdown("**Custom Parlay Legs**")
+            for lg in parlay_legs_list:
+                st.markdown(
+                    render_slip_card(
+                        match="Custom Selection",
+                        outcome=lg["label"],
+                        odds=lg["decimal_odds"],
+                    ),
+                    unsafe_allow_html=True,
+                )
+
+        if not has_items:
             st.markdown(
-                '<div class="odds-alert-box">'
-                '<span class="oa-icon">⚠️</span>'
-                '<div class="oa-text">'
-                '<span class="oa-label">Odds Alert:</span> '
-                "Markets may shift while you are building. Review odds before placing."
-                '</div></div>',
+                '<div class="empty-state">'
+                '<div class="empty-icon">🎫</div>'
+                '<div class="empty-text">Your bet slip is empty.<br>'
+                'Add selections from Bet Builder or Custom Parlay.</div>'
+                '</div>',
                 unsafe_allow_html=True,
             )
+        else:
+            all_odds = [s["decimal_odds"] for s in slip] + [
+                lg["decimal_odds"] for lg in parlay_legs_list
+            ]
+            _calc = BetCalculator()
+            slip_stake = st.session_state.get("slip_pane_stake", 100.0)
+            if len(all_odds) == 1:
+                _res = _calc.calculate_payout(slip_stake, all_odds[0])
+            elif len(all_odds) > 1:
+                _res = _calc.calculate_accumulator(slip_stake, all_odds)
+            else:
+                _res = {"payout": 0.0, "profit": 0.0}
 
-        if len(all_odds) == 1:
-            st.metric("Payout", f"${_res['payout']:.2f}")
-            st.metric("Profit", f"${_res['profit']:.2f}")
-        elif len(all_odds) > 1:
-            st.metric("Combined Odds", f"{_res['combined_odds']:.4f}")
-            st.metric("Total Profit", f"${_res['profit']:.2f}")
-            st.caption(
-                f"{len(all_odds)} selections · "
-                f"Implied prob: {_res['implied_probability']:.2%}"
+            st.markdown(render_payout_hero(_res["payout"], slip_stake), unsafe_allow_html=True)
+
+            st.markdown(
+                "<span style='font-size:0.82rem;font-weight:700;color:var(--text-primary);'>"
+                "Enter Stake</span>",
+                unsafe_allow_html=True,
+            )
+            slip_stake = st.number_input(
+                "Stake ($)",
+                min_value=0.0, value=100.0, step=5.0,
+                key="slip_pane_stake",
+                label_visibility="collapsed",
             )
 
-        if st.button("⚡ Place Parlay", key="btn_place_parlay", use_container_width=True, type="primary"):
-            st.success("✅ Parlay placed! (demo mode — no real wager)")
-        if st.button("Save to Favorites", key="btn_save_fav", use_container_width=True):
-            st.info("⭐ Parlay saved to favorites! (demo mode)")
+            qs_cols = st.columns(4)
+            _quick_keys = ["qs_10", "qs_50", "qs_100", "qs_max"]
+            for _col, _amt, _key in zip(qs_cols[:3], STAKE_QUICK_ADD[:3], _quick_keys[:3]):
+                with _col:
+                    if st.button(f"+{_amt}", key=_key, use_container_width=True):
+                        st.session_state["slip_pane_stake"] = slip_stake + _amt
+                        st.rerun()
+            with qs_cols[3]:
+                if st.button("MAX", key="qs_max", use_container_width=True):
+                    st.session_state["slip_pane_stake"] = float(STAKE_QUICK_ADD[-1])
+                    st.rerun()
 
-        st.markdown("")
-        if st.button("🗑️ Clear All", key="btn_slip_pane_clear"):
-            st.session_state["bet_slip"] = []
-            st.session_state["parlay_legs"] = []
-            st.rerun()
+            if parlay_legs_list:
+                st.markdown(
+                    '<div class="odds-alert-box">'
+                    '<span class="oa-icon">⚠️</span>'
+                    '<div class="oa-text">'
+                    '<span class="oa-label">Odds Alert:</span> '
+                    "Markets may shift while you are building. Review odds before placing."
+                    '</div></div>',
+                    unsafe_allow_html=True,
+                )
+
+            if len(all_odds) == 1:
+                st.metric("Payout", f"${_res['payout']:.2f}")
+                st.metric("Profit", f"${_res['profit']:.2f}")
+            elif len(all_odds) > 1:
+                st.metric("Combined Odds", f"{_res['combined_odds']:.4f}")
+                st.metric("Total Profit", f"${_res['profit']:.2f}")
+                st.caption(
+                    f"{len(all_odds)} selections · "
+                    f"Implied prob: {_res['implied_probability']:.2%}"
+                )
+
+            if st.button("⚡ Place Parlay", key="btn_place_parlay", use_container_width=True, type="primary"):
+                st.success("✅ Parlay placed! (demo mode — no real wager)")
+            if st.button("Save to Favorites", key="btn_save_fav", use_container_width=True):
+                st.info("⭐ Parlay saved to favorites! (demo mode)")
+
+            st.markdown("")
+            if st.button("🗑️ Clear All", key="btn_slip_pane_clear"):
+                st.session_state["bet_slip"] = []
+                st.session_state["parlay_legs"] = []
+                st.rerun()
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(

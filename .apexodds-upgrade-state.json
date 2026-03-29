@@ -1,6 +1,6 @@
 {
-  "current_step": 8,
-  "last_updated": "2026-03-28",
+  "current_step": 10,
+  "last_updated": "2026-03-29",
   "steps": {
     "1": {
       "name": "Audit ui_components imports",
@@ -46,15 +46,15 @@
     },
     "8": {
       "name": "Plan layout rewrite",
-      "status": "pending",
+      "status": "done",
       "files_touched": [],
-      "notes": ""
+      "notes": "Mapped current structure: sidebar (settings/leagues/refresh/API key/sub), 3-column (2/5/3) nav+main+slip, default section=matches. New layout: nav moves into Streamlit sidebar grouped (MARKETS/TOOLS/LIVE/ACCOUNT), full-width main with st.columns([7,3]) when slip_visible=True else st.container(). New session state key: slip_visible (bool, default False). Default active_section changed to dashboard. New sections: dashboard, alerts."
     },
     "9": {
       "name": "Rewrite app.py layout",
-      "status": "pending",
-      "files_touched": [],
-      "notes": ""
+      "status": "done",
+      "files_touched": ["src/app.py", "src/assets/styles.css", "src/sections/dashboard.py", "src/sections/alerts.py"],
+      "notes": "Moved all nav buttons into Streamlit sidebar with grouped headings via .nav-group-label CSS. Replaced 3-column layout with full-width container or st.columns([7,3]) controlled by slip_visible session state. Added floating 'Bet Slip (N)' toggle button. Changed default active_section to dashboard. Created src/sections/dashboard.py (KPI row, hot bets strip, upcoming fixtures, recent alerts, P&L sparkline). Created src/sections/alerts.py (list alerts, mark read, filter by type). Added nav-group-label CSS to styles.css."
     },
     "10": {
       "name": "Redesign match cards",

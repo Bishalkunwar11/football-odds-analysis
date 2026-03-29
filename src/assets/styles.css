@@ -451,6 +451,17 @@ header[data-testid="stHeader"] {
 
 .nav-panel { display: flex; flex-direction: column; gap: 2px; }
 
+/* ── Sidebar nav groups ─────────────────────────────────────── */
+.nav-group-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  padding: 0.6rem 0 0.2rem;
+  margin-top: 0.25rem;
+}
+
 /* ── Match cards ────────────────────────────────────────────── */
 .match-grid {
   display: grid;
