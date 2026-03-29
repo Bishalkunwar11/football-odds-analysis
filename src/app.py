@@ -17,6 +17,14 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
+from pathlib import Path
+
+# Ensure project root is on sys.path so `src.*` imports resolve
+# regardless of how Streamlit is launched (it adds src/ to sys.path by default).
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 import pandas as pd
 import streamlit as st
@@ -265,30 +273,11 @@ _num_value_bets = _stats["num_value_bets"]
 _num_arb_opps = _stats["num_arb_opps"]
 _num_live = len(upcoming_df) if not upcoming_df.empty else 0
 
-_BADGE_CSS = """
-<style>
-.nav-badge {
-  display: inline-block;
-    background: var(--primary);
-    color: var(--text-primary);
-    font-size: 11px;
-  font-weight: 700;
-  border-radius: 10px;
-  padding: 1px 6px;
-  margin-left: 6px;
-  vertical-align: middle;
-  line-height: 1.4;
-}
-</style>
-"""
-st.markdown(_BADGE_CSS, unsafe_allow_html=True)
 
 
 def _badge(n: int) -> str:
-    """Return an inline HTML badge string if n > 0, else empty string."""
-    if n <= 0:
-        return ""
-    return f'<span class="nav-badge">{n}</span>'
+    """Return a plain-text count suffix for nav button labels."""
+    return f" ({n})" if n > 0 else ""
 
 
 def _set_active_section(section_key: str) -> None:
